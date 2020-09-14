@@ -1,2 +1,4 @@
 /B/Other/node_modules/*
+/B/Other/package-lock.json
+/B/Other/xyes.js
 .DS_store

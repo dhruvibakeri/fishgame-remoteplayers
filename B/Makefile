@@ -1,11 +1,3 @@
 SHELL := /bin/bash
-run: node10 build compile
-
-node10:
-	$ scl enable rh-nodejs10 bash;
-
-build:
-	$ cd Other; npm install;
-
-compile:
-	$ tsc xyes.ts
+run:
+	$ scl enable rh-nodejs10 bash; npm install -g typescript; cd Other; npm install; tsc xyes.ts
