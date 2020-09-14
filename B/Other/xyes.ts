@@ -1,23 +1,29 @@
 #!/usr/bin/env node
-const args = process.argv.slice(2)
+const args = process.argv.slice(2);
 
-// const printArgs = (limit?: number, args: String[] = ["hello world"]): void => {
-//     for ( var i = 0; i < limit; i++ ) {
-//         console.log(args.join(" "));
-//     }
-// } 
+const printArgs = (args: String[], limit?: number): void => {
+  const printString = args.length === 0 ? "hello world" : args.join(" ");
+  if (limit) {
+    for (var i = 0; i < limit; i++) {
+      console.log(printString);
+    }
+  } else {
+    while (true) {
+      console.log(printString);
+    }
+  }
+};
 
-if (!args.length) {
-    console.log('Hello world')
-} else if (args[0] === '-limit') {
-    console.log(`limit: ${args.slice(1).join(" ")}`)
-    // printArgs(20)
+const getArgs = (args: String[]): String[] => {
+  if (args[0] === "-limit") {
+    return args.slice(1);
+  } else {
+    return args;
+  }
+};
+
+if (args[0] === "-limit") {
+  printArgs(getArgs(args), 20);
 } else {
-    console.log(`no limit: ${args.join(" ")}`)
+  printArgs(getArgs(args));
 }
-
-// if (yargs.argv._.includes('')
-// console.log(yargs.argv._)
-
-
-

@@ -1,2 +1,2 @@
 #! /bin/bash
-node ./Other/xyes.ts $@
+node ./Other/xyes.js $@
