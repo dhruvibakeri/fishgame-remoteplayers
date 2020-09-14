@@ -18,7 +18,7 @@ It contains the following elements:
 
 ## To Run
 
-Within the `B` directory:
+Within the `Other` directory:
 
 ```shell-script
 $ make
