@@ -18,9 +18,9 @@ It contains the following elements:
 
 ## To Run
 
-Within the `Other` directory:
+Run these commands within the `B` directory:
 
-```shell-script
+```
 $ make
 $ chmod +x xyes
 $ ./xyes
