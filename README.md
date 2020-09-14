@@ -20,9 +20,11 @@ It contains the following elements:
 
 Within the `B` directory:
 
-- Run `make` to setup the environment and compile TS to JS
-- Setup executable permissions with `chmod +x xyes`
-- Run the program with `./xyes`
+```shell-script
+$ make
+$ chmod +x xyes
+$ ./xyes
+```
 
 `xyes` behaves similarly to the Unix `yes` command in that it infinitely echoes text to standard output. However, the user may define what string to echo via command line argument and specify whether to limit the output.
 
