@@ -16,15 +16,15 @@ It contains the following elements:
   - `tsconfig.json` : Configuration file for Typescript
   - `xyes.ts` : Typescript implementation for the prompt program.
 
-## To Run
+## How To Run On Khoury Machines
 
 Run these commands within the `B` directory:
 
 ```
-$ scl enable rh-nodejs10 bash
-$ make
-$ chmod +x xyes
-$ ./xyes [-limit] [args ...]
+scl enable rh-nodejs10 bash
+make
+chmod +x xyes
+./xyes [-limit] [args ...]
 ```
 
 `xyes` behaves similarly to the Unix `yes` command in that it infinitely echoes text to standard output. However, the user may define what string to echo via command line argument and specify whether to limit the output.
