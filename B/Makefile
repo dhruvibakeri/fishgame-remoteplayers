@@ -1,3 +1,7 @@
-SHELL := /bin/bash
-run:
-	$ scl enable rh-nodejs10 bash; npm install -g typescript; cd Other; npm install; tsc xyes.ts
+all: build compile  
+build:  
+	@echo "installing dependencies"  
+	cd Other; npm install
+compile:
+	@echo "compiling typescript"
+	cd Other; npx tsc xyes.ts
