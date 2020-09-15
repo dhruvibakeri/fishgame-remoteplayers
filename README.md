@@ -21,9 +21,10 @@ It contains the following elements:
 Run these commands within the `B` directory:
 
 ```
+$ scl enable rh-nodejs10 bash
 $ make
 $ chmod +x xyes
-$ ./xyes
+$ ./xyes [-limit] [args ...]
 ```
 
 `xyes` behaves similarly to the Unix `yes` command in that it infinitely echoes text to standard output. However, the user may define what string to echo via command line argument and specify whether to limit the output.
