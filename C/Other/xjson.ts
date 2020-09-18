@@ -38,7 +38,7 @@ const isJsonString = (str: string): boolean => {
 const loopUntilUnparseable = (start: number, jsonString: String): number => {
   var tempString = "";
   for (var i = start; i < jsonString.length; ++i) {
-    if (!isJsonString(tempString + jsonString[i])) {
+    if (!isJsonString(tempString + jsonString[i]) && jsonString[i] !== ".") {
       return i;
     }
     tempString = tempString + jsonString[i];
@@ -63,7 +63,7 @@ const loopUntilParseable = (start: number, jsonString: String): number => {
   for (var i = start; i < jsonString.length; ++i) {
     tempString = tempString + jsonString[i];
     if (isJsonString(tempString)) {
-      return i + 1;
+      return loopUntilUnparseable(i + 1, jsonString);
     }
   }
   return -1;

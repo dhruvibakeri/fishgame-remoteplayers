@@ -1,2 +1,2 @@
 #!/bin/bash
-node ./Other/xjson.js <$0
+node ./Other/xjson.js <&0
