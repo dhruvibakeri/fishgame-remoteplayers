@@ -36,7 +36,7 @@ const isJsonString = (str: string): boolean => {
  * @return index indicating the end of a parseable JSON value
  */
 const loopUntilUnparseable = (start: number, jsonString: String): number => {
-  var tempString = "";
+  var tempString = jsonString.substring(0, start);
   for (var i = start; i < jsonString.length; ++i) {
     if (!isJsonString(tempString + jsonString[i]) && jsonString[i] !== ".") {
       return i;
@@ -47,23 +47,20 @@ const loopUntilUnparseable = (start: number, jsonString: String): number => {
 };
 
 /**
- * Takes in a starting index and string and returns the index marking the point at which
- * there is a parseable JSON value
+ * Takes in a string and returns the index marking the end of it's longest
+ * substring that can be parsed into JSON.
  *
  * This is used for JSON values such as strings, objects, lists, etc, the string is not
  * parseable until it includes the entire value (ex. string needs closing quotation marks,
  * object needs matching closing bracket)
  *
- * @param start the index of the first character in jsonString to start evaluating
  * @param jsonString the string to be searched for a parseable JSON value
  * @return index indicating the end of a parseable JSON value
  */
-const loopUntilParseable = (start: number, jsonString: String): number => {
-  var tempString = "";
-  for (var i = start; i < jsonString.length; ++i) {
-    tempString = tempString + jsonString[i];
-    if (isJsonString(tempString)) {
-      return loopUntilUnparseable(i + 1, jsonString);
+const loopUntilParseable = (jsonString: String): number => {
+  for (var i = 0; i <= jsonString.length; ++i) {
+    if (isJsonString(jsonString.substring(0, i))) {
+      return loopUntilUnparseable(i, jsonString);
     }
   }
   return -1;
@@ -77,24 +74,15 @@ const loopUntilParseable = (start: number, jsonString: String): number => {
  * @return index indicating the end of a parseable JSON value
  */
 const parseJsonSequence = (jsonString: String): Array<String> => {
-  var jsonObjs = [];
-  var i = 0;
-  while (i < jsonString.length) {
-    if (isJsonString(jsonString[i])) {
-      var endParseable = loopUntilUnparseable(i, jsonString);
-      jsonObjs.push(JSON.parse(jsonString.slice(i, endParseable)));
-      i = endParseable;
-    } else {
-      var endParseable = loopUntilParseable(i, jsonString);
-      if (endParseable !== -1) {
-        jsonObjs.push(JSON.parse(jsonString.slice(i, endParseable)));
-        i = endParseable;
-      } else {
-        i = jsonString.length;
-      }
-    }
+  let jsonStrs: Array<String> = [];
+  if (jsonString.length < 1) {
+    return [];
+  } else {
+    const lastIndex = loopUntilParseable(jsonString);
+    const token = jsonString.substring(0, lastIndex);
+    jsonStrs.push(JSON.parse(token));
+    return jsonStrs.concat(parseJsonSequence(jsonString.substring(lastIndex)));
   }
-  return jsonObjs;
 };
 
 /**
@@ -104,11 +92,10 @@ const parseJsonSequence = (jsonString: String): Array<String> => {
  * @param jsonValues the list of parsed JSON values
  */
 const generateCountAndSeqOutput = (
-  jsonValues: Array<any>
+  jsonValues: Array<String>
 ): CountAndSeqOutput => {
   const count = jsonValues.length;
   const seq = jsonValues;
-
   return { count, seq };
 };
 
@@ -119,21 +106,21 @@ const generateCountAndSeqOutput = (
  *
  * @param jsonValues the list of parsed JSON values
  */
-const generateListOutput = (jsonValues: Array<any>): ListOutput => {
+const generateListOutput = (jsonValues: Array<String>): ListOutput => {
   const count = jsonValues.length;
   const revSeq = jsonValues.reverse();
-
   return [count, ...revSeq];
 };
 
-const read = async (): Promise<any[]> => {
+const read = async (): Promise<Array<String>> => {
   const input: string = await getStdin();
-  const parsed: any[] = parseJsonSequence(input);
-
+  const parsed: any[] = parseJsonSequence(input.trim());
   return parsed;
 };
 
-read().then((parsed: any[]) => {
-  console.log(JSON.stringify(generateCountAndSeqOutput(parsed)));
-  console.log(JSON.stringify(generateListOutput(parsed)));
-});
+read()
+  .then((parsed: Array<String>) => {
+    console.log(JSON.stringify(generateCountAndSeqOutput(parsed)));
+    console.log(JSON.stringify(generateListOutput(parsed)));
+  })
+  .catch((err) => alert(err));
