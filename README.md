@@ -27,11 +27,11 @@ Run these commands within the `C` directory:
 scl enable rh-nodejs10 bash
 make
 chmod +x xjson
-./xjson
+./xjson < [JSON file] // Run with input file
+echo '[sequence of JSON values]' | ./xjson // Run with text input from command line 
 ```
-Then you'll be able to enter a sequence of well-formatted JSON values.
 
-`xjson` takes in a sequence of well-formatted JSON values, parses them, and returns them in two outputs
+`xjson` takes in a sequence of well-formatted JSON values from STDIN, parses them, and outputs them in the following two outputs to STDOUT:
 - First, a JSON object with two fields, `count` which represents the number of JSON values entered in the input sequence, and `seq`, a list of all JSON values entered in the order they were entered.
 - Second, a JSON list in which the first element represents the count of JSON values entered, and the remaining elements are the JSON values in reverse order.
 
