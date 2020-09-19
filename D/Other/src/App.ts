@@ -15,13 +15,14 @@ if (sizeNum && sizeNum > 0) {
     });
   });
   // start the Express server
-  app.listen(port, async () => {
+  const server = app.listen(port, async () => {
     console.log(`server started at http://localhost:${port}`);
     open(`http://localhost:${port}`);
   });
-  app.on('closed', () => {
-    console.log('window closed');
-  })
+  app.post("/close", (req, res) => {
+    server.close();
+    console.log("closing");
+  });
 } else {
   console.log("usage: ./xgui positive-integer");
 }
