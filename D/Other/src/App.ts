@@ -17,11 +17,10 @@ if (sizeNum && sizeNum > 0) {
   // start the Express server
   const server = app.listen(port, async () => {
     console.log(`server started at http://localhost:${port}`);
-    open(`http://localhost:${port}`);
+    open(`http://localhost:${port}`, {app: 'google-chrome'});
   });
   app.post("/close", (req, res) => {
-    server.close();
-    console.log("closing");
+    process.exit();
   });
 } else {
   console.log("usage: ./xgui positive-integer");
