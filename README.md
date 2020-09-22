@@ -24,7 +24,7 @@ It contains the following elements:
 
 ### How To Run On Khoury Machines
 
-Run these commands within the `C` directory:
+Run these commands within the `D` directory:
 
 ```
 scl enable rh-nodejs10 bash
@@ -32,7 +32,12 @@ make
 ./xgui [positive-integer] // Run with hexagon size
 ```
 
+### How To Test
+
+After making the project, run `./test` within the `D` directory.
+
 `xgui` takes in a positive integer representing the size for a rendered hexagon, and opens a window to display the hexagon at the given size
+
 - When the user clicks the hexagon, the window closes and the program stops
 - If a user doesn't enter a postive integer with the `./xgui` command, the program will print the usage message
 
@@ -66,6 +71,7 @@ echo '[sequence of JSON values]' | ./xjson // Run with text input from command l
 ```
 
 `xjson` takes in a sequence of well-formatted JSON values from STDIN, parses them, and outputs them in the following two outputs to STDOUT:
+
 - First, a JSON object with two fields, `count` which represents the number of JSON values entered in the input sequence, and `seq`, a list of all JSON values entered in the order they were entered.
 - Second, a JSON list in which the first element represents the count of JSON values entered, and the remaining elements are the JSON values in reverse order.
 
