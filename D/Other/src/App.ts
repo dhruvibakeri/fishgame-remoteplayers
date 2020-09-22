@@ -14,6 +14,7 @@ try {
   sizeNum = fetchSizeFromArgs(process.argv);
 } catch {
   console.log(usageMessage);
+  process.exit();
 }
 
 // define a route handler for the default home page
@@ -30,3 +31,5 @@ const server = app.listen(port, async () => {
 app.post("/close", (req, res) => {
   process.exit();
 });
+
+

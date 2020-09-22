@@ -21,6 +21,6 @@ const fetchSizeFromArgs = (args: string[]): number => {
  *
  * @param size The number to check.
  */
-const isValidSize = (size: number): boolean => !isNaN(size) && size > 0;
+const isValidSize = (size: number): boolean => !isNaN(size) && size > 0 && Number.isInteger(size);
 
 export { fetchSizeFromArgs, isValidSize };
