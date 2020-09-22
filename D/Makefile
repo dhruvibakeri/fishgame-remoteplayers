@@ -4,3 +4,4 @@ build:
 	cd Other; npm install
 permissions:
 	chmod +x ./xgui
+	chmod +x ./test
