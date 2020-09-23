@@ -1,5 +1,5 @@
 const getStdin = require("get-stdin");
-import parseJsonSequence from "./parseUtils";
+import parseJsonSequence from "./parse";
 
 interface CountAndSeqOutput {
   readonly count: number;
@@ -12,7 +12,7 @@ type ListOutput = { 0: number } & Array<any>;
  * Take a list of parsed JSON values and output a CountAndSeqOutput with count
  * being the length of the list and seq being the list itself.
  *
- * @param jsonValues the list of parsed JSON values
+ * @param jsonValues the list of parsed JSON values.
  */
 const generateCountAndSeqOutput = (
   jsonValues: Array<String>
@@ -27,7 +27,7 @@ const generateCountAndSeqOutput = (
  * being the length of the list and the rest of the elements being the reversed
  * elements of the given list.
  *
- * @param jsonValues the list of parsed JSON values
+ * @param jsonValues the list of parsed JSON values.
  */
 const generateListOutput = (jsonValues: Array<String>): ListOutput => {
   const count = jsonValues.length;
@@ -35,15 +35,31 @@ const generateListOutput = (jsonValues: Array<String>): ListOutput => {
   return [count, ...revSeq];
 };
 
+/**
+ * Read input from STDIN and parse it into a sequence of JSON values as strings
+ *
+ * @return A Promise containing the array of parsed JSON values.
+ */
 const read = async (): Promise<Array<String>> => {
   const input: string = await getStdin();
-  const parsed: any[] = parseJsonSequence(input.trim());
+  const parsed: Array<String> = parseJsonSequence(input.trim());
   return parsed;
 };
 
-read()
-  .then((parsed: Array<String>) => {
-    console.log(JSON.stringify(generateCountAndSeqOutput(parsed)));
-    console.log(JSON.stringify(generateListOutput(parsed)));
-  })
-  .catch((err) => alert(err));
+/**
+ * Given a Promise containing an array of parsed JSON values, generate and log
+ * JSON CountAndSeq and List outputs.
+ *
+ * @param parsedJson The array of parsed JSON values.
+ * @return A string containing the generated output.
+ */
+const generateOutput = (parsedJson: Array<String>): string => {
+  const countAndSeqOutput = JSON.stringify(
+    generateCountAndSeqOutput(parsedJson)
+  );
+  const listOutput = JSON.stringify(generateListOutput(parsedJson));
+
+  return countAndSeqOutput + "\n" + listOutput;
+};
+
+export { parseJsonSequence, generateOutput };

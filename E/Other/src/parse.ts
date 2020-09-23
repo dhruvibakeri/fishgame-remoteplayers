@@ -16,7 +16,6 @@ const parseJsonSequence = (jsonString: String): Array<String> => {
       parsedValues.push(value);
     }
   };
-
   p.write(jsonString);
 
   return parsedValues;
