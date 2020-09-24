@@ -1,44 +1,28 @@
-import { stdout } from "process";
-import { Duplex } from "stream";
+import { Socket } from "net";
 const NetcatServer = require("netcat/server");
 import { parseJsonSequence, generateOutput } from "./xjson";
 
 const DEFAULT_PORT = 4567;
+const WAIT_TIME = 3000;
 
-class ProcessStream extends Duplex {
-  jsonBuffer: string = ""; // rename
-
-  write(chunk: any) {
-    this.jsonBuffer += chunk.toString();
-    return true;
-  }
-
-  read() {
-    return generateOutput(parseJsonSequence(this.jsonBuffer));
-  }
-}
-
-// setup
 const nc = new NetcatServer();
-const processStream: ProcessStream = new ProcessStream();
+let timer: NodeJS.Timeout;
 
-// connect
-console.log("starting server");
-nc.port(DEFAULT_PORT).listen().pipe(processStream);
+nc.port(DEFAULT_PORT).listen();
 
-nc.on("ready", () => {
-  console.log("server is ready!");
+nc.on("data", (socket: Socket, chunk: any) => {
+  const parsedOutput: string = generateOutput(
+    parseJsonSequence(chunk.toString())
+  );
+  socket.write(parsedOutput);
 });
 
-nc.on("waitTimeout", () => {
-  console.log("timeout");
-  nc.close();
+nc.on("ready", () => {
+  timer = setTimeout(() => {
+    nc.close();
+  }, WAIT_TIME);
 });
 
 nc.on("connection", () => {
-  console.log("client has connected!");
-});
-
-nc.on("clientClose", () => {
-  console.log("client has disconnected :^(");
+  clearTimeout(timer);
 });
