@@ -19,6 +19,7 @@ nc.on("data", (socket: Socket, chunk: any) => {
 
 nc.on("ready", () => {
   timer = setTimeout(() => {
+    console.log("error. server terminated due to client inactivity.");
     nc.close();
   }, WAIT_TIME);
 });
