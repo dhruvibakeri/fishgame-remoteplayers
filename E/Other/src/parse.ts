@@ -9,7 +9,7 @@ const Parser = require("jsonparse");
  */
 const parseJsonSequence = (jsonString: String): Array<String> => {
   const p = new Parser();
-  let parsedValues: Array<String> = [];
+  const parsedValues: Array<String> = [];
 
   p.onValue = (value: string) => {
     if (p.stack.length === 0) {

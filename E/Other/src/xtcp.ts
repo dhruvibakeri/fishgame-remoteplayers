@@ -1,29 +1,44 @@
-import { Transform, Readable } from "stream";
+import { stdout } from "process";
+import { Duplex } from "stream";
 const NetcatServer = require("netcat/server");
-import getRawBody from "raw-body";
 import { parseJsonSequence, generateOutput } from "./xjson";
 
 const DEFAULT_PORT = 4567;
-const LOCALHOST = "127.0.0.1";
-const WAIT_TIME = 3000;
 
+class ProcessStream extends Duplex {
+  jsonBuffer: string = ""; // rename
+
+  write(chunk: any) {
+    this.jsonBuffer += chunk.toString();
+    return true;
+  }
+
+  read() {
+    return generateOutput(parseJsonSequence(this.jsonBuffer));
+  }
+}
+
+// setup
 const nc = new NetcatServer();
-const outputStream: Transform = new Transform();
-nc.addr(LOCALHOST)
-  .port(DEFAULT_PORT)
-  .wait(WAIT_TIME)
-  .listen()
-  .pipe(outputStream);
+const processStream: ProcessStream = new ProcessStream();
 
-getRawBody(outputStream, {
-  encoding: true,
-})
-  .then(parseJsonSequence)
-  .then(generateOutput)
-  .then((output: string) => {
-    const s = new Readable();
-    s.push(output);
-    s.push(null);
-    nc.serve(s);
-  })
-  .catch((err: string) => alert(err));
+// connect
+console.log("starting server");
+nc.port(DEFAULT_PORT).listen().pipe(processStream);
+
+nc.on("ready", () => {
+  console.log("server is ready!");
+});
+
+nc.on("waitTimeout", () => {
+  console.log("timeout");
+  nc.close();
+});
+
+nc.on("connection", () => {
+  console.log("client has connected!");
+});
+
+nc.on("clientClose", () => {
+  console.log("client has disconnected :^(");
+});
