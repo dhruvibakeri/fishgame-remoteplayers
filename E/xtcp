@@ -1,2 +1,2 @@
 #!/bin/bash
-cd Other; npm run start $@;
+cd Other; node . $@;
