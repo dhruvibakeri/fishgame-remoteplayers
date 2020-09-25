@@ -2,6 +2,35 @@
 
 This project contains assignment work for Northeastern's CS 4500: Software Development course.
 
+# E
+
+This directory is for the assignment, [E — TCP](https://felleisen.org/matthias/4500-f20/E.html). The purpose of this assignment was to be an exercise in our chosen programming language, [Typescript](https://www.typescriptlang.org/), and in collaborating on and delivering software. This assignment sets up a TCP connection which takes in well-formed JSON from the input and delivers JSON to output side of TCP connection.
+
+It contains the following elements:
+
+- `Makefile` : Used to handle basic environment setup for a Node environment compatible with Khoury's machines along with Typescript compilation.
+- `xtcp` : The shell-executable command-line program specified within the assignment prompt.
+- `Test` : Directory containing test files.
+- `Other` : Directory containing all auxiliary files.
+  - `src` : Directory containing all TypeScript files for the project
+    - `parse.ts` : TypeScript file with helper functions for parsing json sequence
+    - `utils.ts` : TypeScript file with utils for validating command line arguments
+    - `xjson.ts` : TypeScript file with helper functions for reading and formatting output of json
+    - `xtcp.ts` : Script which sets up and manages the server
+  - `package.json` : Node generated file for handling project information and dependencies.
+  - `tsconfig.json` : Configuration file for Typescript
+  - `.eslintrc` : Configuration file for eslint
+
+### How To Run On Khoury Machines
+
+Run these commands within the `D` directory:
+
+```
+scl enable rh-nodejs10 bash
+make
+./xtcp [TCP port number] // Run with hexagon size
+```
+
 # D
 
 This directory is for the assignment, [D — GUI](https://felleisen.org/matthias/4500-f20/D.html). The purpose of this assignment was to be an exercise in our chosen programming language, [Typescript](https://www.typescriptlang.org/), and in collaborating on and delivering software.
