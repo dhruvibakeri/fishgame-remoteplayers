@@ -14,7 +14,8 @@ const parsePort = (args: string[]): number => {
 };
 
 /**
- * Takes in a number and checks whether it is a valid TCP port.
+ * Takes in a number and checks whether it is a valid TCP port, returning
+ * the number if so.
  *
  * @param port String representing the port.
  * @returns The valid port
@@ -30,10 +31,11 @@ const validatePort = (port: number): number => {
 
 /**
  * Checks if there are no more than three command line arguments in the given
- * array of strings.
+ * array of strings, returning the parsed argument if it exists, a default if
+ * it doesn't, and logging a usage message and ending the program otherwise.
  *
  * @param args Array of strings representing arguments.
- * @returns The third argument parsed into a number as the port.
+ * @returns The third argument parsed into a number as the port or the default.
  */
 const validateNumberOfArgs = (args: string[]): number => {
   if (args.length === 3) {
