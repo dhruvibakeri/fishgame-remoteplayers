@@ -1,29 +1,49 @@
+const MAX_PORT = 65535;
+const MIN_PORT = 3000; // Specified on Piazza as the minimum port to be used
+const DEFAULT_PORT = 4567;
+
 /**
- * Takes in a string and checks if it can be parsed to a valid TCP port
- * if not, logs usage message and ends program
+ * Takes in an array of command line arguments and tries to parse it into a
+ * valid TCP port.
  *
- * @param port string representing the port
+ * @param args Array of strings representing arguments.
+ * @returns The parsed port number.
  */
-const parsePort = (port: string) => {
-    const portNum = parseInt(port);
-    if (isNaN(portNum) || portNum < 0 || portNum > 65535) {
-        console.log("Usage: ./xtcp [TCP-port-number]");
-        process.exit();
-    };
-    return portNum;
+const parsePort = (args: string[]): number => {
+  return validatePort(validateNumberOfArgs(args));
 };
 
 /**
- * Checks if there are more than the expected 3 arguments
- * if not, logs usage message and ends program
+ * Takes in a number and checks whether it is a valid TCP port.
  *
- * @param args array of strings representing arguments
+ * @param port String representing the port.
+ * @returns The valid port
  */
-const checkArgs = (args: string[]) => {
-    if (args.length > 3) {
-        console.log("Usage: ./xtcp [TCP-port-number]");
-        process.exit();
-    };
+const validatePort = (port: number): number => {
+  if (!isNaN(port) && port > MIN_PORT && port <= MAX_PORT) {
+    return port;
+  } else {
+    console.log("Invalid port number: " + port);
+    process.exit();
+  }
 };
 
-export { parsePort, checkArgs };
+/**
+ * Checks if there are no more than three command line arguments in the given
+ * array of strings.
+ *
+ * @param args Array of strings representing arguments.
+ * @returns The third argument parsed into a number as the port.
+ */
+const validateNumberOfArgs = (args: string[]): number => {
+  if (args.length === 3) {
+    return parseInt(args[2]);
+  } else if (args.length < 3) {
+    return DEFAULT_PORT;
+  } else {
+    console.log("Usage: ./xtcp [TCP-port-number]");
+    process.exit();
+  }
+};
+
+export default parsePort;
