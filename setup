@@ -1,0 +1,21 @@
+#!/bin/bash
+
+function cdroot()
+{
+  while [[ $PWD != '/' && ${PWD##*/} != 'libertyhill' ]]; do cd ..; done
+}
+
+mkdir -p $1
+cd $1
+npm init
+npm i --save-dev typescript @types/node @types/jest eslint-config-prettier eslint-plugin-prettier prettier jest eslint
+npm i ts-jest
+npx tsc --init
+npx eslint --init
+
+mkdir src build test
+
+cdroot
+cd template
+make
+src/create-package.ts .

@@ -2,6 +2,7 @@ import { Socket } from "net";
 const NetcatServer = require("netcat/server");
 import { parseJsonSequence, generateOutput } from "./xjson";
 import parsePort from "./utils";
+import { EOL } from "os";
 
 const WAIT_TIME = 3000;
 
@@ -16,6 +17,7 @@ nc.on("data", (socket: Socket, chunk: any) => {
     parseJsonSequence(chunk.toString())
   );
   socket.write(parsedOutput);
+  socket.write(EOL);
 });
 
 nc.on("ready", () => {
