@@ -13,6 +13,7 @@ const DEFAULT_FISH_PER_TILE = 1;
  * @param minimumOneFishTiles minimum number of one-fish tiles on the board
  * @returns a board with the given specifications for columns, rows, holes, and one-fish tiles
  */
+// TODO validate that with the given number of holes, it is still possible to have the given number of 1-fish tiles
 const createHoledOneFishBoard = (
   columns: number,
   rows: number,
@@ -34,6 +35,14 @@ const createHoledOneFishBoard = (
   return boardWithHoles;
 };
 
+/**
+ * Create a board of the given size, with all tiles active and containing the given number of fish
+ *
+ * @param columns the number of columns for the created board
+ * @param rows the number of rows for the created board
+ * @param fishPerTile the number of fish to put on each tile
+ * @returns a board with the given specifications for columns, rows, and fish per tile
+ */
 const createBlankBoard = (
   columns: number,
   rows: number,
@@ -52,6 +61,13 @@ const createBlankBoard = (
   };
 };
 
+/**
+ * Create a tile specifying its number of fish and whether it is active.
+ * 
+ * @param numOfFish the number of fish on the tile
+ * @param isActive whether the tile is active, defaulting to true
+ * @return the created tile
+ */
 const createTile = (numOfFish: number, isActive: boolean = true): Tile => {
   return {
     isActive,
@@ -59,14 +75,23 @@ const createTile = (numOfFish: number, isActive: boolean = true): Tile => {
   };
 };
 
+/**
+ * Deactivate tiles on the given board according to the given array of
+ * specified positions for holes.
+ * 
+ * @param board the board to be insert holes in
+ * @param holePositions the positions of the holes to be added to the board
+ * @return the resulting board with holes added
+ */
 const addHolesToBoard = (
   board: Board,
   holePositions: Array<Coordinate>
 ): Board => holePositions.reduce(removeTile, board);
 
+// TODO check whether the board contains these positions.
 const removeTile = (board: Board, position: Coordinate): Board => {
   const disabledTile: Tile = {
-    ...board[position.yPos][position.xPos],
+    ...board.tiles[position.yPos][position.xPos],
     isActive: false,
   };
 
@@ -88,7 +113,7 @@ const updateTileOnBoard = (
   newTile: Tile
 ): Board =>
   Object.assign([], board, {
-    [position.yPos]: Object.assign([], board[position.yPos], {
+    [position.yPos]: Object.assign([], board.tiles[position.yPos], {
       [position.xPos]: newTile,
     }),
   });
