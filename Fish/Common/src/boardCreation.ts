@@ -1,4 +1,6 @@
 import { Board, Coordinate, Tile } from "../types/board";
+import { positionIsOnBoard } from "./validation";
+import { InvalidBoardConstraintsError, InvalidPositionError } from "../types/errors";
 
 const DEFAULT_FISH_PER_TILE = 1;
 
@@ -11,16 +13,25 @@ const DEFAULT_FISH_PER_TILE = 1;
  * @param rows the number of rows for the created board
  * @param holePositions coordinates for spaces without a tile
  * @param minimumOneFishTiles minimum number of one-fish tiles on the board
- * @returns a board with the given specifications for columns, rows, holes, and one-fish tiles
+ * @returns a board with the given specifications for columns, rows, holes, and one-fish tiles. 
+ * If a given hole position is invalid or the minimum 1-fish tiles constraint 
+ * can't be met due to the number of holes added to the board, returns errors
+ * for each case.
  */
-// TODO validate that with the given number of holes, it is still possible to have the given number of 1-fish tiles
 const createHoledOneFishBoard = (
   columns: number,
   rows: number,
   holePositions?: Array<Coordinate>,
   minimumOneFishTiles?: number
-): Board => {
+): Board | InvalidBoardConstraintsError | InvalidPositionError => {
   const blankBoard = createBlankBoard(columns, rows, DEFAULT_FISH_PER_TILE);
+
+  // If upon creating the specified holes in the board, there are no longer
+  // enough remaining tiles to meet the minimum number of 1-fish tiles,
+  // return an error.
+  if (rows * columns - holePositions.length < minimumOneFishTiles) {
+    throw new InvalidBoardConstraintsError(columns, rows, holePositions.length, minimumOneFishTiles)
+  }
 
   if (!holePositions || !minimumOneFishTiles) {
     // Create a blank board with no holes and the same default number of fish
@@ -31,7 +42,6 @@ const createHoledOneFishBoard = (
   // Create a board with holes at specified positions and a minimum number of
   // 1-fish tiles.
   const boardWithHoles = addHolesToBoard(blankBoard, holePositions);
-
   return boardWithHoles;
 };
 
@@ -81,15 +91,39 @@ const createTile = (numOfFish: number, isActive: boolean = true): Tile => {
  * 
  * @param board the board to be insert holes in
  * @param holePositions the positions of the holes to be added to the board
- * @return the resulting board with holes added
+ * @return the resulting board with holes added or an InvalidPositionError if
+ * one of the hole positions is not on the board.
  */
 const addHolesToBoard = (
   board: Board,
   holePositions: Array<Coordinate>
-): Board => holePositions.reduce(removeTile, board);
+): Board | InvalidPositionError => {
+  let currBoardOrError: Board | InvalidPositionError = board;
 
-// TODO check whether the board contains these positions.
-const removeTile = (board: Board, position: Coordinate): Board => {
+  for (var position of holePositions) {
+    if (currBoardOrError instanceof InvalidPositionError) {
+      break;
+    } else {
+      currBoardOrError = removeTile(currBoardOrError, position);
+    }
+  };
+
+  return currBoardOrError;
+}
+
+/**
+ * Remove/deactivate the tile at the given position on the given board.
+ * 
+ * @param board the board to remove from
+ * @param position the position of the tile to remove
+ * @return the resulting board or an error if the position does not exist on 
+ * the board.
+ */
+const removeTile = (board: Board, position: Coordinate): Board | InvalidPositionError => {
+  if (!positionIsOnBoard(board, position)) {
+    return new InvalidPositionError(board, position);
+  }
+  
   const disabledTile: Tile = {
     ...board.tiles[position.yPos][position.xPos],
     isActive: false,
