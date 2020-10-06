@@ -2,4 +2,6 @@ node_modules/
 build/
 package-lock.json
 *.js
+!*.config.js
+!.eslintrc.js
 .DS_store
