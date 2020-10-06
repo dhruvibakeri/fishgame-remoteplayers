@@ -3,37 +3,37 @@
     div.board 
         .col(v-for='tileCol, colIndex in tiles' :key='index')
             .hexagon(v-for='tile, rowIndex in tileCol' :style='tileAbsolutePosition(colIndex, rowIndex)')
-                Hexagon(:size='size' :isActive='tile.isActive' :key='rowIndex')
+                Tile(:size='size' :isActive='tile.isActive' :numFish='tile.numOfFish' :key='rowIndex')
 </template>
 
 <script lang>
-import Hexagon from "./Hexagon";
+import Tile from "./Tile";
 export default {
   name: "HexagonGrid",
   components: {
-    Hexagon
+    Tile
   },
   data() {
     return {
-      size: 20,
+      size: 80,
       tiles: [
         [
-          { isActive: false },
-          { isActive: true },
-          { isActive: true },
-          { isActive: true }
+          { isActive: false, numOfFish: 1 },
+          { isActive: true, numOfFish: 5 },
+          { isActive: true, numOfFish: 4 },
+          { isActive: true, numOfFish: 3 }
         ],
         [
-          { isActive: true },
-          { isActive: true },
-          { isActive: true },
-          { isActive: true }
+          { isActive: true, numOfFish: 2 },
+          { isActive: true, numOfFish: 1 },
+          { isActive: true, numOfFish: 1 },
+          { isActive: true, numOfFish: 1 }
         ],
         [
-          { isActive: true },
-          { isActive: false },
-          { isActive: true },
-          { isActive: true }
+          { isActive: true, numOfFish: 1 },
+          { isActive: false, numOfFish: 1 },
+          { isActive: true, numOfFish: 1 },
+          { isActive: true, numOfFish: 1 }
         ]
       ]
     };
@@ -66,8 +66,8 @@ export default {
 <style lang="scss">
 .board {
   background-color: lightskyblue;
-  height: 104px;
-  width: 264px;
+  height: 404px;
+  width: 1044px;
 }
 .hexagon {
   position: absolute;
