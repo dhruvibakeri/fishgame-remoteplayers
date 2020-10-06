@@ -13,21 +13,21 @@ import Fish from "./Fish.vue";
 export default Vue.extend({
   name: "FishContainer",
   props: {
-      numFish: { type: Number, required: true }
+    numFish: { type: Number, required: true },
   },
   components: {
-      Fish
+    Fish,
   },
 });
 </script>
 
 <style lang="scss">
-    .fish-container {
-        height: 100%;
-        max-width: 50%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        flex-wrap: wrap;
-    }
+.fish-container {
+  height: 100%;
+  max-width: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
 </style>

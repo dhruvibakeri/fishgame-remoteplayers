@@ -1,24 +1,27 @@
 <!-- Renders a single Fish. -->
 <template lang="pug">
-    img.fish(:src='fish')
+    .penguin(v-html='penguin' :style='{fill: color}')
 </template>
 
 <script lang="ts">
 import Vue from "vue";
 
 export default Vue.extend({
-  name: "Fish",
+  name: "Penguin",
+  props: {
+      color: { type: String, required: true },
+  },
   data() {
     return {
-      fish: require("../../public/fish.svg"),
+      penguin: require("!html-loader!../../public/penguin.svg"),
     };
   },
 });
 </script>
 
 <style lang="scss">
-.fish {
-  height: 25px;
+.penguin {
+  height: 50px;
   width: auto;
 }
 </style>

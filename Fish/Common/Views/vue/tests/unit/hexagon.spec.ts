@@ -3,13 +3,12 @@ import Hexagon from "@/components/Hexagon.vue";
 
 describe("Hexagon.vue", () => {
   it("renders hexagon", () => {
-    const msg = "new message";
     const wrapper = shallowMount(Hexagon, {
       propsData: {
         size: 20,
-        isActive: true
-      }
+        isActive: true,
+      },
     });
-    expect(wrapper.find('polygon')).toBeDefined();
+    expect(wrapper.find("polygon")).toBeDefined();
   });
 });
