@@ -1,3 +1,4 @@
+<!-- Instantiates Vue app. -->
 <template lang="pug">
   div#app
     HexagonGrid
