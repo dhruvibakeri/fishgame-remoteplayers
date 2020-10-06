@@ -46,5 +46,10 @@
       "vue-cli-service lint",
       "git add"
     ]
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "maxWorkers": "1"
   }
 }
