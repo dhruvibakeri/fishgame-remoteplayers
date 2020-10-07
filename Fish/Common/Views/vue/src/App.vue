@@ -16,7 +16,7 @@ export default Vue.extend({
   },
   data() {
     return {
-      board: createHoledOneFishBoard(4, 3, [{ xPos: 0, yPos: 0 }], 1),
+      board: createHoledOneFishBoard(4, 3, [{ col: 0, row: 0 }], 1),
     };
   },
 });

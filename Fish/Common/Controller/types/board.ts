@@ -1,5 +1,5 @@
 export interface Tile {
-  readonly isActive: boolean;
+  readonly isHole: boolean;
   readonly numOfFish: number;
 }
 
@@ -7,12 +7,12 @@ export interface Board {
   readonly tiles: Array<Array<Tile>>;
 }
 
-export interface Coordinate {
-  readonly xPos: number;
-  readonly yPos: number;
+export interface Position {
+  readonly row: number;
+  readonly col: number;
 }
 
-enum PenguinColor {
+export enum PenguinColor {
   Red = "red",
   White = "white",
   Brown = "brown",
@@ -20,6 +20,6 @@ enum PenguinColor {
 }
 
 export interface Penguin {
-  readonly position: Coordinate;
+  readonly position: Position;
   readonly color: PenguinColor;
 }
