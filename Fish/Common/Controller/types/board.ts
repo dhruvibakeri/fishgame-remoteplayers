@@ -7,7 +7,7 @@ export interface Board {
   readonly tiles: Array<Array<Tile>>;
 }
 
-export interface Position {
+export interface BoardPosition {
   readonly row: number;
   readonly col: number;
 }
@@ -16,10 +16,10 @@ export enum PenguinColor {
   Red = "red",
   White = "white",
   Brown = "brown",
-  Black = "black"
+  Black = "black",
 }
 
 export interface Penguin {
-  readonly position: Position;
+  readonly position: BoardPosition;
   readonly color: PenguinColor;
 }

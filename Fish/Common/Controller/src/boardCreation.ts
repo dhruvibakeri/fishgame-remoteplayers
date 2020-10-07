@@ -1,4 +1,4 @@
-import { Board, Position, Tile } from "../types/board";
+import { Board, BoardPosition, Tile } from "../types/board";
 import { isBoard, isTile, positionIsOnBoard } from "./validation";
 import {
   InvalidBoardConstraintsError,
@@ -25,7 +25,7 @@ const DEFAULT_FISH_PER_TILE = 1;
 const createHoledOneFishBoard = (
   columns: number,
   rows: number,
-  holePositions: Array<Position>,
+  holePositions: Array<BoardPosition>,
   minimumOneFishTiles: number
 ): Board | InvalidBoardConstraintsError | InvalidPositionError => {
   // If upon creating the specified holes in the board, there are no longer
@@ -44,7 +44,7 @@ const createHoledOneFishBoard = (
 
   // Create a board with holes at specified positions and a minimum number of
   // 1-fish tiles.
-  const blankBoard = createBlankBoard(columns, rows, DEFAULT_FISH_PER_TILE);
+  const blankBoard = createBlankBoard(rows, columns, DEFAULT_FISH_PER_TILE);
   const boardWithHoles = addHolesToBoard(blankBoard, holePositions);
   return boardWithHoles;
 };
@@ -60,8 +60,8 @@ const createHoledOneFishBoard = (
  * per tile
  */
 const createBlankBoard = (
-  columns: number,
   rows: number,
+  columns: number,
   fishPerTile: number
 ): Board => {
   const tiles: Array<Array<Tile>> = [];
@@ -102,7 +102,7 @@ const createTile = (numOfFish: number, isHole: boolean = false): Tile => {
  */
 const addHolesToBoard = (
   board: Board,
-  holePositions: Array<Position>
+  holePositions: Array<BoardPosition>
 ): Board | InvalidPositionError => {
   let currBoardOrError: Board | InvalidPositionError = board;
 
@@ -131,7 +131,7 @@ const addHolesToBoard = (
  */
 const setTileToHole = (
   board: Board,
-  position: Position
+  position: BoardPosition
 ): Board | InvalidPositionError => setTileOnBoard(board, position, true);
 
 /**
@@ -148,7 +148,7 @@ const setTileToHole = (
  */
 const setTileOnBoard = (
   board: Board,
-  position: Position,
+  position: BoardPosition,
   isHole?: boolean,
   numOfFish?: number
 ): Board | InvalidPositionError => {
@@ -194,7 +194,7 @@ const setTileOnBoard = (
  */
 const getTileOnBoard = (
   board: Board,
-  position: Position
+  position: BoardPosition
 ): Tile | InvalidPositionError => {
   if (!positionIsOnBoard(board, position)) {
     return new InvalidPositionError(board, position);
@@ -203,4 +203,4 @@ const getTileOnBoard = (
   }
 };
 
-export { createHoledOneFishBoard };
+export { createHoledOneFishBoard, createBlankBoard, setTileToHole };

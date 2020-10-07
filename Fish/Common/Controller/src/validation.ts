@@ -1,5 +1,5 @@
 // Helper functions for validating logic
-import { Board, Position, Tile } from "../types/board";
+import { Board, BoardPosition, Tile } from "../types/board";
 
 /**
  * Given a board and a position, determine whether that position is within the
@@ -9,7 +9,7 @@ import { Board, Position, Tile } from "../types/board";
  * @param position the position to be checked
  * @return whether the given position is on the board
  */
-const positionIsOnBoard = (board: Board, position: Position): boolean => {
+const positionIsOnBoard = (board: Board, position: BoardPosition): boolean => {
   const boardRows = board.tiles.length;
   const boardCols = board.tiles[position.row].length;
 
@@ -27,7 +27,7 @@ const positionIsOnBoard = (board: Board, position: Position): boolean => {
  * @param position the position to be checked
  * @return whether the given position is playable on the board
  */
-const positionIsPlayable = (board: Board, position: Position): boolean =>
+const positionIsPlayable = (board: Board, position: BoardPosition): boolean =>
   positionIsOnBoard(board, position) &&
   !board.tiles[position.row][position.col].isHole;
 
