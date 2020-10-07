@@ -1,10 +1,5 @@
-<<<<<<< Updated upstream
-import { Board, Coordinate } from "../types/board";
-import { positionIsOnBoard } from "./validation";
-=======
 import { Board, Position } from "../types/board";
 import { positionIsPlayable } from "./validation";
->>>>>>> Stashed changes
 
 /**
  * An enumeration describing the possible vertical directions in which a
@@ -26,15 +21,9 @@ enum HorizontalDirection {
 }
 
 /**
-<<<<<<< Updated upstream
- * Takes in a coordinate position of a penguin and a board state, and returns an arrayu of
- * all reachable positions from the given position (must be reachable via straight line,
- * cannot go through empty space)
-=======
  * Takes in a Position position of a penguin and a board state, and returns an
  * array of all reachable positions from the given position (must be reachable
  * via straight line, cannot go through a hole).
->>>>>>> Stashed changes
  *
  * @param board board state to find reachable positions
  * @param position position to start from when finding reachable positions
@@ -43,15 +32,6 @@ enum HorizontalDirection {
  */
 const getReachablePositions = (
   board: Board,
-<<<<<<< Updated upstream
-  position: Coordinate
-): Array<Coordinate> => {
-  const reachablePositions: Array<Coordinate> = [];
-
-  for (const verticalDirection in VerticalDirection) {
-    for (const horizontalDirection in HorizontalDirection) {
-      const curReachableInDirection: Array<Coordinate> = getReachablePositionsInDirection(
-=======
   position: Position
 ): Array<Position> => {
   const reachablePositions: Array<Position> = [];
@@ -61,7 +41,6 @@ const getReachablePositions = (
   for (const verticalDirection in VerticalDirection) {
     for (const horizontalDirection in HorizontalDirection) {
       const curReachableInDirection: Array<Position> = getReachablePositionsInDirection(
->>>>>>> Stashed changes
         board,
         position,
         verticalDirection as VerticalDirection,
@@ -87,40 +66,22 @@ const getReachablePositions = (
  */
 const getReachablePositionsInDirection = (
   board: Board,
-<<<<<<< Updated upstream
-  position: Coordinate,
-  verticalDirection: VerticalDirection,
-  horizontalDirection: HorizontalDirection
-): Array<Coordinate> => {
-  const reachableTiles: Array<Coordinate> = [];
-  let nextPosition: Coordinate = getNextPos(
-=======
   position: Position,
   verticalDirection: VerticalDirection,
   horizontalDirection: HorizontalDirection
 ): Array<Position> => {
   const reachableTiles: Array<Position> = [];
   let nextPosition: Position = getNextPosition(
->>>>>>> Stashed changes
     position,
     verticalDirection,
     horizontalDirection
   );
 
-<<<<<<< Updated upstream
-  while (
-    board.tiles[nextPosition.yPos][nextPosition.xPos].isActive &&
-    positionIsOnBoard(board, nextPosition)
-  ) {
-    reachableTiles.push({ xPos: nextPosition.xPos, yPos: nextPosition.yPos });
-    nextPosition = getNextPos(
-=======
   // Keep moving in the given direction, accumulating positions so long as they
   // are playable.
   while (positionIsPlayable(board, nextPosition)) {
     reachableTiles.push({ col: nextPosition.col, row: nextPosition.row });
     nextPosition = getNextPosition(
->>>>>>> Stashed changes
       nextPosition,
       verticalDirection,
       horizontalDirection
@@ -139,19 +100,11 @@ const getReachablePositionsInDirection = (
  * @param horizontalDirection the horizontal direction to move
  * @return the next position from the given position in the given vertical and horizontal direction
  */
-<<<<<<< Updated upstream
-const getNextPos = (
-  position: Coordinate,
-  verticalDirection: VerticalDirection,
-  horizontalDirection: HorizontalDirection
-): Coordinate => {
-=======
 const getNextPosition = (
   position: Position,
   verticalDirection: VerticalDirection,
   horizontalDirection: HorizontalDirection
 ): Position => {
->>>>>>> Stashed changes
   if (
     verticalDirection === VerticalDirection.Up &&
     horizontalDirection === HorizontalDirection.Neutral
@@ -191,17 +144,10 @@ const getNextPosition = (
  * @param position the position to increment from
  * @return the incremented Position
  */
-<<<<<<< Updated upstream
-const getNextPosUpNeutral = (position: Coordinate): Coordinate => {
-  return {
-    xPos: position.xPos,
-    yPos: position.yPos - 2,
-=======
 const getNextPosUpNeutral = (position: Position): Position => {
   return {
     col: position.col,
     row: position.row - 2,
->>>>>>> Stashed changes
   };
 };
 
@@ -212,15 +158,6 @@ const getNextPosUpNeutral = (position: Position): Position => {
  * @param position the position to increment from
  * @return the incremented Position
  */
-<<<<<<< Updated upstream
-const getNextPosUpRight = (position: Coordinate): Coordinate => {
-  const xPosIsOdd: boolean = position.xPos % 2 === 1;
-  const nextXPos: number = xPosIsOdd ? position.xPos + 1 : position.xPos;
-
-  return {
-    xPos: nextXPos,
-    yPos: position.yPos - 1,
-=======
 const getNextPosUpRight = (position: Position): Position => {
   const colIsOdd: boolean = position.col % 2 === 1;
   const nextcol: number = colIsOdd ? position.col + 1 : position.col;
@@ -228,7 +165,6 @@ const getNextPosUpRight = (position: Position): Position => {
   return {
     col: nextcol,
     row: position.row - 1,
->>>>>>> Stashed changes
   };
 };
 
@@ -239,15 +175,6 @@ const getNextPosUpRight = (position: Position): Position => {
  * @param position the position to increment from
  * @return the incremented Position
  */
-<<<<<<< Updated upstream
-const getNextPosUpLeft = (position: Coordinate): Coordinate => {
-  const xPosIsEven: boolean = position.xPos % 2 === 0;
-  const nextXPos: number = xPosIsEven ? position.xPos - 1 : position.xPos;
-
-  return {
-    xPos: nextXPos,
-    yPos: position.yPos - 1,
-=======
 const getNextPosUpLeft = (position: Position): Position => {
   const colIsEven: boolean = position.col % 2 === 0;
   const nextcol: number = colIsEven ? position.col - 1 : position.col;
@@ -255,7 +182,6 @@ const getNextPosUpLeft = (position: Position): Position => {
   return {
     col: nextcol,
     row: position.row - 1,
->>>>>>> Stashed changes
   };
 };
 
@@ -265,17 +191,10 @@ const getNextPosUpLeft = (position: Position): Position => {
  * @param position the position to increment from
  * @return the incremented Position
  */
-<<<<<<< Updated upstream
-const getNextPosDownNeutral = (position: Coordinate): Coordinate => {
-  return {
-    xPos: position.xPos,
-    yPos: position.yPos + 2,
-=======
 const getNextPosDownNeutral = (position: Position): Position => {
   return {
     col: position.col,
     row: position.row + 2,
->>>>>>> Stashed changes
   };
 };
 
@@ -286,15 +205,6 @@ const getNextPosDownNeutral = (position: Position): Position => {
  * @param position the position to increment from
  * @return the incremented Position
  */
-<<<<<<< Updated upstream
-const getNextPosDownRight = (position: Coordinate): Coordinate => {
-  const xPosIsOdd: boolean = position.xPos % 2 === 1;
-  const nextXPos: number = xPosIsOdd ? position.xPos + 1 : position.xPos;
-
-  return {
-    xPos: nextXPos,
-    yPos: position.yPos + 1,
-=======
 const getNextPosDownRight = (position: Position): Position => {
   const colIsOdd: boolean = position.col % 2 === 1;
   const nextcol: number = colIsOdd ? position.col + 1 : position.col;
@@ -302,7 +212,6 @@ const getNextPosDownRight = (position: Position): Position => {
   return {
     col: nextcol,
     row: position.row + 1,
->>>>>>> Stashed changes
   };
 };
 
@@ -313,15 +222,6 @@ const getNextPosDownRight = (position: Position): Position => {
  * @param position the position to increment from
  * @return the incremented Position
  */
-<<<<<<< Updated upstream
-const getNextPosDownLeft = (position: Coordinate): Coordinate => {
-  const xPosIsEven: boolean = position.xPos % 2 === 0;
-  const nextXPos: number = xPosIsEven ? position.xPos - 1 : position.xPos;
-
-  return {
-    xPos: nextXPos,
-    yPos: position.yPos + 1,
-=======
 const getNextPosDownLeft = (position: Position): Position => {
   const colIsEven: boolean = position.col % 2 === 0;
   const nextcol: number = colIsEven ? position.col - 1 : position.col;
@@ -329,6 +229,5 @@ const getNextPosDownLeft = (position: Position): Position => {
   return {
     col: nextcol,
     row: position.row + 1,
->>>>>>> Stashed changes
   };
 };
