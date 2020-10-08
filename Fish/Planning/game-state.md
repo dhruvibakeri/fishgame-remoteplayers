@@ -1,6 +1,6 @@
 # 2 &mdash; The Game Pieces | Design Task
 
-## Game State Representation:
+## Game State Representation
 
 The game state will consist of several elements that need to be kept track of as the game goes on.
 
