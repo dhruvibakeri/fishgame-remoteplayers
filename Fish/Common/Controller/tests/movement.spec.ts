@@ -1,5 +1,5 @@
 import { Board, BoardPosition } from "../types/board";
-import { createBlankBoard } from "../src/boardCreation";
+import { createBlankBoard, setTileToHole } from "../src/boardCreation";
 import {
   getNextPosDownLeft,
   getNextPosDownNeutral,
@@ -11,6 +11,7 @@ import {
   VerticalDirection,
   HorizontalDirection,
   getNextPosition,
+  getReachablePositionsInDirection,
 } from "../src/movement";
 
 describe("movement", () => {
@@ -36,15 +37,49 @@ describe("movement", () => {
         upRight2,
         downRight,
       ]);
-      /*
       expect(new Set(getReachablePositions(board, center))).toEqual(
         expectedReachablePositions
       );
-      */
     });
   });
 
-  describe("getReachablePositionsInDirection", () => {});
+  describe("getReachablePositionsInDirection", () => {
+    const start: BoardPosition = { row: 3, col: 0 };
+
+    it("gets reachable positions in a direction until hitting the board boundaries", () => {
+      const expectedReachablePositions: Set<BoardPosition> = new Set([
+        center,
+        upRight,
+        upRight2,
+      ]);
+      expect(
+        new Set(
+          getReachablePositionsInDirection(
+            board,
+            start,
+            VerticalDirection.Up,
+            HorizontalDirection.Right
+          )
+        )
+      ).toEqual(expectedReachablePositions);
+    });
+
+    it("gets reachable positions in a direction until hitting a hole", () => {
+      const boardWithHole: Board = setTileToHole(board, {
+        row: 1,
+        col: 1,
+      }) as Board;
+      const expectedReachablePositions: Array<BoardPosition> = [center];
+      expect(
+        getReachablePositionsInDirection(
+          boardWithHole,
+          start,
+          VerticalDirection.Up,
+          HorizontalDirection.Right
+        )
+      ).toEqual(expectedReachablePositions);
+    });
+  });
 
   describe("getNextPosition", () => {
     it("increments in the up direction", () => {

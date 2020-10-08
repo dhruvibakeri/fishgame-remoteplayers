@@ -34,7 +34,7 @@ const getReachablePositions = (
   board: Board,
   position: BoardPosition
 ): Array<BoardPosition> => {
-  const reachablePositions: Array<BoardPosition> = [];
+  let reachablePositions: Array<BoardPosition> = [];
 
   // For every direction which can be travelled, get the reachable positions
   // and accumulate them within reachablePositions.
@@ -46,7 +46,7 @@ const getReachablePositions = (
         verticalDirection as VerticalDirection,
         horizontalDirection as HorizontalDirection
       );
-      reachablePositions.concat(curReachableInDirection);
+      reachablePositions = reachablePositions.concat(curReachableInDirection);
     }
   }
 
