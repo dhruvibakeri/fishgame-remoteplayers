@@ -1,4 +1,4 @@
-import { Board, Position } from "../types/board";
+import { Board, BoardPosition } from "../types/board";
 import { positionIsPlayable } from "./validation";
 
 /**
@@ -6,8 +6,8 @@ import { positionIsPlayable } from "./validation";
  * penguin could move on the board.
  */
 enum VerticalDirection {
-  Up = "up",
-  Down = "down",
+  Up = "Up",
+  Down = "Down",
 }
 
 /**
@@ -15,9 +15,9 @@ enum VerticalDirection {
  * penguin could move on the board.
  */
 enum HorizontalDirection {
-  Right = "right",
-  Left = "left",
-  Neutral = "neutral",
+  Right = "Right",
+  Left = "Left",
+  Neutral = "Neutral",
 }
 
 /**
@@ -32,15 +32,15 @@ enum HorizontalDirection {
  */
 const getReachablePositions = (
   board: Board,
-  position: Position
-): Array<Position> => {
-  const reachablePositions: Array<Position> = [];
+  position: BoardPosition
+): Array<BoardPosition> => {
+  const reachablePositions: Array<BoardPosition> = [];
 
   // For every direction which can be travelled, get the reachable positions
   // and accumulate them within reachablePositions.
   for (const verticalDirection in VerticalDirection) {
     for (const horizontalDirection in HorizontalDirection) {
-      const curReachableInDirection: Array<Position> = getReachablePositionsInDirection(
+      const curReachableInDirection: Array<BoardPosition> = getReachablePositionsInDirection(
         board,
         position,
         verticalDirection as VerticalDirection,
@@ -66,12 +66,12 @@ const getReachablePositions = (
  */
 const getReachablePositionsInDirection = (
   board: Board,
-  position: Position,
+  position: BoardPosition,
   verticalDirection: VerticalDirection,
   horizontalDirection: HorizontalDirection
-): Array<Position> => {
-  const reachableTiles: Array<Position> = [];
-  let nextPosition: Position = getNextPosition(
+): Array<BoardPosition> => {
+  const reachableTiles: Array<BoardPosition> = [];
+  let nextPosition: BoardPosition = getNextPosition(
     position,
     verticalDirection,
     horizontalDirection
@@ -101,10 +101,10 @@ const getReachablePositionsInDirection = (
  * @return the next position from the given position in the given vertical and horizontal direction
  */
 const getNextPosition = (
-  position: Position,
+  position: BoardPosition,
   verticalDirection: VerticalDirection,
   horizontalDirection: HorizontalDirection
-): Position => {
+): BoardPosition => {
   if (
     verticalDirection === VerticalDirection.Up &&
     horizontalDirection === HorizontalDirection.Neutral
@@ -144,7 +144,7 @@ const getNextPosition = (
  * @param position the position to increment from
  * @return the incremented Position
  */
-const getNextPosUpNeutral = (position: Position): Position => {
+const getNextPosUpNeutral = (position: BoardPosition): BoardPosition => {
   return {
     col: position.col,
     row: position.row - 2,
@@ -158,9 +158,9 @@ const getNextPosUpNeutral = (position: Position): Position => {
  * @param position the position to increment from
  * @return the incremented Position
  */
-const getNextPosUpRight = (position: Position): Position => {
-  const colIsOdd: boolean = position.col % 2 === 1;
-  const nextcol: number = colIsOdd ? position.col + 1 : position.col;
+const getNextPosUpRight = (position: BoardPosition): BoardPosition => {
+  const rowIsOdd: boolean = position.row % 2 === 1;
+  const nextcol: number = rowIsOdd ? position.col + 1 : position.col;
 
   return {
     col: nextcol,
@@ -175,9 +175,9 @@ const getNextPosUpRight = (position: Position): Position => {
  * @param position the position to increment from
  * @return the incremented Position
  */
-const getNextPosUpLeft = (position: Position): Position => {
-  const colIsEven: boolean = position.col % 2 === 0;
-  const nextcol: number = colIsEven ? position.col - 1 : position.col;
+const getNextPosUpLeft = (position: BoardPosition): BoardPosition => {
+  const rowIsEven: boolean = position.row % 2 === 0;
+  const nextcol: number = rowIsEven ? position.col - 1 : position.col;
 
   return {
     col: nextcol,
@@ -191,7 +191,7 @@ const getNextPosUpLeft = (position: Position): Position => {
  * @param position the position to increment from
  * @return the incremented Position
  */
-const getNextPosDownNeutral = (position: Position): Position => {
+const getNextPosDownNeutral = (position: BoardPosition): BoardPosition => {
   return {
     col: position.col,
     row: position.row + 2,
@@ -205,9 +205,9 @@ const getNextPosDownNeutral = (position: Position): Position => {
  * @param position the position to increment from
  * @return the incremented Position
  */
-const getNextPosDownRight = (position: Position): Position => {
-  const colIsOdd: boolean = position.col % 2 === 1;
-  const nextcol: number = colIsOdd ? position.col + 1 : position.col;
+const getNextPosDownRight = (position: BoardPosition): BoardPosition => {
+  const rowIsOdd: boolean = position.row % 2 === 1;
+  const nextcol: number = rowIsOdd ? position.col + 1 : position.col;
 
   return {
     col: nextcol,
@@ -222,12 +222,26 @@ const getNextPosDownRight = (position: Position): Position => {
  * @param position the position to increment from
  * @return the incremented Position
  */
-const getNextPosDownLeft = (position: Position): Position => {
-  const colIsEven: boolean = position.col % 2 === 0;
-  const nextcol: number = colIsEven ? position.col - 1 : position.col;
+const getNextPosDownLeft = (position: BoardPosition): BoardPosition => {
+  const rowIsEven: boolean = position.row % 2 === 0;
+  const nextcol: number = rowIsEven ? position.col - 1 : position.col;
 
   return {
     col: nextcol,
     row: position.row + 1,
   };
+};
+
+export {
+  VerticalDirection,
+  HorizontalDirection,
+  getReachablePositions,
+  getReachablePositionsInDirection,
+  getNextPosition,
+  getNextPosUpNeutral,
+  getNextPosUpRight,
+  getNextPosUpLeft,
+  getNextPosDownNeutral,
+  getNextPosDownRight,
+  getNextPosDownLeft,
 };

@@ -11,12 +11,12 @@ import { Board, BoardPosition, Tile } from "../types/board";
  */
 const positionIsOnBoard = (board: Board, position: BoardPosition): boolean => {
   const boardRows = board.tiles.length;
-  const boardCols = board.tiles[position.row].length;
+  const boardCols = board.tiles[0].length;
 
-  const isValidcol = 0 <= position.col && position.col < boardCols;
-  const isValidrow = 0 <= position.row && position.row < boardRows;
+  const isValidRow = 0 <= position.row && position.row < boardRows;
+  const isValidCol = 0 <= position.col && position.col < boardCols;
 
-  return isValidcol && isValidrow;
+  return isValidRow && isValidCol;
 };
 
 /**
@@ -53,4 +53,47 @@ const isBoard = (boardOrError: Board | Error): boardOrError is Board => {
   return board.tiles !== undefined && Array.isArray(board.tiles);
 };
 
-export { positionIsOnBoard, positionIsPlayable, isTile, isBoard };
+/**
+ * Determine whether the given dimensions for a board are valid.
+ *
+ * @param columns the number of columns in the board
+ * @param rows the number of rows in the board
+ */
+const isValidBoardSize = (columns: number, rows: number): boolean => {
+  return columns > 0 && rows > 0;
+};
+
+/**
+ * Determine whether the given minimum number of 1-fish tiles is valid relative
+ * to the given board dimensions and hole positions.
+ *
+ * @param columns the number of columns for the created board
+ * @param rows the number of rows for the created board
+ * @param holePositions Positions for spaces without a tile
+ * @param minimumOneFishTiles minimum number of one-fish tiles on the board
+ */
+const isValidMinimumOneFishTiles = (
+  columns: number,
+  rows: number,
+  holePositions: Array<BoardPosition>,
+  minimumOneFishTiles: number
+): boolean => {
+  // If upon creating the specified holes in the board, there are no longer
+  // enough remaining tiles to meet the minimum number of 1-fish tiles,
+  // return an error.
+  const numberOfTilesAfterAddingHoles: number =
+    rows * columns - holePositions.length;
+  return (
+    minimumOneFishTiles > 0 &&
+    numberOfTilesAfterAddingHoles >= minimumOneFishTiles
+  );
+};
+
+export {
+  positionIsOnBoard,
+  positionIsPlayable,
+  isTile,
+  isBoard,
+  isValidBoardSize,
+  isValidMinimumOneFishTiles,
+};

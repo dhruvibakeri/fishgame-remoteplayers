@@ -1,11 +1,11 @@
-import { Board, Position } from "./board";
+import { Board, BoardPosition } from "./board";
 
 class InvalidPositionError extends Error {
   board: Board;
-  position: Position;
+  position: BoardPosition;
   message: string;
 
-  constructor(board: Board, position: Position, message?: string) {
+  constructor(board: Board, position: BoardPosition, message?: string) {
     super();
     this.board = board;
     this.position = position;
