@@ -1,0 +1,2 @@
+#!/bin/bash
+cd Views/vue; npm run test:unit
