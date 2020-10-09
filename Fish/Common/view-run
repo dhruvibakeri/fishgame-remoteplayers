@@ -1,3 +1,2 @@
 #!/bin/bash
 cd Views/vue; npm run serve
-firefox "http://localhost:8080/"

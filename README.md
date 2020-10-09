@@ -72,13 +72,20 @@ make
 npm test
 ```
 
-For the controller, run the following in the `View` directory:
+For the view, run the following in the `View` directory:
 
 ```
 scl enable rh-nodejs10 bash
 make
-npm test
+npm run serve
 ```
+and open browser at `localhost:8080`,
+or test using
+```
+npm run test:unit
+```
+NOTE: If you're having issues installing npm packages on khoury machines, try clearing the cache using `npm cache clean` and installing again.
+We attempted to make a makefile in the Common directory that installed packages for both Controller and Views, but ran into issues with exceeding stack size on khoury machines. You may have success with these files, but if not please follow the instructions above to install dependencies and run visualization/tests separately so as to not overwhelm the capabilities of the vm. The `Makefile`, `view-run` `view-test` and `controller-test` files work on non-vm.
 
 # 1 &mdash; Dot Game
 
