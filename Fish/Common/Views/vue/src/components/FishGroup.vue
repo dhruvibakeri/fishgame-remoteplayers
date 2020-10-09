@@ -1,6 +1,6 @@
 <!-- Renders a group of fish with the given number of fish (numFish). -->
 <template lang="pug">
-    .fish-container
+    .fish-group
         //- Display a fish for every number in numFish
         div(v-for='singleFish in numFish')
             Fish
@@ -22,7 +22,7 @@ export default Vue.extend({
 </script>
 
 <style lang="scss">
-.fish-container {
+.fish-group {
   height: 100%;
   max-width: 50%;
   display: flex;

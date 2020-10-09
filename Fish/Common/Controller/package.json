@@ -27,7 +27,7 @@
     "build": "tsc",
     "prestart": "npm run build",
     "start": "node . <&0",
-    "lint": "eslint '*/**/*.{js,ts}' --quiet --fix",
+    "lint": "eslint '*/**/*.{js,ts}' --fix",
     "test": "jest"
   },
   "jest": {

@@ -1,3 +1,3 @@
-all: build permissions  
+all: build  
 build:    
 	npm install
