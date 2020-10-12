@@ -242,7 +242,7 @@ const createNumberedBoard = (tileFish: number[][]): Board | InvalidBoardConstrai
         const setTileBoard = setTileOnBoard(curBoard, {row, col}, tileFish[row][col] === 0, tileFish[row][col]);
         if (isBoard(setTileBoard)) {
           curBoard = setTileBoard;
-        };
+        }
       }
     }
     return curBoard;
@@ -259,5 +259,5 @@ export {
   setTileToHole,
   setTileOnBoard,
   getTileOnBoard,
-  createNumberedBoard
+  createNumberedBoard,
 };

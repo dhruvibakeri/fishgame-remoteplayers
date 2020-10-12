@@ -1,1 +1,1 @@
-node ../../Common/Controller/src/xboard.ts <&0
+node ../../Common/Controller/build/src/xboard.js <&0

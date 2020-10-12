@@ -1,4 +1,4 @@
-const getStdin = require("get-stdin");
+import getStdin from "get-stdin"
 import { createNumberedBoard } from "./boardCreation";
 import { getReachablePositions } from "./movement";
 import { isBoard } from "./validation";
