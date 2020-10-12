@@ -229,6 +229,20 @@ const createHoledOneFishBoard = (
   }
 };
 
+const createNumberedBoard = (tileFish: number[][]): Board | InvalidBoardConstraintsError | InvalidPositionError => {
+  const blankBoard = createBlankBoard(tileFish.length, tileFish[0].length, 0);
+
+  if (isBoard(blankBoard)) {
+    for (let row = 0; row < tileFish.length; row++) {
+      for (let col = 0; col < tileFish[0].length; col++) {
+        setTileOnBoard(blankBoard, {row, col}, tileFish[row][col] === 0, tileFish[row][col]);
+      }
+    }
+  }
+
+  return blankBoard;
+}
+
 export {
   createHoledOneFishBoard,
   createBlankBoard,
@@ -237,4 +251,5 @@ export {
   setTileToHole,
   setTileOnBoard,
   getTileOnBoard,
+  createNumberedBoard
 };
