@@ -83,13 +83,15 @@ const setTileOnBoard = (
     );
 
     // Copy the existing board, changing just the new tile.
-    return {
+    const newBoard = {
       tiles: Object.assign([], board.tiles, {
         [position.row]: Object.assign([], board.tiles[position.row], {
           [position.col]: newTile,
         }),
       }),
     };
+    // console.log(newBoard);
+    return newBoard;
   } else {
     // The specified position is not on the board. Return the error.
     return currentTileOrError;
@@ -232,12 +234,18 @@ const createHoledOneFishBoard = (
 const createNumberedBoard = (tileFish: number[][]): Board | InvalidBoardConstraintsError | InvalidPositionError => {
   const blankBoard = createBlankBoard(tileFish.length, tileFish[0].length, 0);
 
+  
   if (isBoard(blankBoard)) {
+    let curBoard = blankBoard
     for (let row = 0; row < tileFish.length; row++) {
       for (let col = 0; col < tileFish[0].length; col++) {
-        setTileOnBoard(blankBoard, {row, col}, tileFish[row][col] === 0, tileFish[row][col]);
+        const setTileBoard = setTileOnBoard(curBoard, {row, col}, tileFish[row][col] === 0, tileFish[row][col]);
+        if (isBoard(setTileBoard)) {
+          curBoard = setTileBoard;
+        };
       }
     }
+    return curBoard;
   }
 
   return blankBoard;

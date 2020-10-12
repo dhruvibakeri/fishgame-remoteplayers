@@ -3,6 +3,7 @@ import {
   addHolesToBoard,
   createBlankBoard,
   createHoledOneFishBoard,
+  createNumberedBoard,
   createTile,
   getTileOnBoard,
   setTileOnBoard,
@@ -17,12 +18,15 @@ describe("boardCreation", () => {
   const invalidPosition: BoardPosition = { row: 2, col: 2 };
   const invalidHolePositions: Array<BoardPosition> = [invalidPosition];
   const tile: Tile = { isHole: false, numOfFish: 1 };
+  const tile3Fish: Tile = {isHole: false, numOfFish: 3 };
+  const tile5Fish: Tile = {isHole: false, numOfFish: 5 };
   const tiles: Array<Array<Tile>> = [
     [tile, tile],
     [tile, tile],
   ];
   const board: Board = { tiles };
   const hole: Tile = { isHole: true, numOfFish: 1 };
+  const hole0Fish: Tile = { isHole: true, numOfFish: 0 };
   const tilesWithHole: Array<Array<Tile>> = [
     [tile, tile],
     [hole, tile],
@@ -30,6 +34,10 @@ describe("boardCreation", () => {
   const boardWithHole: Board = { tiles: tilesWithHole };
   const validPosition: BoardPosition = { row: 1, col: 0 };
   const validHolePositions: Array<BoardPosition> = [validPosition];
+  const tileArray: number[][] = [[1,5,1],[5,1,5]];
+  const numberedBoard: Board = { tiles: [[tile, tile5Fish, tile],[tile5Fish, tile, tile5Fish]]};
+  const tileArrayWithHoles: number[][] = [[3,0,5],[3,5,1],[1,0,1]];
+  const numberedBoardWithHoles: Board = { tiles: [[tile3Fish, hole0Fish, tile5Fish],[tile3Fish, tile5Fish, tile], [tile, hole0Fish, tile]]};
 
   describe("createHoledOneFishBoard", () => {
     it("rejects invalid dimensions", () => {
@@ -167,6 +175,16 @@ describe("boardCreation", () => {
 
     it("returns the tile at the requested position", () => {
       expect(getTileOnBoard(boardWithHole, validPosition)).toEqual(hole);
+    });
+  });
+
+  describe("createNumberedBoard", () => {
+    it("returns a board with specified fish on each tile", () => {
+      expect(createNumberedBoard(tileArray)).toEqual(numberedBoard);
+    });
+
+    it("returns the tile at the requested position", () => {
+      expect(createNumberedBoard(tileArrayWithHoles)).toEqual(numberedBoardWithHoles);
     });
   });
 });
