@@ -16,13 +16,11 @@ const DEFAULT_FISH_PER_TILE = 1;
 /**
  * Create a tile specifying its number of fish and whether it is active.
  *
- * @param numOfFish the number of fish on the tile
- * @param isHole whether the tile is a hole, defaulting to false
+ * @param numOfFish the number of fish on the tile, defaults to DEFAULT_FISH_PER_TILE
  * @return the created tile
  */
-const createTile = (numOfFish: number, isHole = false): Tile => {
+const createTile = (numOfFish: number = DEFAULT_FISH_PER_TILE): Tile => {
   return {
-    isHole,
     numOfFish,
   };
 };
@@ -53,33 +51,24 @@ const getTileOnBoard = (
  * of the given board, changing the specified tile.
  * @param board board to be updated
  * @param position position of tile to be updated
- * @param isHole whether the updated tile is a hole
- * @param numOfFish the number of fish on the updated tile
+ * @param numOfFish the number of fish on the updated tile, 0 for a hole
  * @return a new board with the updated tile or an error if the position is not
  * on the board.
  */
 const setTileOnBoard = (
   board: Board,
   position: BoardPosition,
-  isHole?: boolean,
-  numOfFish?: number
+  numOfFish: number
 ): Board | InvalidPositionError => {
-  // If there are no changes to make, return the board.
-  if (isHole === undefined && numOfFish === undefined) {
-    return board;
-  }
-
   const currentTileOrError: Tile | InvalidPositionError = getTileOnBoard(
     board,
     position
   );
 
   if (isTile(currentTileOrError)) {
-    // Create a new tile, using either the specified values for isHole and
-    // numOfFish or the existing values of the tile.
+    // Create a new tile, using the specified value for numOfFish.
     const newTile: Tile = createTile(
-      numOfFish === undefined ? currentTileOrError.numOfFish : numOfFish,
-      isHole === undefined ? currentTileOrError.isHole : isHole
+       numOfFish
     );
 
     // Copy the existing board, changing just the new tile.
@@ -100,6 +89,7 @@ const setTileOnBoard = (
 
 /**
  * Sets the tile at the given position on the given board to a hole.
+ * In other terms, set the tile's number of fish to 0.
  *
  * @param board the board to remove from
  * @param position the position of the tile to remove
@@ -109,7 +99,7 @@ const setTileOnBoard = (
 const setTileToHole = (
   board: Board,
   position: BoardPosition
-): Board | InvalidPositionError => setTileOnBoard(board, position, true);
+): Board | InvalidPositionError => setTileOnBoard(board, position, 0);
 
 /**
  * Deactivate tiles on the given board according to the given array of
@@ -231,17 +221,34 @@ const createHoledOneFishBoard = (
   }
 };
 
+/**
+ * Create a Board given a rectangular, 2D array specifying the number of fish at the Tile at
+ * each position. 0 fish on a tile represents a hole.
+ * @param tileFish a 2D array specifying the number of fish at at the Tile at 
+ * each position
+ * @return either created Board if successful or any error that occurred.
+ */
 const createNumberedBoard = (tileFish: number[][]): Board | InvalidBoardConstraintsError | InvalidPositionError => {
+  // Return an error of the board is empty.
+  if (tileFish.length <= 0) {
+    return new InvalidBoardConstraintsError(0, 0);
+  }
+  
+  // Begin with a blank board the same size as the given 2D array.
   const blankBoard = createBlankBoard(tileFish.length, tileFish[0].length, 0);
-
   
   if (isBoard(blankBoard)) {
     let curBoard = blankBoard
+
+    // For each given tile fish amount, set the corresponding Tile on the
+    // created blank board to that fish amount.
     for (let row = 0; row < tileFish.length; row++) {
       for (let col = 0; col < tileFish[0].length; col++) {
-        const setTileBoard = setTileOnBoard(curBoard, {row, col}, tileFish[row][col] === 0, tileFish[row][col]);
+        const setTileBoard = setTileOnBoard(curBoard, {row, col}, tileFish[row][col]);
         if (isBoard(setTileBoard)) {
           curBoard = setTileBoard;
+        } else {
+          return setTileBoard
         }
       }
     }

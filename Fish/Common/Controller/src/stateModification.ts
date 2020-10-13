@@ -1,7 +1,13 @@
 import { Player, Game } from "../types/state";
 import { Board, BoardPosition, Penguin, PenguinColor } from "../types/board";
-import { InvalidNumberOfPlayersError, InvalidPositionError } from "../types/errors";
-import { positionIsOnBoard } from "./validation";
+import { 
+    InvalidNumberOfPlayersError, 
+    InvalidPositionError, 
+    IllegalPenguinMoveError, 
+    InvalidGameStateError
+} from "../types/errors";
+import { isPenguin, positionIsOnBoard, validatePenguinMove } from "./validation";
+
 
 const MAX_NUMBER_OF_PLAYERS = 4;
 const MIN_NUMBER_OF_PLAYERS = 2;
@@ -54,11 +60,83 @@ const placePenguin = (penguin: Penguin, game: Game, position: BoardPosition): Ga
         return new InvalidPositionError(game.board, position);
     }
 
-    
+    return new InvalidPositionError(game.board, position);
 }
 
-const movePenguin = (game: Game, player: Player, startPosition: BoardPosition, endPosition: BoardPosition): Game => {
-    
+// TODO test
+/**
+ * Delete the penguin at the given start position in the given penguin position
+ * mapping and add the given penguin at the given end position in the mapping.
+ * 
+ * @param penguinPositions the Penguin position mapping
+ * @param penguin the Penguin to move to the end position
+ * @param startPosition the starting position to clear within the mapping
+ * @param endPosition the end position to add the Penguin to
+ * @return the new updated position mapping
+ */
+const movePenguinInPenguinPositions = (
+    penguinPositions: Map<BoardPosition, Penguin>, 
+    penguin: Penguin,
+    startPosition: BoardPosition, 
+    endPosition: BoardPosition
+): Map<BoardPosition, Penguin> => {
+    // Copy the given position mapping.
+    const newPenguinPositions: Map<BoardPosition, Penguin> = new Map(penguinPositions);
+
+    // Remove the Penguin at the start position.
+    newPenguinPositions.delete(startPosition);
+
+    // Add the Penguin to its end position.
+    newPenguinPositions.set(endPosition, penguin);
+
+    return newPenguinPositions;
+}
+
+// TODO test
+/**
+ * Move the given Player's penguin at the given start position on the Board of
+ * the given Game state to a given end position.
+ * 
+ * @param game the Game state
+ * @param player the Player who is moving their Penguin
+ * @param startPosition the position of Penguin the Player wishes to move
+ * @param endPosition the position the Player wants to move its Penguin to
+ * @return the new Game state with the resulting move or an error
+ */
+const movePenguin = (
+    game: Game, 
+    player: Player, 
+    startPosition: BoardPosition, 
+    endPosition: BoardPosition
+): Game | InvalidPositionError | IllegalPenguinMoveError | InvalidGameStateError => {
+    // Verify that the start and end positions are valid.
+    if (!positionIsOnBoard(game.board, startPosition)) {
+        return new InvalidPositionError(game.board, startPosition);
+    } else if (!positionIsOnBoard(game.board, endPosition)) {
+        return new InvalidPositionError(game.board, endPosition);
+    }
+
+    // Validate the move and get the Penguin being moved.
+    const playerPenguinOrError: Penguin | IllegalPenguinMoveError | InvalidGameStateError = validatePenguinMove(game, player, startPosition, endPosition);
+
+    if (isPenguin(playerPenguinOrError)) {
+        // If the move is valid, update the Game state's Penguin position 
+        // mapping and return the new state. 
+        const updatedPenguinPositions: Map<BoardPosition, Penguin> = movePenguinInPenguinPositions(
+            game.penguinPositions, 
+            playerPenguinOrError, 
+            startPosition, 
+            endPosition
+        );
+
+        return {
+            ...game,
+            penguinPositions: updatedPenguinPositions
+        }
+    } else {
+        // If the move was not valid, return the error.
+        return playerPenguinOrError;
+    }
 }
 
 export {

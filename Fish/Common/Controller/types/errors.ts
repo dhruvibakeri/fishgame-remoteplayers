@@ -1,4 +1,5 @@
 import { Board, BoardPosition } from "./board";
+import { Game, Player } from "./state";
 
 class InvalidPositionError extends Error {
   board: Board;
@@ -63,10 +64,63 @@ class InvalidNumberOfPlayersError extends Error {
     if (message) {
       this.message = message;
     } else {
-      this.message = "Invalid number of players specified for game."
+      this.message = "Invalid number of players specified for game.";
     }
     this.stack = new Error().stack;
   }
 }
 
-export { InvalidPositionError, InvalidBoardConstraintsError, InvalidNumberOfPlayersError };
+class IllegalPenguinMoveError extends Error {
+  game: Game;
+  player: Player;
+  startPosition: BoardPosition;
+  endPosition: BoardPosition;
+  message: string;
+
+  constructor(
+    game: Game,
+    player: Player,
+    startPosition: BoardPosition,
+    endPosition: BoardPosition,
+    message?: string
+  ) {
+    super();
+    this.game = game;
+    this.player = player;
+    this.startPosition = startPosition;
+    this.endPosition = endPosition;
+    if (message) {
+      this.message = message;
+    } else {
+      this.message = "Illegal Penguin move made by player.";
+    }
+    this.stack = new Error().stack;
+  }
+}
+
+class InvalidGameStateError extends Error {
+  game: Game;
+  message: string;
+
+  constructor(
+    game: Game,
+    message?: string
+  ) {
+    super();
+    this.game = game;
+    if (message) {
+      this.message = message;
+    } else {
+      this.message = "Invalid game state detected.";
+    }
+    this.stack = new Error().stack;
+  }
+}
+
+export { 
+  InvalidPositionError, 
+  InvalidBoardConstraintsError, 
+  InvalidNumberOfPlayersError,
+  IllegalPenguinMoveError,
+  InvalidGameStateError,
+};

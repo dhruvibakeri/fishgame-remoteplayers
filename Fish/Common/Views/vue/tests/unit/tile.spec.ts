@@ -6,7 +6,6 @@ describe('Tile.vue', () => {
     const wrapper = shallowMount(Tile, {
       propsData: {
         size: 10,
-        isHole: false,
         numFish: 1
       }
     });
@@ -19,8 +18,7 @@ describe('Tile.vue', () => {
     const wrapper = shallowMount(Tile, {
       propsData: {
         size: 10,
-        isHole: true,
-        numFish: 1
+        numFish: 0
       }
     });
     expect(wrapper.find(".hexagon").exists()).toBe(false);
@@ -33,7 +31,6 @@ describe('Tile.vue', () => {
     const wrapper = mount(Tile, {
       propsData: {
         size: 10,
-        isHole: false,
         numFish: 5
       }
     });

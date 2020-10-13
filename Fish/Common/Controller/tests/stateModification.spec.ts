@@ -1,17 +1,15 @@
-import { Board, BoardPosition, Tile } from "../types/board";
+import { Board, PenguinColor } from "../types/board";
 import { Player, Game } from "../types/state";
 import {
-  InvalidBoardConstraintsError,
-  InvalidPositionError,
   InvalidNumberOfPlayersError
 } from "../types/errors";
-import { MAX_NUMBER_OF_PLAYERS, sortPlayersByAge, createState } from "../src/stateModification";
+import { sortPlayersByAge, createState } from "../src/stateModification";
 import { createBlankBoard } from "../src/boardCreation"
 
 describe("stateModification", () => {
-    const player1: Player = { name: "foo", age: 20 };
-    const player2: Player = { name: "bar", age: 30 };
-    const player3: Player = { name: "baz", age: 45 };
+  const player1: Player = { name: "foo", age: 20 };
+  const player2: Player = { name: "bar", age: 30 };
+  const player3: Player = { name: "baz", age: 45 };
 
   describe("sortPlayersByAge", () => {
     it("maintains sorted (ascending age) order of already sorted players", () => {
@@ -35,23 +33,27 @@ describe("stateModification", () => {
 
   describe("createState", () => {
     const board: Board = createBlankBoard(2, 2, 1) as Board;
-    const playerToColorMapping: Map<Player
+    const playerToColorMapping: Map<Player, PenguinColor> = new Map([
+      [player1, PenguinColor.Black], 
+      [player2, PenguinColor.Brown], 
+      [player3, PenguinColor.Red]
+    ]);
 
     it("rejects an empty list of players", () => {
       const players: Array<Player> = []
-      expect(createState(players, board)).toEqual(new InvalidNumberOfPlayersError(players.length));
+      expect(createState(players, playerToColorMapping, board)).toEqual(new InvalidNumberOfPlayersError(players.length));
     });
 
     it("rejects a single player", () => {
       const players: Array<Player> = [player1];
-      expect(createState(players, board)).toEqual(
+      expect(createState(players, playerToColorMapping, board)).toEqual(
         new InvalidNumberOfPlayersError(players.length)
       );
     })
 
     it("rejects a number of players greater than the maximum", () => {
       const players: Array<Player> = [player1, player2, player3, player3, player3];
-      expect(createState(players, board)).toEqual(new InvalidNumberOfPlayersError(players.length));
+      expect(createState(players, playerToColorMapping, board)).toEqual(new InvalidNumberOfPlayersError(players.length));
     });
 
     it("successfully creates a Game state with a number of players equal to the maximum", () => {
@@ -61,10 +63,11 @@ describe("stateModification", () => {
         players: expectedPlayerOrdering,
         board,
         curPlayer: player1,
-        penguinPositions: new Map()
+        penguinPositions: new Map(),
+        playerToColorMapping
       };
 
-      expect(createState(players, board)).toEqual(expectedGameState);
+      expect(createState(players, playerToColorMapping, board)).toEqual(expectedGameState);
     });
 
     it("successfully creates a Game state with a number of players greater than the maximum", () => {
@@ -74,10 +77,11 @@ describe("stateModification", () => {
         players: expectedPlayerOrdering,
         board, 
         curPlayer: player1,
-        penguinPositions: new Map()
+        penguinPositions: new Map(), 
+        playerToColorMapping
       }
 
-      expect(createState(players, board)).toEqual(expectedGameState);
+      expect(createState(players, playerToColorMapping, board)).toEqual(expectedGameState);
     });
   })
 });

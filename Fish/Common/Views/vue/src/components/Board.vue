@@ -3,7 +3,7 @@
     div.board(:style='calculateBoardSize()')
         div.col(v-for='tileCol, colIndex in board.tiles' :key='colIndex' msg="blah")
             div.tile-container(v-for='tile, rowIndex in tileCol' :style='tileAbsolutePosition(colIndex, rowIndex, tile)')
-                Tile.tile(:size='tileSize' :isHole='tile.isHole' :numFish='tile.numOfFish' :key='rowIndex')
+                Tile.tile(:size='tileSize' :numFish='tile.numOfFish' :key='rowIndex')
 </template>
 
 <script lang="ts">

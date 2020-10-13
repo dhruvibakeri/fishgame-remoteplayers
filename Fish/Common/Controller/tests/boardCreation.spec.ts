@@ -17,16 +17,16 @@ import {
 describe("boardCreation", () => {
   const invalidPosition: BoardPosition = { row: 2, col: 2 };
   const invalidHolePositions: Array<BoardPosition> = [invalidPosition];
-  const tile: Tile = { isHole: false, numOfFish: 1 };
-  const tile3Fish: Tile = {isHole: false, numOfFish: 3 };
-  const tile5Fish: Tile = {isHole: false, numOfFish: 5 };
+  const tile: Tile = { numOfFish: 1 };
+  const tile3Fish: Tile = { numOfFish: 3 };
+  const tile5Fish: Tile = { numOfFish: 5 };
   const tiles: Array<Array<Tile>> = [
     [tile, tile],
     [tile, tile],
   ];
   const board: Board = { tiles };
-  const hole: Tile = { isHole: true, numOfFish: 1 };
-  const hole0Fish: Tile = { isHole: true, numOfFish: 0 };
+  const hole: Tile = { numOfFish: 0 };
+  const hole0Fish: Tile = { numOfFish: 0 };
   const tilesWithHole: Array<Array<Tile>> = [
     [tile, tile],
     [hole, tile],
@@ -86,11 +86,11 @@ describe("boardCreation", () => {
 
   describe("createTile", () => {
     it("creates a tile without a hole", () => {
-      expect(createTile(1, false)).toEqual(tile);
+      expect(createTile(1)).toEqual(tile);
     });
 
     it("creates a tile with a hole", () => {
-      expect(createTile(1, true)).toEqual({ isHole: true, numOfFish: 1 });
+      expect(createTile(0)).toEqual({ numOfFish: 0 });
     });
 
     it("defaults to creating a tile without a hole", () => {
@@ -128,41 +128,37 @@ describe("boardCreation", () => {
 
   describe("setTileOnBoard", () => {
     it("rejects an invalid tile position", () => {
-      expect(setTileOnBoard(board, invalidPosition, true)).toEqual(
+      expect(setTileOnBoard(board, invalidPosition, 1)).toEqual(
         new InvalidPositionError(board, invalidPosition)
       );
     });
 
     it("changes a tile on the board to not a hole", () => {
-      expect(setTileOnBoard(boardWithHole, validPosition, false)).toEqual(
+      expect(setTileOnBoard(boardWithHole, validPosition, 1)).toEqual(
         board
       );
     });
 
     it("changes the number of fish on a tile", () => {
-      const newTile: Tile = { numOfFish: 3, isHole: false };
+      const newTile: Tile = { numOfFish: 3 };
       const tiles: Array<Array<Tile>> = [
         [tile, tile],
         [newTile, tile],
       ];
       const newBoard: Board = { tiles };
-      expect(setTileOnBoard(board, validPosition, undefined, 3)).toEqual(
+      expect(setTileOnBoard(board, validPosition, 3)).toEqual(
         newBoard
       );
     });
 
     it("changes both a tile's hole state and number of fish", () => {
-      const newTile: Tile = { numOfFish: 3, isHole: true };
+      const newTile: Tile = { numOfFish: 3 };
       const tiles: Array<Array<Tile>> = [
         [tile, tile],
         [newTile, tile],
       ];
       const newBoard: Board = { tiles };
-      expect(setTileOnBoard(board, validPosition, true, 3)).toEqual(newBoard);
-    });
-
-    it("no-ops when not given any values to modify", () => {
-      expect(setTileOnBoard(board, validPosition)).toEqual(board);
+      expect(setTileOnBoard(board, validPosition, 3)).toEqual(newBoard);
     });
   });
 

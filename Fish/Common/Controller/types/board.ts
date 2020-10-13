@@ -1,19 +1,18 @@
 /**
- * A Tile represents a single tile within a Board.
+ * A Tile represents a single tile within a Board with a number of fish on it.
+ * If there are 0 fish on the Tile, then it is a hole.
  * 
  * It contains:
- * isHole    - whether this Tile is a hole
  * numOfFish - The number of fish on this tile
  */
 export interface Tile {
-  readonly isHole: boolean;
   readonly numOfFish: number;
 }
 
 /**
  * A Board is 2D array of Tiles representing the entire board within a Fish game.
  * The position of each Tile within the game is represented by its index within 
- * the 2D array, in col-row order.
+ * the 2D array, in row-column order.
  * 
  * It contains:
  * tiles - the 2D array of Tiles

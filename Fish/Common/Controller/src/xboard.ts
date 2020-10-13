@@ -3,12 +3,12 @@ import { createNumberedBoard } from "./boardCreation";
 import { getReachablePositions } from "./movement";
 import { isBoard } from "./validation";
 
-interface inputBoardPosn {
+interface InputBoardPosn {
     position: number[];
     board: number[][];
 }
 
-const read = async (): Promise<inputBoardPosn> => {
+const readStdin = async (): Promise<InputBoardPosn> => {
     const input: string = await getStdin();
     const parsed = JSON.parse(input);
     return parsed;
@@ -23,7 +23,7 @@ const getNumReachableFromBoard = (arrayBoard: number[][], position: number[]) =>
     }
 }
 
-read()
-    .then((parsed: inputBoardPosn) => {
+readStdin()
+    .then((parsed: InputBoardPosn) => {
         console.log(getNumReachableFromBoard(parsed.board, parsed.position));
     })

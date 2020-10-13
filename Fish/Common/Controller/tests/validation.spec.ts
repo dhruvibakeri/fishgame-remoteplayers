@@ -103,7 +103,7 @@ describe("validation", () => {
     });
 
     it("accepts a Tile", () => {
-      const tile: Tile = { isHole: false, numOfFish: 1 };
+      const tile: Tile = { numOfFish: 1 };
       expect(isTile(tile)).toEqual(true);
     });
   });
