@@ -6,7 +6,7 @@ import {
     InvalidGameStateError,
     IllegalPenguinPositionError
 } from "../types/errors";
-import { isError, validatePenguinMove, validatePenguinPlacement } from "./validation";
+import { isError, playerHasUnplacedPenguin, positionIsOnBoard, positionIsPlayable, validatePenguinMove } from "./validation";
 
 
 const MAX_NUMBER_OF_PLAYERS = 4;
@@ -20,6 +20,25 @@ const MIN_NUMBER_OF_PLAYERS = 2;
 const sortPlayersByAge = (players: Array<Player>): Array<Player> => {
     return players.sort((playerA: Player, playerB: Player) => playerA.age - playerB.age);
 };
+
+/**
+ * Creates array of all unplaced penguins for initial game state. Adds 6 - players.length penguins for each player
+ * to array.
+ * @param players Array of players for which to create penguins
+ * @param playerToColorMapping Mapping of players to colors, used to assign penguin colors
+ * @returns Array of penguins. Contains 6 - players.length penguins of each color in playerToColorMapping
+ */
+const buildUnplacedPenguinArray = (players: Array<Player>, playerToColorMapping: Map<Player, PenguinColor>): Array<Penguin> => {
+    const unplacedPenguins: Array<Penguin> = [];
+    for (const player of players) {
+        const color = playerToColorMapping.get(player);
+        for (let index = 0; index < (6 - players.length); index++) {
+            unplacedPenguins.push({ color });
+        }
+    }
+
+    return unplacedPenguins;
+}
 
 /**
  * Create a new Game state given an array of Players, their color mappings, and
@@ -37,11 +56,13 @@ const createState = (players: Array<Player>, playerToColorMapping: Map<Player, P
 
     // Sort the players by age to get the ordering.
     const playerOrdering: Array<Player> = sortPlayersByAge(players);
+    const unplacedPenguins: Array<Penguin> = buildUnplacedPenguinArray(players, playerToColorMapping);
 
     return {
       players: playerOrdering,
       board,
       curPlayer: playerOrdering[0],
+      unplacedPenguins: unplacedPenguins,
       penguinPositions: new Map(),
       playerToColorMapping
     };
@@ -56,8 +77,35 @@ const createState = (players: Array<Player>, playerToColorMapping: Map<Player, P
  * @param position Position at which to place the penguin
  * @return the Game state with the updated board or an error
  */
-const placePenguin = (game: Game, player: Player, position: BoardPosition): Game | InvalidGameStateError | InvalidPositionError | IllegalPenguinPositionError => {
+const placePenguin = (player: Player, game: Game, position: BoardPosition): Game | InvalidPositionError | InvalidGameStateError => {
+    if (!positionIsOnBoard(game.board, position)) {
+        return new InvalidPositionError(game.board, position);
+    }
 
+    if (!playerHasUnplacedPenguin(player, game)) {
+        return new InvalidGameStateError(game, "Player does not have any remaining unplaced penguins");
+    }
+
+    const playerColor = game.playerToColorMapping.get(player);
+    const penguinToPlaceIndex = game.unplacedPenguins.findIndex((penguin: Penguin) => { penguin.color === playerColor });
+    const penguinToPlace = game.unplacedPenguins[penguinToPlaceIndex];
+    const newUnplacedPenguinArray = game.unplacedPenguins.splice(penguinToPlaceIndex, 1);
+
+    // Validate the move and get the Penguin being moved.
+    if (positionIsPlayable(game, position)) {
+        const updatedPenguinPositions: Map<BoardPosition, Penguin> = movePenguinInPenguinPositions(
+            game.penguinPositions, 
+            penguinToPlace,
+            position
+        );
+        return {
+            ...game,
+            unplacedPenguins: newUnplacedPenguinArray,
+            penguinPositions: updatedPenguinPositions,
+        };
+    }
+
+    return new InvalidPositionError(game.board, position);
 }
 
 /**
@@ -73,14 +121,16 @@ const placePenguin = (game: Game, player: Player, position: BoardPosition): Game
 const movePenguinInPenguinPositions = (
     penguinPositions: Map<BoardPosition, Penguin>, 
     penguin: Penguin,
-    startPosition: BoardPosition, 
-    endPosition: BoardPosition
+    endPosition: BoardPosition,
+    startPosition?: BoardPosition
 ): Map<BoardPosition, Penguin> => {
     // Copy the given position mapping.
     const newPenguinPositions: Map<BoardPosition, Penguin> = new Map(penguinPositions);
 
     // Remove the Penguin at the start position.
-    newPenguinPositions.delete(startPosition);
+    if (startPosition) {
+        newPenguinPositions.delete(startPosition);
+    }
 
     // Add the Penguin to its end position.
     newPenguinPositions.set(endPosition, penguin);
@@ -116,8 +166,8 @@ const movePenguin = (
         const updatedPenguinPositions = movePenguinInPenguinPositions(
             game.penguinPositions, 
             playerPenguinOrError, 
+            endPosition,
             startPosition, 
-            endPosition
         );
 
         return {

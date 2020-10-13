@@ -32,9 +32,10 @@ const positionIsOnBoard = (board: Board, position: BoardPosition): boolean => {
  * @param position the position to be checked
  * @return whether the given position is playable on the board
  */
-const positionIsPlayable = (board: Board, position: BoardPosition): boolean =>
-  positionIsOnBoard(board, position) &&
-  board.tiles[position.row][position.col].numOfFish > 0;
+const positionIsPlayable = (game: Game, position: BoardPosition): boolean =>
+  positionIsOnBoard(game.board, position) &&
+  game.board.tiles[position.row][position.col].numOfFish > 0 &&
+  game.penguinPositions.get(position) === undefined;
 
 /**
  * Determine whether the given dimensions for a board are valid.
@@ -114,9 +115,36 @@ const validatePenguinPlacement = (game: Game, player: Player, position: BoardPos
  * @param startPosition 
  * @param endPosition 
  */
-const positionIsReachable = (board: Board, startPosition: BoardPosition, endPosition: BoardPosition): boolean => {
-  return getReachablePositions(board, startPosition).filter(
+const positionIsReachable = (game: Game, startPosition: BoardPosition, endPosition: BoardPosition): boolean => {
+  return getReachablePositions(game, startPosition).filter(
     (position: BoardPosition) => position.col === endPosition.col && position.row === endPosition.row).length > 0;
+}
+
+//TODO test
+/**
+ * Takes in a player and a game state, and checks if the player has at least one remaining
+ * unplaced penguin in the given game state
+ * 
+ * @param player player to check for remaining unplaced penguins
+ * @param game game state to check for remaining penguins for given player
+ * @returns true if player has at least one unplaced penguin, returns false if they do not
+ */
+const playerHasUnplacedPenguin = (player: Player, game: Game): boolean => {
+  const playerColor: PenguinColor = game.playerToColorMapping.get(player);
+  const penguinIndex: number = game.unplacedPenguins.findIndex((penguin: Penguin) => { penguin.color === playerColor });
+  return  penguinIndex !== -1;
+}
+
+// TODO test
+/**
+ * Typeguard for checking whether a given Penguin or Error is a Penguin.
+ * 
+ * @param penguinOrError the Penguin or Error to check
+ * @return whether the given Penguin or Error is a Penguin
+ */
+const isPenguin = (penguinOrError: Penguin | Error): penguinOrError is Penguin => {
+  const penguin: Penguin = penguinOrError as Penguin;
+  return penguin.color !== undefined;
 }
 
 /**
@@ -125,14 +153,15 @@ const positionIsReachable = (board: Board, startPosition: BoardPosition, endPosi
  * 
  * @param game the Game state
  * @param player the Player moving its Penguin
- * @param startPosition the Player's Penguin's current position
  * @param endPosition the Player's Penguin's end position after the move
+ * @param startPosition the Player's Penguin's current position, not required if
+ * penguin is being placed on the board before game starts
  * @return the Penguin being moved if the move is valid or an error if not
  */
 const validatePenguinMove = (
   game: Game, 
   player: Player, 
-  startPosition: BoardPosition, 
+  startPosition: BoardPosition,
   endPosition: BoardPosition
 ): Penguin | InvalidGameStateError | InvalidPositionError | IllegalPenguinPositionError => {
   // Verify that the start position is on the board.
@@ -145,7 +174,7 @@ const validatePenguinMove = (
 
   if (isError(validatedEndPosition)) {
     return validatedEndPosition;
-  } else if (!positionIsReachable(game.board, startPosition, endPosition)) {
+  } else if (!positionIsReachable(game, startPosition, endPosition)) {
     return new UnreachablePositionError(game, player, startPosition, endPosition);
   }
 
@@ -174,5 +203,7 @@ export {
   validatePenguinPlacement,
   positionIsReachable,
   validatePenguinMove,
+  playerHasUnplacedPenguin,
+  isPenguin,
   isError
 };
