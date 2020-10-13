@@ -65,19 +65,7 @@ const placePenguinInPenguinPositions = (penguinPositions: Map<BoardPosition, Pen
  * @return the Game state with the updated board or an error
  */
 const placePenguin = (game: Game, player: Player, position: BoardPosition): Game | InvalidGameStateError | InvalidPositionError | IllegalPenguinPositionError => {
-    // Check whether the given position is valid and playable.
-    const validatedPosition: BoardPosition | InvalidPositionError | IllegalPenguinPositionError = validatePenguinPlacement(game, player, position);
-    
-    if (isError(validatedPosition)) {
-        return validatedPosition;
-    } else {
-        // Create a new Penguin for the player.
-        const newPenguin: Penguin = { color: game.playerToColorMapping.get(player) };
-        return {
-            ...game,
-            penguinPositions: placePenguinInPenguinPositions(game.penguinPositions, newPenguin, position)
-        }
-    }
+
 }
 
 /**
