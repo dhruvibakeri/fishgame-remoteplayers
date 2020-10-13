@@ -88,7 +88,6 @@ const movePenguinInPenguinPositions = (
     return newPenguinPositions;
 }
 
-// TODO test
 /**
  * Move the given Player's penguin at the given start position on the Board of
  * the given Game state to a given end position.

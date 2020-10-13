@@ -72,7 +72,6 @@ const isValidMinimumOneFishTiles = (
   );
 };
 
-// TODO test
 /**
  * Typeguard for checking whether the given parameter is an Error.
  * 
@@ -83,7 +82,6 @@ const isError = (anything: any): anything is Error => {
   return error.message !== undefined && error.name !== undefined;
 }
 
-// TODO test
 /**
  * Determine if the given Player may place a Penguin on the given position with
  * with the given Game state.
@@ -110,7 +108,6 @@ const validatePenguinPlacement = (game: Game, player: Player, position: BoardPos
   }
 }
 
-// TODO test
 /**
  * Determine whether the given end position is reachable from the given start position on the given Board.
  * @param board 
@@ -175,6 +172,7 @@ export {
   isValidBoardSize,
   isValidMinimumOneFishTiles,
   validatePenguinPlacement,
+  positionIsReachable,
   validatePenguinMove,
   isError
 };
