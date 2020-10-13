@@ -1,7 +1,7 @@
 import getStdin from "get-stdin"
 import { createNumberedBoard } from "./boardCreation";
 import { getReachablePositions } from "./movement";
-import { isBoard } from "./validation";
+import { isError } from "./validation";
 
 interface InputBoardPosn {
     position: number[];
@@ -17,7 +17,7 @@ const readStdin = async (): Promise<InputBoardPosn> => {
 const getNumReachableFromBoard = (arrayBoard: number[][], position: number[]) => {
     const board = createNumberedBoard(arrayBoard);
     const startPosition = { row: position[0], col: position[1]};
-    if (isBoard(board)) {
+    if (!isError(board)) {
         const reachableTiles = getReachablePositions(board, startPosition);
         return reachableTiles.length;
     }

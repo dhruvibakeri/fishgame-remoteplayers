@@ -234,8 +234,6 @@ const getNextPosDownLeft = (position: BoardPosition): BoardPosition => {
 };
 
 export {
-  VerticalDirection,
-  HorizontalDirection,
   getReachablePositions,
   getReachablePositionsInDirection,
   getNextPosition,

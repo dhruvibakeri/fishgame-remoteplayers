@@ -2,9 +2,19 @@
 
 This project contains assignment work for Northeastern's CS 4500: Software Development course.
 
+# 3 &mdash; The Game State
+
+These additions are for the assignment, [3 - The Game State](https://felleisen.org/matthias/4500-f20/3.html). The purpose of this assignment is to design and implement data representations for a Fish game's game state, be able to bridge between data representations via a test harness, and lastly design a representation of a full Fish game.
+
+### How To Test
+
+## Our test suite
+
+## The test harness
+
 # 2 &mdash; The Game Pieces
 
-These additions are for the assignment, [2 - The Game Pieces](https://felleisen.org/matthias/4500-f20/2.html). The purpose of this assignment is to design and implement data representation for the various game pieces on the board.
+These additions are for the assignment, [2 - The Game Pieces](https://felleisen.org/matthias/4500-f20/2.html). The purpose of this assignment is to design and implement data representations for the various game pieces on the board.
 
 <details>
   <summary>Click to see the new elements:</summary>
@@ -79,11 +89,14 @@ scl enable rh-nodejs10 bash
 make
 npm run serve
 ```
+
 and open browser at `localhost:8080`,
 or test using
+
 ```
 npm run test:unit
 ```
+
 NOTE: If you're having issues installing npm packages on khoury machines, try clearing the cache using `npm cache clean` and installing again.
 We attempted to make a makefile in the Common directory that installed packages for both Controller and Views, but ran into issues with exceeding stack size on khoury machines. You may have success with these files, but if not please follow the instructions above to install dependencies and run visualization/tests separately so as to not overwhelm the capabilities of the vm. The `Makefile`, `view-run` `view-test` and `controller-test` files work on non-vm.
 

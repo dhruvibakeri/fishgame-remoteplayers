@@ -1,8 +1,10 @@
 // Helper functions for validating logic
-import { IllegalPenguinMoveError, InvalidGameStateError } from "../types/errors";
+import { InvalidGameStateError, InvalidPositionError, IllegalPenguinPositionError, UnreachablePositionError } from "../types/errors";
 import { Player } from "../types/state";
 import { Game } from "../types/state";
 import { Board, BoardPosition, Penguin, PenguinColor, Tile } from "../types/board";
+import { getTileOnBoard } from "./boardCreation";
+import { getReachablePositions } from "./movement";
 
 /**
  * Given a board and a position, determine whether that position is within the
@@ -34,28 +36,6 @@ const positionIsPlayable = (game: Game, position: BoardPosition): boolean =>
   positionIsOnBoard(game.board, position) &&
   game.board.tiles[position.row][position.col].numOfFish > 0 &&
   game.penguinPositions.get(position) === undefined;
-
-/**
- * Typeguard for checking whether a given tile or error is a tile.
- *
- * @param tileOrError the given tile or error
- * @return whether the input is a tile
- */
-const isTile = (tileOrError: Tile | Error): tileOrError is Tile => {
-  const tile: Tile = tileOrError as Tile;
-  return tile.numOfFish !== undefined;
-};
-
-/**
- * Typeguard for checking whether a given board or error is a board.
- *
- * @param tileOrError the given tile or error
- * @return whether the input is a tile
- */
-const isBoard = (boardOrError: Board | Error): boardOrError is Board => {
-  const board: Board = boardOrError as Board;
-  return board.tiles !== undefined && Array.isArray(board.tiles);
-};
 
 /**
  * Determine whether the given dimensions for a board are valid.
@@ -95,38 +75,52 @@ const isValidMinimumOneFishTiles = (
 
 // TODO test
 /**
- * Determine if the given Player may move one of its Penguins on a given
- * valid starting position to a given valid end position on the board of the
- * given Game state.
+ * Typeguard for checking whether the given parameter is an Error.
+ * 
+ * @param anything the input to check against
+ */
+const isError = (anything: any): anything is Error => {
+  const error: Error = anything as Error;
+  return error.message !== undefined && error.name !== undefined;
+}
+
+// TODO test
+/**
+ * Determine if the given Player may place a Penguin on the given position with
+ * with the given Game state.
  * 
  * @param game the Game state
- * @param player the Player moving its Penguin
- * @param endPosition the Player's Penguin's end position after the move
- * @param startPosition the Player's Penguin's current position, not required if
- * penguin is being placed on the board before game starts
- * @return the Penguin being moved if the move is valid or an error if not
+ * @param player the Player placing the Penguin
+ * @param position the position of the placement
  */
-const validatePenguinMove = (
-  game: Game, 
-  player: Player, 
-  startPosition: BoardPosition,
-  endPosition: BoardPosition
-): Penguin | IllegalPenguinMoveError | InvalidGameStateError => {
-    const maybePlayerColor: PenguinColor | undefined = game.playerToColorMapping.get(player);
-    const maybePenguinAtStart: Penguin | undefined = game.penguinPositions.get(startPosition);
-    const maybePenguinAtEnd: Penguin | undefined = game.penguinPositions.get(endPosition);
+const validatePenguinPlacement = (game: Game, player: Player, position: BoardPosition): BoardPosition | InvalidPositionError | IllegalPenguinPositionError => {
+  if (!positionIsOnBoard(game.board, position)) {
+    return new InvalidPositionError(game.board, position);
+  }
 
-    const correctPenguinColor: boolean = maybePenguinAtStart !== undefined && maybePlayerColor === maybePenguinAtStart.color;
-    const endPositionIsOpen: boolean = maybePenguinAtEnd === undefined;
-    const isValidMove: boolean = correctPenguinColor && endPositionIsOpen;
+  const maybeTile: Tile | InvalidPositionError = getTileOnBoard(game.board, position);
+  const maybePenguinPosition: Penguin | undefined = game.penguinPositions.get(position);
 
-    if (!maybePlayerColor) {
-      return new InvalidGameStateError(game, "Incomplete player to penguin color mapping.");
-    } if (maybePenguinAtStart && isValidMove) {
-      return maybePenguinAtStart;
-    } else {
-      return new IllegalPenguinMoveError(game, player, startPosition, endPosition);
-    }
+  const isNotHole = !isError(maybeTile) && maybeTile.numOfFish > 0;
+  const isFree = maybePenguinPosition === undefined;
+
+  if (isNotHole && isFree) {
+    return position;
+  } else {
+    return new IllegalPenguinPositionError(game, player, position);
+  }
+}
+
+// TODO test
+/**
+ * Determine whether the given end position is reachable from the given start position on the given Board.
+ * @param board 
+ * @param startPosition 
+ * @param endPosition 
+ */
+const positionIsReachable = (game: Game, startPosition: BoardPosition, endPosition: BoardPosition): boolean => {
+  return getReachablePositions(game, startPosition).filter(
+    (position: BoardPosition) => position.col === endPosition.col && position.row === endPosition.row).length > 0;
 }
 
 //TODO test
@@ -156,14 +150,62 @@ const isPenguin = (penguinOrError: Penguin | Error): penguinOrError is Penguin =
   return penguin.color !== undefined;
 }
 
+/**
+ * Determine if the given Player may move one of its Penguins on a starting
+ * position to a given end position on the board of the given Game state.
+ * 
+ * @param game the Game state
+ * @param player the Player moving its Penguin
+ * @param endPosition the Player's Penguin's end position after the move
+ * @param startPosition the Player's Penguin's current position, not required if
+ * penguin is being placed on the board before game starts
+ * @return the Penguin being moved if the move is valid or an error if not
+ */
+const validatePenguinMove = (
+  game: Game, 
+  player: Player, 
+  startPosition: BoardPosition,
+  endPosition: BoardPosition
+): Penguin | InvalidGameStateError | InvalidPositionError | IllegalPenguinPositionError => {
+  // Verify that the start position is on the board.
+  if (!positionIsOnBoard(game.board, startPosition)) {
+      return new InvalidPositionError(game.board, startPosition);
+  }
+
+  // Verify that a Penguin can be placed on the given end position.
+  const validatedEndPosition: BoardPosition | InvalidPositionError | IllegalPenguinPositionError = validatePenguinPlacement(game, player, endPosition);
+
+  if (isError(validatedEndPosition)) {
+    return validatedEndPosition;
+  } else if (!positionIsReachable(game, startPosition, endPosition)) {
+    return new UnreachablePositionError(game, player, startPosition, endPosition);
+  }
+
+  // Verify that the Player has a Penguin at the starting position.
+  const maybePlayerColor: PenguinColor | undefined = game.playerToColorMapping.get(player);
+  const maybePenguinAtStart: Penguin | undefined = game.penguinPositions.get(startPosition);
+
+  if (maybePlayerColor === undefined) {
+    return new InvalidGameStateError(game);
+  }
+
+  const playerHasPenguinAtStart = maybePenguinAtStart !== undefined && maybePlayerColor === maybePenguinAtStart.color;
+
+  if (!playerHasPenguinAtStart) {
+    return new IllegalPenguinPositionError(game, player, startPosition, endPosition);
+  }
+
+  return maybePenguinAtStart;
+}
+
 export {
   positionIsOnBoard,
   positionIsPlayable,
-  isTile,
-  isBoard,
   isValidBoardSize,
   isValidMinimumOneFishTiles,
+  validatePenguinPlacement,
   validatePenguinMove,
   playerHasUnplacedPenguin,
   isPenguin,
+  isError
 };
