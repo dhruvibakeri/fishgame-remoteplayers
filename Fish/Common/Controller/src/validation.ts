@@ -85,6 +85,33 @@ const isError = (anything: any): anything is Error => {
 
 // TODO test
 /**
+ * Determine if the given Player may place a Penguin on the given position with
+ * with the given Game state.
+ * 
+ * @param game the Game state
+ * @param player the Player placing the Penguin
+ * @param position the position of the placement
+ */
+const validatePenguinPlacement = (game: Game, player: Player, position: BoardPosition): BoardPosition | InvalidPositionError | IllegalPenguinPositionError => {
+  if (!positionIsOnBoard(game.board, position)) {
+    return new InvalidPositionError(game.board, position);
+  }
+
+  const maybeTile: Tile | InvalidPositionError = getTileOnBoard(game.board, position);
+  const maybePenguinPosition: Penguin | undefined = game.penguinPositions.get(position);
+
+  const isNotHole = !isError(maybeTile) && maybeTile.numOfFish > 0;
+  const isFree = maybePenguinPosition === undefined;
+
+  if (isNotHole && isFree) {
+    return position;
+  } else {
+    return new IllegalPenguinPositionError(game, player, position);
+  }
+}
+
+// TODO test
+/**
  * Determine whether the given end position is reachable from the given start position on the given Board.
  * @param board 
  * @param startPosition 
