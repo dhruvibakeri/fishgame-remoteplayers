@@ -53,3 +53,22 @@ export enum PenguinColor {
 export interface Penguin {
   readonly color: PenguinColor;
 }
+
+/**
+ * An enumeration describing the possible vertical directions in which a
+ * penguin could move on the board.
+ */
+export enum VerticalDirection {
+  Up = "Up",
+  Down = "Down",
+}
+
+/**
+ * An enumeration describing the possible horizontal directions in which a
+ * penguin could move on the board.
+ */
+export enum HorizontalDirection {
+  Right = "Right",
+  Left = "Left",
+  Neutral = "Neutral",
+}

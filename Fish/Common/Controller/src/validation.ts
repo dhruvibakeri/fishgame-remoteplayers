@@ -5,7 +5,6 @@ import { Game } from "../types/state";
 import { Board, BoardPosition, Penguin, PenguinColor, Tile } from "../types/board";
 import { getTileOnBoard } from "./boardCreation";
 import { getReachablePositions } from "./movement";
-import { start } from "repl";
 
 /**
  * Given a board and a position, determine whether that position is within the
