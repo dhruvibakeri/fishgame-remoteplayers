@@ -50,4 +50,23 @@ class InvalidBoardConstraintsError extends Error {
   }
 }
 
-export { InvalidPositionError, InvalidBoardConstraintsError };
+class InvalidNumberOfPlayersError extends Error {
+  numOfPlayers: number;
+  message: string;
+
+  constructor(
+    numOfPlayers: number, 
+    message?: string
+  ) {
+    super();
+    this.numOfPlayers = numOfPlayers
+    if (message) {
+      this.message = message;
+    } else {
+      this.message = "Invalid number of players specified for game."
+    }
+    this.stack = new Error().stack;
+  }
+}
+
+export { InvalidPositionError, InvalidBoardConstraintsError, InvalidNumberOfPlayersError };

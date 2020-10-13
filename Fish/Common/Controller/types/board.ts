@@ -20,6 +20,5 @@ export enum PenguinColor {
 }
 
 export interface Penguin {
-  readonly position: BoardPosition;
   readonly color: PenguinColor;
 }
