@@ -30,9 +30,10 @@ const positionIsOnBoard = (board: Board, position: BoardPosition): boolean => {
  * @param position the position to be checked
  * @return whether the given position is playable on the board
  */
-const positionIsPlayable = (board: Board, position: BoardPosition): boolean =>
-  positionIsOnBoard(board, position) &&
-  board.tiles[position.row][position.col].numOfFish > 0;
+const positionIsPlayable = (game: Game, position: BoardPosition): boolean =>
+  positionIsOnBoard(game.board, position) &&
+  game.board.tiles[position.row][position.col].numOfFish > 0 &&
+  game.penguinPositions.get(position) === undefined;
 
 /**
  * Typeguard for checking whether a given tile or error is a tile.
@@ -100,14 +101,15 @@ const isValidMinimumOneFishTiles = (
  * 
  * @param game the Game state
  * @param player the Player moving its Penguin
- * @param startPosition the Player's Penguin's current position
  * @param endPosition the Player's Penguin's end position after the move
+ * @param startPosition the Player's Penguin's current position, not required if
+ * penguin is being placed on the board before game starts
  * @return the Penguin being moved if the move is valid or an error if not
  */
 const validatePenguinMove = (
   game: Game, 
   player: Player, 
-  startPosition: BoardPosition, 
+  startPosition: BoardPosition,
   endPosition: BoardPosition
 ): Penguin | IllegalPenguinMoveError | InvalidGameStateError => {
     const maybePlayerColor: PenguinColor | undefined = game.playerToColorMapping.get(player);
@@ -125,6 +127,21 @@ const validatePenguinMove = (
     } else {
       return new IllegalPenguinMoveError(game, player, startPosition, endPosition);
     }
+}
+
+//TODO test
+/**
+ * Takes in a player and a game state, and checks if the player has at least one remaining
+ * unplaced penguin in the given game state
+ * 
+ * @param player player to check for remaining unplaced penguins
+ * @param game game state to check for remaining penguins for given player
+ * @returns true if player has at least one unplaced penguin, returns false if they do not
+ */
+const playerHasUnplacedPenguin = (player: Player, game: Game): boolean => {
+  const playerColor: PenguinColor = game.playerToColorMapping.get(player);
+  const penguinIndex: number = game.unplacedPenguins.findIndex((penguin: Penguin) => { penguin.color === playerColor });
+  return  penguinIndex !== -1;
 }
 
 // TODO test
@@ -147,5 +164,6 @@ export {
   isValidBoardSize,
   isValidMinimumOneFishTiles,
   validatePenguinMove,
+  playerHasUnplacedPenguin,
   isPenguin,
 };

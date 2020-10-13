@@ -27,6 +27,7 @@ export interface Game {
     readonly players: Player[];
     readonly board: Board;
     readonly curPlayer: Player;
+    readonly unplacedPenguins: Array<Penguin>;
     readonly penguinPositions: Map<BoardPosition, Penguin>;
     readonly playerToColorMapping: Map<Player, PenguinColor>;
 }

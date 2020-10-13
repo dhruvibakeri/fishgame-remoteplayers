@@ -1,4 +1,5 @@
 import { Board, BoardPosition } from "../types/board";
+import { Game } from "../types/state";
 import { positionIsPlayable } from "./validation";
 
 /**
@@ -31,7 +32,7 @@ enum HorizontalDirection {
  * line
  */
 const getReachablePositions = (
-  board: Board,
+  game: Game,
   position: BoardPosition
 ): Array<BoardPosition> => {
   let reachablePositions: Array<BoardPosition> = [];
@@ -41,7 +42,7 @@ const getReachablePositions = (
   for (const verticalDirection in VerticalDirection) {
     for (const horizontalDirection in HorizontalDirection) {
       const curReachableInDirection: Array<BoardPosition> = getReachablePositionsInDirection(
-        board,
+        game,
         position,
         verticalDirection as VerticalDirection,
         horizontalDirection as HorizontalDirection
@@ -65,7 +66,7 @@ const getReachablePositions = (
  * vertical and horizontal direction
  */
 const getReachablePositionsInDirection = (
-  board: Board,
+  game: Game,
   position: BoardPosition,
   verticalDirection: VerticalDirection,
   horizontalDirection: HorizontalDirection
@@ -79,7 +80,7 @@ const getReachablePositionsInDirection = (
 
   // Keep moving in the given direction, accumulating positions so long as they
   // are playable.
-  while (positionIsPlayable(board, nextPosition)) {
+  while (positionIsPlayable(game, nextPosition)) {
     reachableTiles.push({ col: nextPosition.col, row: nextPosition.row });
     nextPosition = getNextPosition(
       nextPosition,
