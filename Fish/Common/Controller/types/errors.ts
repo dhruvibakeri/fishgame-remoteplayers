@@ -1,6 +1,9 @@
 import { Board, BoardPosition } from "./board";
 import { Game, Player } from "./state";
 
+/**
+ * Error used to represent the use of out-of-bounds positions for a given board.
+ */
 class InvalidPositionError extends Error {
   board: Board;
   position: BoardPosition;
@@ -19,6 +22,9 @@ class InvalidPositionError extends Error {
   }
 }
 
+/**
+ * Error used to represent invalid constraints used to specify a board.
+ */
 class InvalidBoardConstraintsError extends Error {
   columns: number;
   rows: number;
@@ -51,6 +57,10 @@ class InvalidBoardConstraintsError extends Error {
   }
 }
 
+/**
+ * Error used to represent an out-of-bounds number of players used to create a 
+ * game state, that is a number less than 2 or greater than 4.
+ */
 class InvalidNumberOfPlayersError extends Error {
   numOfPlayers: number;
   message: string;
@@ -70,34 +80,58 @@ class InvalidNumberOfPlayersError extends Error {
   }
 }
 
-class IllegalPenguinMoveError extends Error {
+/**
+ * Error used to represent the placement or movement of an avatar to an illegal
+ * position within a game state.
+ */
+class IllegalPenguinPositionError extends Error {
   game: Game;
   player: Player;
-  startPosition: BoardPosition;
-  endPosition: BoardPosition;
+  position1: BoardPosition;
+  position2?: BoardPosition;
   message: string;
 
   constructor(
     game: Game,
     player: Player,
-    startPosition: BoardPosition,
-    endPosition: BoardPosition,
+    position1: BoardPosition,
+    position2?: BoardPosition,
     message?: string
   ) {
     super();
     this.game = game;
     this.player = player;
-    this.startPosition = startPosition;
-    this.endPosition = endPosition;
+    this.position1 = position1;
+    if (position2) {
+      this.position2 = position2;
+    }
     if (message) {
       this.message = message;
     } else {
-      this.message = "Illegal Penguin move made by player.";
+      this.message = "Illegal Penguin position specified by Player.";
     }
     this.stack = new Error().stack;
   }
 }
 
+/**
+ * Error used to represent the movement of an avatar to an unreachable position.
+ */
+class UnreachablePositionError extends IllegalPenguinPositionError {
+  constructor(
+    game: Game, 
+    player: Player,
+    startPosition: BoardPosition,
+    endPosition: BoardPosition,
+    message?: string
+  ) {
+    super(game, player, startPosition, endPosition, message);
+  }
+}
+
+/**
+ * Error used to represent an invalid existing game state.
+ */
 class InvalidGameStateError extends Error {
   game: Game;
   message: string;
@@ -121,6 +155,7 @@ export {
   InvalidPositionError, 
   InvalidBoardConstraintsError, 
   InvalidNumberOfPlayersError,
-  IllegalPenguinMoveError,
+  IllegalPenguinPositionError,
+  UnreachablePositionError, 
   InvalidGameStateError,
 };

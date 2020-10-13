@@ -1,4 +1,4 @@
-import { Board, BoardPosition } from "../types/board";
+import { Board, BoardPosition, HorizontalDirection, VerticalDirection } from "../types/board";
 import { createBlankBoard, setTileToHole } from "../src/boardCreation";
 import {
   getNextPosDownLeft,
@@ -8,8 +8,6 @@ import {
   getNextPosUpNeutral,
   getNextPosUpRight,
   getReachablePositions,
-  VerticalDirection,
-  HorizontalDirection,
   getNextPosition,
   getReachablePositionsInDirection,
 } from "../src/movement";

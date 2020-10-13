@@ -1,10 +1,9 @@
 import { Board, BoardPosition, Tile } from "../types/board";
 import {
-  isBoard,
-  isTile,
   isValidBoardSize,
   positionIsOnBoard,
   isValidMinimumOneFishTiles,
+  isError,
 } from "./validation";
 import {
   InvalidBoardConstraintsError,
@@ -65,7 +64,10 @@ const setTileOnBoard = (
     position
   );
 
-  if (isTile(currentTileOrError)) {
+  if (isError(currentTileOrError)) {
+    // The specified position is not on the board. Return the error.
+    return currentTileOrError;
+  } else {
     // Create a new tile, using the specified value for numOfFish.
     const newTile: Tile = createTile(
        numOfFish
@@ -81,9 +83,6 @@ const setTileOnBoard = (
     };
     // console.log(newBoard);
     return newBoard;
-  } else {
-    // The specified position is not on the board. Return the error.
-    return currentTileOrError;
   }
 };
 
@@ -118,13 +117,13 @@ const addHolesToBoard = (
 
   // For each given hole position, attempt to add the hole to the board.
   for (const position of holePositions) {
-    if (isBoard(currBoardOrError)) {
+    if (isError(currBoardOrError)) {
+      // Stop trying if an error has occurred.
+      break;
+    } else {
       // If no error has occurred yet, try to add the next hole, storing the
       // resulting board or error.
       currBoardOrError = setTileToHole(currBoardOrError, position);
-    } else {
-      // Stop trying if an error has occurred.
-      break;
     }
   }
 
@@ -208,7 +207,9 @@ const createHoledOneFishBoard = (
   );
 
   // Check if creating a board failed, returning the error if so.
-  if (isBoard(blankBoardOrError)) {
+  if (isError(blankBoardOrError)) {
+    return blankBoardOrError;
+  } else {
     // If creating the blank board succeeded, try to add holes to the board and
     // return the result.
     const boardWithHolesOrError: Board | InvalidPositionError = addHolesToBoard(
@@ -216,8 +217,6 @@ const createHoledOneFishBoard = (
       holePositions
     );
     return boardWithHolesOrError;
-  } else {
-    return blankBoardOrError;
   }
 };
 
@@ -237,7 +236,9 @@ const createNumberedBoard = (tileFish: number[][]): Board | InvalidBoardConstrai
   // Begin with a blank board the same size as the given 2D array.
   const blankBoard = createBlankBoard(tileFish.length, tileFish[0].length, 0);
   
-  if (isBoard(blankBoard)) {
+  if (isError(blankBoard)) {
+    return blankBoard;
+  } else {
     let curBoard = blankBoard
 
     // For each given tile fish amount, set the corresponding Tile on the
@@ -245,17 +246,15 @@ const createNumberedBoard = (tileFish: number[][]): Board | InvalidBoardConstrai
     for (let row = 0; row < tileFish.length; row++) {
       for (let col = 0; col < tileFish[0].length; col++) {
         const setTileBoard = setTileOnBoard(curBoard, {row, col}, tileFish[row][col]);
-        if (isBoard(setTileBoard)) {
-          curBoard = setTileBoard;
+        if (isError(setTileBoard)) {
+          return setTileBoard;
         } else {
-          return setTileBoard
+          curBoard = setTileBoard;
         }
       }
     }
     return curBoard;
   }
-
-  return blankBoard;
 }
 
 export {

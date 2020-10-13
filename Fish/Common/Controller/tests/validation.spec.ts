@@ -1,18 +1,15 @@
 import {
   positionIsOnBoard,
   positionIsPlayable,
-  isTile,
-  isBoard,
   isValidBoardSize,
   isValidMinimumOneFishTiles,
   validatePenguinMove,
-  isPenguin,
 } from "../src/validation";
 import { createBlankBoard, createHoledOneFishBoard, setTileToHole } from "../src/boardCreation";
 import { Board, BoardPosition, Penguin, PenguinColor, Tile } from "../types/board";
 import { Game, Player } from "../types/state";
 import { createState } from "../src/stateModification";
-import { IllegalPenguinMoveError, InvalidGameStateError, InvalidNumberOfPlayersError, InvalidPositionError } from "../types/errors";
+import { IllegalPenguinPositionError, UnreachablePositionError, InvalidGameStateError, InvalidNumberOfPlayersError, InvalidPositionError } from "../types/errors";
 
 describe("validation", () => {
   describe("positionIsOnBoard", () => {
@@ -101,30 +98,6 @@ describe("validation", () => {
     });
   });
 
-  describe("isTile", () => {
-    it("rejects an Error", () => {
-      const error: Error = new Error();
-      expect(isTile(error)).toEqual(false);
-    });
-
-    it("accepts a Tile", () => {
-      const tile: Tile = { numOfFish: 1 };
-      expect(isTile(tile)).toEqual(true);
-    });
-  });
-
-  describe("isBoard", () => {
-    it("rejects an Error", () => {
-      const error: Error = new Error();
-      expect(isBoard(error)).toEqual(false);
-    });
-
-    it("accepts a Board", () => {
-      const board: Board = createBlankBoard(3, 3, 1) as Board;
-      expect(isBoard(board)).toEqual(true);
-    });
-  });
-
   describe("isValidBoardSize", () => {
     it("rejects a column amount of 0", () => {
       expect(isValidBoardSize(0, 1)).toEqual(false);
@@ -207,18 +180,18 @@ describe("validation", () => {
 
     it("rejects a player trying to move from a starting position not containing one of their penguins", () => {
       const invalidStartPosition: BoardPosition = { col: 1, row: 1 };
-      const expectedError = new IllegalPenguinMoveError(game, player1, invalidStartPosition, validEndPosition);
+      const expectedError = new IllegalPenguinPositionError(game, player1, invalidStartPosition, validEndPosition);
       expect(validatePenguinMove(game, player1, invalidStartPosition, validEndPosition)).toEqual(expectedError);
     });
 
     it("rejects a player trying to move to a position not reachable from the start", () => {
       const invalidEndPosition: BoardPosition = { col: 1, row: 1 };
-      const expectedError = new IllegalPenguinMoveError(game, player1, validStartPosition, invalidEndPosition);
+      const expectedError = new UnreachablePositionError(game, player1, validStartPosition, invalidEndPosition);
       expect(validatePenguinMove(game, player1, validStartPosition, invalidEndPosition)).toEqual(expectedError);
     });
 
     it("rejects a player trying to move to a hole", () => {
-      const expectedError = new IllegalPenguinMoveError(game, player1, validEndPosition, holePosition);
+      const expectedError = new IllegalPenguinPositionError(game, player1, validEndPosition, holePosition);
       expect(validatePenguinMove(game, player1, validEndPosition, holePosition)).toEqual(expectedError);
     });
 
@@ -229,24 +202,12 @@ describe("validation", () => {
         ...game,
         penguinPositions: twoPenguinPositions
       };
-      const expectedError = new IllegalPenguinMoveError(game, player1, validStartPosition, validEndPosition);
+      const expectedError = new IllegalPenguinPositionError(game, player1, validStartPosition, validEndPosition);
       expect(validatePenguinMove(gameWithTwoPenguins, player1, validStartPosition, validEndPosition)).toEqual(expectedError);
     });
 
     it("accepts a valid move", () => {
       expect(validatePenguinMove(game, player1, validStartPosition, validEndPosition)).toEqual(player1Penguin);
-    });
-  });
-
-  describe("isPenguin", () => {
-    it("rejects an error", () => {
-      const error = new InvalidNumberOfPlayersError(0);
-      expect(isPenguin(error)).toEqual(false);
-    });
-
-    it("accepts a Penguin", () => {
-      const penguin: Penguin = { color: PenguinColor.White };
-      expect(isPenguin(penguin)).toEqual(true);
     });
   });
 });

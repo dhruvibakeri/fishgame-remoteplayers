@@ -1,7 +1,7 @@
 import { Board, BoardPosition, Penguin, PenguinColor } from "../types/board";
 import { Player, Game } from "../types/state";
 import {
-  IllegalPenguinMoveError,
+  IllegalPenguinPositionError,
   InvalidGameStateError,
   InvalidNumberOfPlayersError, InvalidPositionError
 } from "../types/errors";
@@ -131,25 +131,25 @@ describe("stateModification", () => {
       expect(movePenguin(game, player1, validStartPosition, invalidEndPosition)).toEqual(expectedError);
     });
 
-    it("rejects an player without a penguin color mapping", () => {
+    it("rejects a player without a penguin color mapping", () => {
       const expectedError = new InvalidGameStateError(game);
       expect(movePenguin(game, player3, validStartPosition, validEndPosition)).toEqual(expectedError);
     });
 
     it("rejects a player trying to move from from a starting position not containing one of their penguins", () => {
       const invalidStartPosition: BoardPosition = { col: 1, row: 1 };
-      const expectedError = new IllegalPenguinMoveError(game, player1, invalidStartPosition, validEndPosition);
+      const expectedError = new IllegalPenguinPositionError(game, player1, invalidStartPosition, validEndPosition);
       expect(movePenguin(game, player1, invalidStartPosition, validEndPosition)).toEqual(expectedError);
     });
 
     it("rejects a player trying to move to a position not reachable from the start", () => {
       const invalidEndPosition: BoardPosition = { col: 1, row: 1 };
-      const expectedError = new IllegalPenguinMoveError(game, player1, validStartPosition, invalidEndPosition);
+      const expectedError = new IllegalPenguinPositionError(game, player1, validStartPosition, invalidEndPosition);
       expect(movePenguin(game, player1, validStartPosition, invalidEndPosition)).toEqual(expectedError);
     });
 
     it("rejects a player trying to move to a hole", () => {
-      const expectedError = new IllegalPenguinMoveError(game, player1, validEndPosition, holePosition);
+      const expectedError = new IllegalPenguinPositionError(game, player1, validEndPosition, holePosition);
       expect(movePenguin(game, player1, validEndPosition, holePosition)).toEqual(expectedError);
     });
 
@@ -160,7 +160,7 @@ describe("stateModification", () => {
         ...game,
         penguinPositions: twoPenguinPositions
       };
-      const expectedError = new IllegalPenguinMoveError(game, player1, validStartPosition, validEndPosition);
+      const expectedError = new IllegalPenguinPositionError(game, player1, validStartPosition, validEndPosition);
       expect(movePenguin(gameWithTwoPenguins, player1, validStartPosition, validEndPosition)).toEqual(expectedError);
     });
 
