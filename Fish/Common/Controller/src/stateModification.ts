@@ -47,14 +47,6 @@ const createState = (players: Array<Player>, playerToColorMapping: Map<Player, P
     };
 }
 
-const placePenguinInPenguinPositions = (penguinPositions: Map<BoardPosition, Penguin>, penguin: Penguin, position: BoardPosition): Map<BoardPosition, Penguin> => {
-    // Copy the current penguin positions and add the new penguin.
-    return new Map([
-        ...penguinPositions, 
-        [position, penguin]
-    ]);
-}
-
 /**
  * Places a penguin on behalf of a player. Takes in a penguin, position, and game state,
  * and places the penguin at the given position if it is a valid position.
