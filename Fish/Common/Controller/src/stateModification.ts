@@ -64,7 +64,6 @@ const placePenguin = (penguin: Penguin, game: Game, position: BoardPosition): Ga
     return new InvalidPositionError(game.board, position);
 }
 
-// TODO test
 /**
  * Delete the penguin at the given start position in the given penguin position
  * mapping and add the given penguin at the given end position in the mapping.
@@ -137,6 +136,8 @@ export {
     MAX_NUMBER_OF_PLAYERS,
     sortPlayersByAge,
     createState,
+    movePenguinInPenguinPositions,
+    movePenguin
 }
 
 
