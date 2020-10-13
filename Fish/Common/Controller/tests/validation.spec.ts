@@ -5,9 +5,14 @@ import {
   isBoard,
   isValidBoardSize,
   isValidMinimumOneFishTiles,
+  validatePenguinMove,
+  isPenguin,
 } from "../src/validation";
-import { createBlankBoard, setTileToHole } from "../src/boardCreation";
-import { Board, BoardPosition, Tile } from "../types/board";
+import { createBlankBoard, createHoledOneFishBoard, setTileToHole } from "../src/boardCreation";
+import { Board, BoardPosition, Penguin, PenguinColor, Tile } from "../types/board";
+import { Game, Player } from "../types/state";
+import { createState } from "../src/stateModification";
+import { IllegalPenguinMoveError, InvalidGameStateError, InvalidNumberOfPlayersError, InvalidPositionError } from "../types/errors";
 
 describe("validation", () => {
   describe("positionIsOnBoard", () => {
@@ -159,6 +164,89 @@ describe("validation", () => {
 
     it("accepts a minimum number of 1-fish tiles which can be added to the given board dimensions after adding the given holes", () => {
       expect(isValidMinimumOneFishTiles(3, 3, holePositions, 3));
+    });
+  });
+
+  describe("validatePenguinMove", () => {
+    const player1: Player = { name: "foo", age: 20 };
+    const player2: Player = { name: "bar", age: 30 };
+    const player3: Player = { name: "baz", age: 42 };
+    const players: Array<Player> = [player1, player2];
+    const playerToColorMapping: Map<Player, PenguinColor> = new Map([
+      [player1, PenguinColor.Black], 
+      [player2, PenguinColor.Brown]
+    ]);
+    const holePosition: BoardPosition = { col: 1, row: 0 };
+    const holePositions: Array<BoardPosition> = [holePosition];
+    const validStartPosition: BoardPosition = { col: 0, row: 0 };
+    const validEndPosition: BoardPosition = { col: 0, row: 1 };
+    const board: Board = createHoledOneFishBoard(2, 2, holePositions, 1) as Board;
+    const player1Penguin: Penguin = { color: PenguinColor.Black };
+    const penguinPositions: Map<BoardPosition, Penguin> = new Map([[validStartPosition, player1Penguin]]);
+    const game: Game = {
+      ...createState(players, playerToColorMapping, board) as Game,
+      penguinPositions
+    };
+
+    it("rejects a start position outside of the board", () => {
+      const invalidStartPosition: BoardPosition = { col: 2, row: 2 };
+      const expectedError = new InvalidPositionError(board, invalidStartPosition);
+      expect(validatePenguinMove(game, player1, invalidStartPosition, validEndPosition)).toEqual(expectedError);
+    });
+
+    it("rejects an end position outside of the board", () => {
+      const invalidEndPosition: BoardPosition = { col: 3, row: 3 };
+      const expectedError = new InvalidPositionError(board, invalidEndPosition);
+      expect(validatePenguinMove(game, player1, validStartPosition, invalidEndPosition)).toEqual(expectedError);
+    });
+
+    it("rejects a player with no color mapping to a penguin", () => {
+      const expectedError = new InvalidGameStateError(game);
+      expect(validatePenguinMove(game, player3, validStartPosition, validEndPosition)).toEqual(expectedError);
+    });
+
+    it("rejects a player trying to move from a starting position not containing one of their penguins", () => {
+      const invalidStartPosition: BoardPosition = { col: 1, row: 1 };
+      const expectedError = new IllegalPenguinMoveError(game, player1, invalidStartPosition, validEndPosition);
+      expect(validatePenguinMove(game, player1, invalidStartPosition, validEndPosition)).toEqual(expectedError);
+    });
+
+    it("rejects a player trying to move to a position not reachable from the start", () => {
+      const invalidEndPosition: BoardPosition = { col: 1, row: 1 };
+      const expectedError = new IllegalPenguinMoveError(game, player1, validStartPosition, invalidEndPosition);
+      expect(validatePenguinMove(game, player1, validStartPosition, invalidEndPosition)).toEqual(expectedError);
+    });
+
+    it("rejects a player trying to move to a hole", () => {
+      const expectedError = new IllegalPenguinMoveError(game, player1, validEndPosition, holePosition);
+      expect(validatePenguinMove(game, player1, validEndPosition, holePosition)).toEqual(expectedError);
+    });
+
+    it("rejects a player trying to move to a position with another penguin present", () => {
+      const twoPenguinPositions: Map<BoardPosition, Penguin> = new Map(penguinPositions);
+      twoPenguinPositions.set(validEndPosition, { color: PenguinColor.White });
+      const gameWithTwoPenguins: Game = {
+        ...game,
+        penguinPositions: twoPenguinPositions
+      };
+      const expectedError = new IllegalPenguinMoveError(game, player1, validStartPosition, validEndPosition);
+      expect(validatePenguinMove(gameWithTwoPenguins, player1, validStartPosition, validEndPosition)).toEqual(expectedError);
+    });
+
+    it("accepts a valid move", () => {
+      expect(validatePenguinMove(game, player1, validStartPosition, validEndPosition)).toEqual(player1Penguin);
+    });
+  });
+
+  describe("isPenguin", () => {
+    it("rejects an error", () => {
+      const error = new InvalidNumberOfPlayersError(0);
+      expect(isPenguin(error)).toEqual(false);
+    });
+
+    it("accepts a Penguin", () => {
+      const penguin: Penguin = { color: PenguinColor.White };
+      expect(isPenguin(penguin)).toEqual(true);
     });
   });
 });

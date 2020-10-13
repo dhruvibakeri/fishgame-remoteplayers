@@ -70,9 +70,9 @@ describe("stateModification", () => {
       expect(createState(players, playerToColorMapping, board)).toEqual(expectedGameState);
     });
 
-    it("successfully creates a Game state with a number of players greater than the maximum", () => {
-      const players: Array<Player> = [player3, player2, player3, player1, player2];
-      const expectedPlayerOrdering: Array<Player> = [player1, player2, player2, player3, player3];
+    it("successfully creates a Game state with a number of players less than the maximum", () => {
+      const players: Array<Player> = [player3, player2, player1];
+      const expectedPlayerOrdering: Array<Player> = [player1, player2, player3];
       const expectedGameState: Game = {
         players: expectedPlayerOrdering,
         board, 

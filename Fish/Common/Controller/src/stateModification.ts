@@ -54,6 +54,7 @@ const createState = (players: Array<Player>, playerToColorMapping: Map<Player, P
  * @param penguin Penguin to be placed
  * @param game Current game state
  * @param position Position at which to place the penguin
+ * @return the Game state with the updated board or an error
  */
 const placePenguin = (penguin: Penguin, game: Game, position: BoardPosition): Game | InvalidPositionError => {
     if (!positionIsOnBoard(game.board, position)) {
@@ -109,20 +110,13 @@ const movePenguin = (
     startPosition: BoardPosition, 
     endPosition: BoardPosition
 ): Game | InvalidPositionError | IllegalPenguinMoveError | InvalidGameStateError => {
-    // Verify that the start and end positions are valid.
-    if (!positionIsOnBoard(game.board, startPosition)) {
-        return new InvalidPositionError(game.board, startPosition);
-    } else if (!positionIsOnBoard(game.board, endPosition)) {
-        return new InvalidPositionError(game.board, endPosition);
-    }
-
     // Validate the move and get the Penguin being moved.
-    const playerPenguinOrError: Penguin | IllegalPenguinMoveError | InvalidGameStateError = validatePenguinMove(game, player, startPosition, endPosition);
+    const playerPenguinOrError: Penguin | IllegalPenguinMoveError | InvalidGameStateError | InvalidPositionError = validatePenguinMove(game, player, startPosition, endPosition);
 
     if (isPenguin(playerPenguinOrError)) {
         // If the move is valid, update the Game state's Penguin position 
         // mapping and return the new state. 
-        const updatedPenguinPositions: Map<BoardPosition, Penguin> = movePenguinInPenguinPositions(
+        const updatedPenguinPositions = movePenguinInPenguinPositions(
             game.penguinPositions, 
             playerPenguinOrError, 
             startPosition, 
@@ -134,7 +128,7 @@ const movePenguin = (
             penguinPositions: updatedPenguinPositions
         }
     } else {
-        // If the move was not valid, return the error.
+        // If the move was invalid, return the error.
         return playerPenguinOrError;
     }
 }

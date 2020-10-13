@@ -1,8 +1,11 @@
 // Helper functions for validating logic
-import { IllegalPenguinMoveError, InvalidGameStateError } from "../types/errors";
+import { IllegalPenguinMoveError, InvalidGameStateError, InvalidPositionError } from "../types/errors";
 import { Player } from "../types/state";
 import { Game } from "../types/state";
 import { Board, BoardPosition, Penguin, PenguinColor, Tile } from "../types/board";
+import { getTileOnBoard } from "./boardCreation";
+import { getReachablePositions } from "./movement";
+import { start } from "repl";
 
 /**
  * Given a board and a position, determine whether that position is within the
@@ -94,9 +97,8 @@ const isValidMinimumOneFishTiles = (
 
 // TODO test
 /**
- * Determine if the given Player may move one of its Penguins on a given
- * valid starting position to a given valid end position on the board of the
- * given Game state.
+ * Determine if the given Player may move one of its Penguins on a starting
+ * position to a given end position on the board of the given Game state.
  * 
  * @param game the Game state
  * @param player the Player moving its Penguin
@@ -109,17 +111,32 @@ const validatePenguinMove = (
   player: Player, 
   startPosition: BoardPosition, 
   endPosition: BoardPosition
-): Penguin | IllegalPenguinMoveError | InvalidGameStateError => {
+): Penguin | IllegalPenguinMoveError | InvalidGameStateError | InvalidPositionError => {
+    // Verify that the start and end positions are valid.
+    if (!positionIsOnBoard(game.board, startPosition)) {
+        return new InvalidPositionError(game.board, startPosition);
+    } else if (!positionIsOnBoard(game.board, endPosition)) {
+        return new InvalidPositionError(game.board, endPosition);
+    }
+
+    // Define relevant constants for validating a move.
     const maybePlayerColor: PenguinColor | undefined = game.playerToColorMapping.get(player);
     const maybePenguinAtStart: Penguin | undefined = game.penguinPositions.get(startPosition);
     const maybePenguinAtEnd: Penguin | undefined = game.penguinPositions.get(endPosition);
+    const endTile: Tile = getTileOnBoard(game.board, endPosition) as Tile;
 
-    const correctPenguinColor: boolean = maybePenguinAtStart !== undefined && maybePlayerColor === maybePenguinAtStart.color;
-    const endPositionIsOpen: boolean = maybePenguinAtEnd === undefined;
-    const isValidMove: boolean = correctPenguinColor && endPositionIsOpen;
+    // Determine if the move is valid based upon what entites are present at 
+    // the start/end positions.
+    const endTileIsReachableFromStart = getReachablePositions(game.board, startPosition).filter(
+      (position: BoardPosition) => position.col === endPosition.col && position.row === endPosition.row).length > 0; // TODO make into helper
+    const correctPenguinColor = maybePenguinAtStart !== undefined && maybePlayerColor === maybePenguinAtStart.color;
+    const endPositionIsNotAHole = endTile.numOfFish > 0;
+    const noPenguinOnEndPosition = maybePenguinAtEnd === undefined;
+    const isValidMove = endTileIsReachableFromStart && correctPenguinColor && endPositionIsNotAHole && noPenguinOnEndPosition;
 
+    // Return the penguin if there was no error and the move was valid, otherwise error.
     if (!maybePlayerColor) {
-      return new InvalidGameStateError(game, "Incomplete player to penguin color mapping.");
+      return new InvalidGameStateError(game);
     } if (maybePenguinAtStart && isValidMove) {
       return maybePenguinAtStart;
     } else {
