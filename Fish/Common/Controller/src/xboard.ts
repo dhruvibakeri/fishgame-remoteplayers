@@ -1,6 +1,6 @@
 import getStdin from "get-stdin"
 import { createNumberedBoard } from "./boardCreation";
-import { getReachablePositions } from "./movement";
+import { getReachablePositions } from "./movementChecking";
 import { isError } from "./validation";
 
 interface InputBoardPosn {

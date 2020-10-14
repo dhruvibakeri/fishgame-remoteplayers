@@ -1,5 +1,6 @@
-import { Board, BoardPosition, HorizontalDirection, VerticalDirection } from "../types/board";
+import { Board, BoardPosition, HorizontalDirection, VerticalDirection, PenguinColor } from "../types/board";
 import { createBlankBoard, setTileToHole } from "../src/boardCreation";
+import { Game, Player } from "../types/state";
 import {
   getNextPosDownLeft,
   getNextPosDownNeutral,
@@ -10,7 +11,10 @@ import {
   getReachablePositions,
   getNextPosition,
   getReachablePositionsInDirection,
-} from "../src/movement";
+} from "../src/movementChecking";
+import { createState } from "../src/stateCreation";
+import { InvalidNumberOfPlayersError } from "../types/errors";
+import { isError } from "../src/validation";
 
 describe("movement", () => {
   const board: Board = createBlankBoard(4, 3, 1) as Board;
@@ -23,6 +27,17 @@ describe("movement", () => {
   const down: BoardPosition = { row: 4, col: 1 };
   const downRight: BoardPosition = { row: 3, col: 1 };
   const downLeft: BoardPosition = { row: 3, col: 0 };
+  const player1: Player = { name: "foo", age: 20 };
+  const player2: Player = { name: "bar", age: 30 };
+  const player3: Player = { name: "baz", age: 45 };
+  const players: Array<Player> = [player3, player2, player1];
+  const playerToColorMapping: Map<Player, PenguinColor> = new Map([
+    [player1, PenguinColor.Black], 
+    [player2, PenguinColor.Brown], 
+    [player3, PenguinColor.Red]
+  ]);
+  const gameOrError: Game | InvalidNumberOfPlayersError = createState(players, playerToColorMapping, board);
+  const game: Game = !isError(gameOrError) && gameOrError;
 
   describe("getReachablePositions", () => {
     it("gets reachable positions in all directions", () => {
@@ -35,9 +50,11 @@ describe("movement", () => {
         upRight2,
         downRight,
       ]);
-      expect(new Set(getReachablePositions(board, center))).toEqual(
+
+      expect(new Set(getReachablePositions(game, center))).toEqual(
         expectedReachablePositions
       );
+      
     });
   });
 
@@ -50,10 +67,11 @@ describe("movement", () => {
         upRight,
         upRight2,
       ]);
+
       expect(
         new Set(
           getReachablePositionsInDirection(
-            board,
+            game,
             start,
             VerticalDirection.Up,
             HorizontalDirection.Right
@@ -67,10 +85,12 @@ describe("movement", () => {
         row: 1,
         col: 1,
       }) as Board;
+      const gameWithHoleOrError: Game | InvalidNumberOfPlayersError = createState(players, playerToColorMapping, boardWithHole);
+      const gameWithHole: Game = !isError(gameWithHoleOrError) && gameWithHoleOrError;
       const expectedReachablePositions: Array<BoardPosition> = [center];
       expect(
         getReachablePositionsInDirection(
-          boardWithHole,
+          gameWithHole,
           start,
           VerticalDirection.Up,
           HorizontalDirection.Right

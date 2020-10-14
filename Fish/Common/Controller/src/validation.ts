@@ -2,9 +2,8 @@
 import { InvalidGameStateError, InvalidPositionError, IllegalPenguinPositionError, UnreachablePositionError } from "../types/errors";
 import { Player } from "../types/state";
 import { Game } from "../types/state";
-import { Board, BoardPosition, Penguin, PenguinColor, Tile } from "../types/board";
-import { getTileOnBoard } from "./boardCreation";
-import { getReachablePositions } from "./movement";
+import { Board, BoardPosition, Penguin, PenguinColor } from "../types/board";
+import { getReachablePositions } from "./movementChecking";
 
 /**
  * Given a board and a position, determine whether that position is within the
@@ -25,17 +24,28 @@ const positionIsOnBoard = (board: Board, position: BoardPosition): boolean => {
 };
 
 /**
- * Given a board and a position, determine whether a penguin can be placed on
- * that position on the board.
+ * Given a board and a position, check if the position is on the board and not a hole
  *
  * @param board the board to be checking against
  * @param position the position to be checked
  * @return whether the given position is playable on the board
  */
-const positionIsPlayable = (game: Game, position: BoardPosition): boolean =>
-  positionIsOnBoard(game.board, position) &&
-  game.board.tiles[position.row][position.col].numOfFish > 0 &&
-  game.penguinPositions.get(position) === undefined;
+const positionIsPlayable = (game: Game, position: BoardPosition): boolean => {
+  return positionIsOnBoard(game.board, position) &&
+  game.board.tiles[position.row][position.col].numOfFish > 0;
+};
+
+/**
+ * Given a board and a position, check if the position is on the board, not a hole,
+ * and that there is no penguin on the given position.
+ *
+ * @param board the board to be checking against
+ * @param position the position to be checked
+ * @return whether the given position is playable on the board
+ */
+const endPositionIsPlayable = (game: Game, position: BoardPosition): boolean => {
+  return positionIsPlayable(game, position) && !!game.penguinPositions.get(position);
+};
 
 /**
  * Determine whether the given dimensions for a board are valid.
@@ -77,36 +87,11 @@ const isValidMinimumOneFishTiles = (
  * Typeguard for checking whether the given parameter is an Error.
  * 
  * @param anything the input to check against
+ * @return whether the input is an error
  */
 const isError = (anything: any): anything is Error => {
   const error: Error = anything as Error;
   return error.message !== undefined && error.name !== undefined;
-}
-
-/**
- * Determine if the given Player may place a Penguin on the given position with
- * with the given Game state.
- * 
- * @param game the Game state
- * @param player the Player placing the Penguin
- * @param position the position of the placement
- */
-const validatePenguinPlacement = (game: Game, player: Player, position: BoardPosition): BoardPosition | InvalidPositionError | IllegalPenguinPositionError => {
-  if (!positionIsOnBoard(game.board, position)) {
-    return new InvalidPositionError(game.board, position);
-  }
-
-  const maybeTile: Tile | InvalidPositionError = getTileOnBoard(game.board, position);
-  const maybePenguinPosition: Penguin | undefined = game.penguinPositions.get(position);
-
-  const isNotHole = !isError(maybeTile) && maybeTile.numOfFish > 0;
-  const isFree = maybePenguinPosition === undefined;
-
-  if (isNotHole && isFree) {
-    return position;
-  } else {
-    return new IllegalPenguinPositionError(game, player, position);
-  }
 }
 
 /**
@@ -130,21 +115,8 @@ const positionIsReachable = (game: Game, startPosition: BoardPosition, endPositi
  * @returns true if player has at least one unplaced penguin, returns false if they do not
  */
 const playerHasUnplacedPenguin = (player: Player, game: Game): boolean => {
-  const playerColor: PenguinColor = game.playerToColorMapping.get(player);
-  const penguinIndex: number = game.unplacedPenguins.findIndex((penguin: Penguin) => { penguin.color === playerColor });
-  return  penguinIndex !== -1;
-}
-
-// TODO test
-/**
- * Typeguard for checking whether a given Penguin or Error is a Penguin.
- * 
- * @param penguinOrError the Penguin or Error to check
- * @return whether the given Penguin or Error is a Penguin
- */
-const isPenguin = (penguinOrError: Penguin | Error): penguinOrError is Penguin => {
-  const penguin: Penguin = penguinOrError as Penguin;
-  return penguin.color !== undefined;
+  const remainingPenguins: number = game.remainingUnplacedPenguins.get(player);
+  return  remainingPenguins > 0;
 }
 
 /**
@@ -166,16 +138,9 @@ const validatePenguinMove = (
 ): Penguin | InvalidGameStateError | InvalidPositionError | IllegalPenguinPositionError => {
   // Verify that the start position is on the board.
   if (!positionIsOnBoard(game.board, startPosition)) {
-      return new InvalidPositionError(game.board, startPosition);
-  }
-
-  // Verify that a Penguin can be placed on the given end position.
-  const validatedEndPosition: BoardPosition | InvalidPositionError | IllegalPenguinPositionError = validatePenguinPlacement(game, player, endPosition);
-
-  if (isError(validatedEndPosition)) {
-    return validatedEndPosition;
-  } else if (!positionIsReachable(game, startPosition, endPosition)) {
-    return new UnreachablePositionError(game, player, startPosition, endPosition);
+    return new InvalidPositionError(game.board, startPosition);
+  } else if (!positionIsOnBoard(game.board, endPosition)) {
+    return new InvalidPositionError(game.board, endPosition);
   }
 
   // Verify that the Player has a Penguin at the starting position.
@@ -192,6 +157,13 @@ const validatePenguinMove = (
     return new IllegalPenguinPositionError(game, player, startPosition, endPosition);
   }
 
+  // Verify that the end position is playable and reachable.
+  if (!positionIsPlayable(game, endPosition)) {
+    return new IllegalPenguinPositionError(game, player, startPosition, endPosition);
+  } else if (!positionIsReachable(game, startPosition, endPosition)) {
+    return new UnreachablePositionError(game, player, startPosition, endPosition);
+  }
+
   return maybePenguinAtStart;
 }
 
@@ -200,10 +172,8 @@ export {
   positionIsPlayable,
   isValidBoardSize,
   isValidMinimumOneFishTiles,
-  validatePenguinPlacement,
   positionIsReachable,
   validatePenguinMove,
   playerHasUnplacedPenguin,
-  isPenguin,
   isError
-};
+}

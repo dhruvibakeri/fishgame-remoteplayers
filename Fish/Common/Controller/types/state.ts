@@ -20,14 +20,18 @@ export interface Player {
  * ordering which they will take turns
  * @param board the current Board of the game
  * @param curPlayer the player who's turn it currently is
+ * @param unplacedPenguins a Map from Player to Number, the number represents how
+ * many penguins the player has left to place
  * @param penguinPositions a Map from BoardPosition to Penguin tracking all 
  * penguins that have been placed on the board (value) and their positions (key).
+ * @param playerToColorMapping a Map from player to PenguinColor to represent the
+ * player's penguin color
  */
 export interface Game {
     readonly players: Player[];
     readonly board: Board;
     readonly curPlayer: Player;
-    readonly unplacedPenguins: Array<Penguin>;
+    readonly remainingUnplacedPenguins: Map<Player, number>;
     readonly penguinPositions: Map<BoardPosition, Penguin>;
     readonly playerToColorMapping: Map<Player, PenguinColor>;
 }
