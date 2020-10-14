@@ -3,7 +3,7 @@ import { Player, Game } from "../types/state";
 import {
   IllegalPenguinPositionError,
   InvalidGameStateError,
-  InvalidPositionError
+  InvalidPositionError,
 } from "../types/errors";
 import { movePenguinInPenguinPositions, movePenguin, placePenguin } from "../src/penguinPlacement";
 
@@ -17,7 +17,7 @@ describe("penguinMovement", () => {
   const players: Array<Player> = [player1, player2];
     const playerToColorMapping: Map<Player, PenguinColor> = new Map([
       [player1, PenguinColor.Black], 
-      [player2, PenguinColor.Brown]
+      [player2, PenguinColor.Brown],
     ]);
     const holePosition: BoardPosition = { col: 1, row: 0 };
     const holePositions: Array<BoardPosition> = [holePosition];
@@ -28,7 +28,7 @@ describe("penguinMovement", () => {
     const penguinPositions: Map<BoardPosition, Penguin> = new Map([[validStartPosition, player1Penguin]]);
     const game: Game = {
       ...createState(players, playerToColorMapping, board) as Game,
-      penguinPositions
+      penguinPositions,
     };
 
   describe("movePenguinInPenguinPosition", () => {
@@ -46,13 +46,13 @@ describe("penguinMovement", () => {
 
     it("rejects a start position not on the board", () => {
       const invalidStartPosition: BoardPosition = { col: 2, row: 2 };
-      const expectedError = new InvalidPositionError(board, invalidStartPosition);
+      const expectedError = new IllegalPenguinPositionError(game, player1, invalidStartPosition, validEndPosition);
       expect(movePenguin(game, player1, invalidStartPosition, validEndPosition)).toEqual(expectedError);
     });
 
     it("rejects an end position not on the board", () => {
       const invalidEndPosition: BoardPosition = { col: 3, row: 3 };
-      const expectedError = new InvalidPositionError(board, invalidEndPosition);
+      const expectedError = new IllegalPenguinPositionError(game, player1, validStartPosition, invalidEndPosition);
       expect(movePenguin(game, player1, validStartPosition, invalidEndPosition)).toEqual(expectedError);
     });
 
@@ -83,7 +83,7 @@ describe("penguinMovement", () => {
       twoPenguinPositions.set(validEndPosition, { color: PenguinColor.White });
       const gameWithTwoPenguins: Game = {
         ...game,
-        penguinPositions: twoPenguinPositions
+        penguinPositions: twoPenguinPositions,
       };
       const expectedError = new IllegalPenguinPositionError(game, player1, validStartPosition, validEndPosition);
       expect(movePenguin(gameWithTwoPenguins, player1, validStartPosition, validEndPosition)).toEqual(expectedError);
@@ -93,7 +93,7 @@ describe("penguinMovement", () => {
       const expectedPenguinPositions: Map<BoardPosition, Penguin> = new Map([[validEndPosition, player1Penguin]]);
       const expectedGameState: Game = {
         ...game,
-        penguinPositions: expectedPenguinPositions
+        penguinPositions: expectedPenguinPositions,
       };
       expect(movePenguin(game, player1, validStartPosition, validEndPosition)).toEqual(expectedGameState);
     });
@@ -109,7 +109,7 @@ describe("penguinMovement", () => {
         const expectedGameState: Game = {
             ...game,
             penguinPositions: expectedPenguinPositions,
-            remainingUnplacedPenguins: expectedRemainingUnplacedPenguins
+            remainingUnplacedPenguins: expectedRemainingUnplacedPenguins,
         }
       expect(placePenguin(player1, game, placePosition)).toEqual(expectedGameState);
     });

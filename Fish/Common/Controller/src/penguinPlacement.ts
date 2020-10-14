@@ -3,7 +3,7 @@ import { BoardPosition, Penguin } from "../types/board";
 import {
     InvalidPositionError, 
     InvalidGameStateError,
-    IllegalPenguinPositionError
+    IllegalPenguinPositionError,
 } from "../types/errors";
 import { isError, playerHasUnplacedPenguin, positionIsPlayable, validatePenguinMove } from "./validation";
 
@@ -107,12 +107,12 @@ const movePenguin = (
             game.penguinPositions, 
             playerPenguinOrError, 
             endPosition,
-            startPosition, 
+            startPosition 
         );
 
         return {
             ...game,
-            penguinPositions: updatedPenguinPositions
+            penguinPositions: updatedPenguinPositions,
         }
     }
 }
@@ -120,5 +120,5 @@ const movePenguin = (
 export {
     movePenguinInPenguinPositions,
     placePenguin,
-    movePenguin
+    movePenguin,
 }

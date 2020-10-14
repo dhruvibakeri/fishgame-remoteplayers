@@ -1,7 +1,7 @@
 import { Board, PenguinColor } from "../types/board";
 import { Player, Game } from "../types/state";
 import {
-  InvalidNumberOfPlayersError
+  InvalidNumberOfPlayersError,
 } from "../types/errors";
 import { sortPlayersByAge, createState, buildUnplacedPenguinMap } from "../src/stateCreation";
 
@@ -52,12 +52,12 @@ describe("stateModification", () => {
     const playerToColorMapping3Players: Map<Player, PenguinColor> = new Map([
       [player1, PenguinColor.Black], 
       [player2, PenguinColor.Brown], 
-      [player3, PenguinColor.Red]
+      [player3, PenguinColor.Red],
     ]);
     const unplacedPenguins3Players = new Map([
       [player1, 3],
       [player2, 3],
-      [player3, 3]
+      [player3, 3],
     ]);
     const playerToColorMapping4Players: Map<Player, PenguinColor> = new Map([
       [player1, PenguinColor.Black], 
@@ -69,7 +69,7 @@ describe("stateModification", () => {
       [player1, 2],
       [player2, 2],
       [player3, 2],
-      [player4, 2]
+      [player4, 2],
     ]);
 
     it("rejects an empty list of players", () => {
@@ -97,7 +97,7 @@ describe("stateModification", () => {
         curPlayer: player1,
         remainingUnplacedPenguins: unplacedPenguins4Players,
         penguinPositions: new Map(),
-        playerToColorMapping: playerToColorMapping4Players
+        playerToColorMapping: playerToColorMapping4Players,
       };
 
       expect(createState(players, playerToColorMapping4Players, board)).toEqual(expectedGameState);
@@ -111,7 +111,7 @@ describe("stateModification", () => {
         curPlayer: player1,
         remainingUnplacedPenguins: unplacedPenguins3Players,
         penguinPositions: new Map(), 
-        playerToColorMapping: playerToColorMapping3Players
+        playerToColorMapping: playerToColorMapping3Players,
       }
 
       expect(createState(players, playerToColorMapping3Players, board)).toEqual(expectedGameState);

@@ -34,7 +34,7 @@ describe("movement", () => {
   const playerToColorMapping: Map<Player, PenguinColor> = new Map([
     [player1, PenguinColor.Black], 
     [player2, PenguinColor.Brown], 
-    [player3, PenguinColor.Red]
+    [player3, PenguinColor.Red],
   ]);
   const gameOrError: Game | InvalidNumberOfPlayersError = createState(players, playerToColorMapping, board);
   const game: Game = !isError(gameOrError) && gameOrError;

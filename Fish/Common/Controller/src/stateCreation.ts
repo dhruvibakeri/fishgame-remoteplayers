@@ -1,7 +1,7 @@
 import { Player, Game } from "../types/state";
 import { Board, PenguinColor } from "../types/board";
 import { 
-    InvalidNumberOfPlayersError
+    InvalidNumberOfPlayersError,
 } from "../types/errors";
 
 
@@ -60,7 +60,7 @@ const createState = (players: Array<Player>, playerToColorMapping: Map<Player, P
       curPlayer: playerOrdering[0],
       remainingUnplacedPenguins: unplacedPenguins,
       penguinPositions: new Map(),
-      playerToColorMapping
+      playerToColorMapping,
     };
 }
 
@@ -68,7 +68,7 @@ export {
     MAX_NUMBER_OF_PLAYERS,
     sortPlayersByAge,
     createState,
-    buildUnplacedPenguinMap
+    buildUnplacedPenguinMap,
 }
 
 
