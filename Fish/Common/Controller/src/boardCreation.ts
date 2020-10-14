@@ -81,7 +81,6 @@ const setTileOnBoard = (
         }),
       }),
     };
-    // console.log(newBoard);
     return newBoard;
   }
 };

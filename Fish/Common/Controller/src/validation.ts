@@ -32,19 +32,8 @@ const positionIsOnBoard = (board: Board, position: BoardPosition): boolean => {
  */
 const positionIsPlayable = (game: Game, position: BoardPosition): boolean => {
   return positionIsOnBoard(game.board, position) &&
-  game.board.tiles[position.row][position.col].numOfFish > 0;
-};
-
-/**
- * Given a board and a position, check if the position is on the board, not a hole,
- * and that there is no penguin on the given position.
- *
- * @param board the board to be checking against
- * @param position the position to be checked
- * @return whether the given position is playable on the board
- */
-const endPositionIsPlayable = (game: Game, position: BoardPosition): boolean => {
-  return positionIsPlayable(game, position) && !!game.penguinPositions.get(position);
+  game.board.tiles[position.row][position.col].numOfFish > 0 &&
+  !game.penguinPositions.has(position);
 };
 
 /**

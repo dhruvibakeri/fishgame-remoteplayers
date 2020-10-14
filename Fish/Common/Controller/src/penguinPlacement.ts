@@ -5,7 +5,7 @@ import {
     InvalidGameStateError,
     IllegalPenguinPositionError
 } from "../types/errors";
-import { isError, playerHasUnplacedPenguin, positionIsOnBoard, positionIsPlayable, validatePenguinMove } from "./validation";
+import { isError, playerHasUnplacedPenguin, positionIsPlayable, validatePenguinMove } from "./validation";
 
 /**
  * Place a Penguin at the given end position, optionally also removing the 
@@ -47,10 +47,8 @@ const movePenguinInPenguinPositions = (
  * @return the Game state with the updated board or an error
  */
 const placePenguin = (player: Player, game: Game, position: BoardPosition): Game | InvalidPositionError | InvalidGameStateError | IllegalPenguinPositionError => {
-    // console.log("placing penguin");
     // Validate position where penguin will be placed
     if (!positionIsPlayable(game, position)) {
-        console.log('hello position not on board')
         return new IllegalPenguinPositionError(game, player, position);
     }
 

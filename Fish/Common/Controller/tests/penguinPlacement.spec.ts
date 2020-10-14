@@ -101,10 +101,10 @@ describe("penguinMovement", () => {
 
   describe("placePenguin", () => {
     it("places a penguin when player has unplaced penguins and the placement locaiton is valid", () => {
-        const placePosition: BoardPosition = { col: 0, row: 0 };
-        const expectedPenguinPositions: Map<BoardPosition, Penguin> = game.penguinPositions;
+        const placePosition: BoardPosition = { col: 0, row: 1 };
+        const expectedPenguinPositions: Map<BoardPosition, Penguin> = new Map(game.penguinPositions);
         expectedPenguinPositions.set(placePosition, { color: game.playerToColorMapping.get(player1)});
-        const expectedRemainingUnplacedPenguins: Map<Player, number> = game.remainingUnplacedPenguins;
+        const expectedRemainingUnplacedPenguins: Map<Player, number> = new Map(game.remainingUnplacedPenguins);
         expectedRemainingUnplacedPenguins.set(player1, game.remainingUnplacedPenguins.get(player1) - 1);
         const expectedGameState: Game = {
             ...game,

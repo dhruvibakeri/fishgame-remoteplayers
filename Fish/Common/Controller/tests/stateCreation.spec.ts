@@ -1,13 +1,11 @@
-import { Board, BoardPosition, Penguin, PenguinColor } from "../types/board";
+import { Board, PenguinColor } from "../types/board";
 import { Player, Game } from "../types/state";
 import {
-  IllegalPenguinPositionError,
-  InvalidGameStateError,
-  InvalidNumberOfPlayersError, InvalidPositionError
+  InvalidNumberOfPlayersError
 } from "../types/errors";
 import { sortPlayersByAge, createState, buildUnplacedPenguinMap } from "../src/stateCreation";
 
-import { createBlankBoard, createHoledOneFishBoard } from "../src/boardCreation"
+import { createBlankBoard } from "../src/boardCreation"
 
 describe("stateModification", () => {
   const player1: Player = { name: "foo", age: 20 };
