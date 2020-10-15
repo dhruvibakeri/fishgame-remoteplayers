@@ -6,7 +6,7 @@
       div(v-for='(player, index) in game.players' :key='index')
         div.player-number {{index + 1}}
         Player(
-          :name='player.name' 
+          :player='player' 
           :unplacedPenguins='game.remainingUnplacedPenguins.get(player)' 
           :color='game.playerToColorMapping.get(player)'
           :isCurPlayer='isCurPlayer(player)'

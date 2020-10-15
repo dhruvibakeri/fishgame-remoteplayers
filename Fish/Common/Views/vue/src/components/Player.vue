@@ -1,18 +1,19 @@
 <!-- Renders a single Hexagon tile with given size unless isActive is false, in which case the tile is hidden. -->
 <template lang="pug">
   .player(:class='{current: isCurPlayer}')
-    div.player-name {{name}}
+    div.player-name {{player.name}}
     div.color-indicator(:style='colorStyle')
     div.unplaced-penguins {{unplacedPenguins}} remaining
 </template>
 
 <script lang="ts">
 import Vue from "vue";
+import { Player } from "../../../../Controller/types/state";
 
 export default Vue.extend({
   name: "Player",
   props: {
-    name: { type: String, required: true },
+    player: { type: Object as () => Player, required: true },
     unplacedPenguins: { type: Number, required: true },
     color: { type: String, required: true },
     isCurPlayer: { type: Boolean, required: true },
