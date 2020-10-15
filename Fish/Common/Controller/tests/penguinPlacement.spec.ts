@@ -40,10 +40,60 @@ describe("penguinMovement", () => {
       const expectedPenguinPositions: Map<BoardPosition, Penguin> = new Map([[endPosition, penguin]]);
       expect(movePenguinInPenguinPositions(initialPenguinPositions, penguin, endPosition, startPosition)).toEqual(expectedPenguinPositions);
     });
+
+    it("maps the end position to the penguin when only given end position", () => {
+      const startPosition: BoardPosition = { col: 0, row: 0 };
+      const endPosition: BoardPosition = { col: 0, row: 1 };
+      const penguin: Penguin = { color: PenguinColor.Red };
+      const initialPenguinPositions: Map<BoardPosition, Penguin> = new Map([[startPosition, penguin]]);
+      const expectedPenguinPositions: Map<BoardPosition, Penguin> = new Map([[startPosition, penguin], [endPosition, penguin]]);
+      expect(movePenguinInPenguinPositions(initialPenguinPositions, penguin, endPosition)).toEqual(expectedPenguinPositions);
+    });
+  });
+
+  describe("placePenguin", () => {
+    const placePosition: BoardPosition = { col: 0, row: 1 };
+    const expectedPenguinPositions: Map<BoardPosition, Penguin> = new Map(game.penguinPositions);
+    expectedPenguinPositions.set(placePosition, { color: game.playerToColorMapping.get(player1)});
+    const expectedRemainingUnplacedPenguins: Map<Player, number> = new Map(game.remainingUnplacedPenguins);
+    expectedRemainingUnplacedPenguins.set(player1, game.remainingUnplacedPenguins.get(player1) - 1);
+    const expectedGameState: Game = {
+        ...game,
+        penguinPositions: expectedPenguinPositions,
+        remainingUnplacedPenguins: expectedRemainingUnplacedPenguins,
+    }
+    const outOfBoundsPosition: BoardPosition = { col: 6, row: 8 };
+
+    it("rejects placement position that is not on board", () => {
+      expect(placePenguin(player1, game, outOfBoundsPosition )).toEqual(new IllegalPenguinPositionError(game, player1, outOfBoundsPosition));
+    });
+
+    it("rejects placement position that is a hole", () => {
+      expect(placePenguin(player1, game, holePosition)).toEqual(new IllegalPenguinPositionError(game, player1, holePosition));
+    });
+
+    it("rejects placement position that already has a penguin", () => {
+      expect(placePenguin(player1, game, validStartPosition)).toEqual(new IllegalPenguinPositionError(game, player1, validStartPosition));
+    });
+
+    it("rejects placement if player does not have penguin remaining", () => {
+      const noUnplacedPenguins: Map<Player, number> = new Map([[player1, 0], [player2, 0]]);
+      const noUnplacedPenguinsGame: Game = {
+        ...game,
+      remainingUnplacedPenguins: noUnplacedPenguins,
+    };
+      expect(placePenguin(player1, noUnplacedPenguinsGame, placePosition)).toEqual(new InvalidGameStateError(
+        noUnplacedPenguinsGame,
+        "Player does not have any remaining unplaced penguins"
+      ));
+    });
+
+    it("places a penguin when player has unplaced penguins and the placement locaiton is valid", () => {
+      expect(placePenguin(player1, game, placePosition)).toEqual(expectedGameState);
+    });
   });
 
   describe("movePenguin", () => {
-
     it("rejects a start position not on the board", () => {
       const invalidStartPosition: BoardPosition = { col: 2, row: 2 };
       const expectedError = new IllegalPenguinPositionError(game, player1, invalidStartPosition, validEndPosition);
@@ -96,22 +146,6 @@ describe("penguinMovement", () => {
         penguinPositions: expectedPenguinPositions,
       };
       expect(movePenguin(game, player1, validStartPosition, validEndPosition)).toEqual(expectedGameState);
-    });
-  });
-
-  describe("placePenguin", () => {
-    it("places a penguin when player has unplaced penguins and the placement locaiton is valid", () => {
-        const placePosition: BoardPosition = { col: 0, row: 1 };
-        const expectedPenguinPositions: Map<BoardPosition, Penguin> = new Map(game.penguinPositions);
-        expectedPenguinPositions.set(placePosition, { color: game.playerToColorMapping.get(player1)});
-        const expectedRemainingUnplacedPenguins: Map<Player, number> = new Map(game.remainingUnplacedPenguins);
-        expectedRemainingUnplacedPenguins.set(player1, game.remainingUnplacedPenguins.get(player1) - 1);
-        const expectedGameState: Game = {
-            ...game,
-            penguinPositions: expectedPenguinPositions,
-            remainingUnplacedPenguins: expectedRemainingUnplacedPenguins,
-        }
-      expect(placePenguin(player1, game, placePosition)).toEqual(expectedGameState);
     });
   });
 });
