@@ -1,5 +1,10 @@
 // Helper functions for validating logic
-import { InvalidGameStateError, InvalidPositionError, IllegalPenguinPositionError, UnreachablePositionError } from "../types/errors";
+import {
+  InvalidGameStateError,
+  InvalidPositionError,
+  IllegalPenguinPositionError,
+  UnreachablePositionError,
+} from "../types/errors";
 import { Player } from "../types/state";
 import { Game } from "../types/state";
 import { Board, BoardPosition, Penguin, PenguinColor } from "../types/board";
@@ -31,9 +36,11 @@ const positionIsOnBoard = (board: Board, position: BoardPosition): boolean => {
  * @return whether the given position is playable on the board
  */
 const positionIsPlayable = (game: Game, position: BoardPosition): boolean => {
-  return positionIsOnBoard(game.board, position) &&
-  game.board.tiles[position.row][position.col].numOfFish > 0 &&
-  !game.penguinPositions.has(position);
+  return (
+    positionIsOnBoard(game.board, position) &&
+    game.board.tiles[position.row][position.col].numOfFish > 0 &&
+    !game.penguinPositions.has(position)
+  );
 };
 
 /**
@@ -74,14 +81,14 @@ const isValidMinimumOneFishTiles = (
 
 /**
  * Typeguard for checking whether the given parameter is an Error.
- * 
+ *
  * @param anything the input to check against
  * @return whether the input is an error
  */
 const isError = (anything: any): anything is Error => {
   const error: Error = anything as Error;
   return error.message !== undefined && error.name !== undefined;
-}
+};
 
 /**
  * Determine whether the given end position is reachable from the given start position on the given Board.
@@ -110,7 +117,7 @@ const pathIsPlayable = (game: Game, startPosition: BoardPosition, endPosition: B
 /**
  * Takes in a player and a game state, and checks if the player has at least one remaining
  * unplaced penguin in the given game state
- * 
+ *
  * @param player player to check for remaining unplaced penguins
  * @param game game state to check for remaining penguins for given player
  * @returns true if player has at least one unplaced penguin, returns false if they do not
@@ -123,7 +130,7 @@ const playerHasUnplacedPenguin = (player: Player, game: Game): boolean => {
 /**
  * Determine if the given Player may move one of its Penguins on a starting
  * position to a given end position on the board of the given Game state.
- * 
+ *
  * @param game the Game state
  * @param player the Player moving its Penguin
  * @param endPosition the Player's Penguin's end position after the move
@@ -132,8 +139,8 @@ const playerHasUnplacedPenguin = (player: Player, game: Game): boolean => {
  * @return the Penguin being moved if the move is valid or an error if not
  */
 const validatePenguinMove = (
-  game: Game, 
-  player: Player, 
+  game: Game,
+  player: Player,
   startPosition: BoardPosition,
   endPosition: BoardPosition
 ): Penguin | InvalidGameStateError | InvalidPositionError | IllegalPenguinPositionError => {
@@ -162,7 +169,7 @@ const validatePenguinMove = (
   }
 
   return penguinAtStart || new InvalidGameStateError(game);
-}
+};
 
 export {
   positionIsOnBoard,
@@ -173,4 +180,4 @@ export {
   validatePenguinMove,
   playerHasUnplacedPenguin,
   isError,
-}
+};

@@ -135,8 +135,13 @@ const getNextPosition = (
     horizontalDirection === HorizontalDirection.Right
   ) {
     return getNextPosDownRight(position);
-  } else {
+  } else if (
+    verticalDirection === VerticalDirection.Down &&
+    horizontalDirection === HorizontalDirection.Left
+  ) {
     return getNextPosDownLeft(position);
+  } else {
+    return position;
   }
 };
 
