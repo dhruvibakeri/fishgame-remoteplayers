@@ -39,51 +39,6 @@ describe("boardCreation", () => {
   const tileArrayWithHoles: number[][] = [[3,0,5],[3,5,1],[1,0,1]];
   const numberedBoardWithHoles: Board = { tiles: [[tile3Fish, hole0Fish, tile5Fish],[tile3Fish, tile5Fish, tile], [tile, hole0Fish, tile]]};
 
-  describe("createHoledOneFishBoard", () => {
-    it("rejects invalid dimensions", () => {
-      expect(createHoledOneFishBoard(-1, -3, [], 1)).toEqual(
-        new InvalidBoardConstraintsError(-1, 0)
-      );
-    });
-
-    it("rejects invalid hole positions", () => {
-      expect(createHoledOneFishBoard(2, 2, invalidHolePositions, 1)).toEqual(
-        new InvalidPositionError(board, invalidHolePositions[0])
-      );
-    });
-
-    it("rejects a number of tiles after adding holes that is lower than the minimum one fish tiles", () => {
-      expect(createHoledOneFishBoard(2, 2, validHolePositions, 4)).toEqual(
-        new InvalidBoardConstraintsError(2, 2, validHolePositions.length, 4)
-      );
-    });
-
-    it("rejects a negative number of minimum 1-fish tiles", () => {
-      expect(createHoledOneFishBoard(2, 2, validHolePositions, -1)).toEqual(
-        new InvalidBoardConstraintsError(2, 2, validHolePositions.length, -1)
-      );
-    });
-
-    it("creates a holed 1-fish board with valid arguments", () => {
-      const expectedBoard: Board = boardWithHole;
-      expect(createHoledOneFishBoard(2, 2, validHolePositions, 1)).toEqual(
-        expectedBoard
-      );
-    });
-  });
-
-  describe("createBlankBoard", () => {
-    it("rejects invalid dimensions", () => {
-      expect(createBlankBoard(0, 0, 1)).toEqual(
-        new InvalidBoardConstraintsError(0, 0)
-      );
-    });
-
-    it("creates a blank board with valid dimensions", () => {
-      expect(createBlankBoard(2, 2, 1)).toEqual(board);
-    });
-  });
-
   describe("createTile", () => {
     it("creates a tile without a hole", () => {
       expect(createTile(1)).toEqual(tile);
@@ -98,31 +53,15 @@ describe("boardCreation", () => {
     });
   });
 
-  describe("addHolesToBoard", () => {
-    it("rejects a hole position not on the board", () => {
-      expect(addHolesToBoard(board, invalidHolePositions)).toEqual(
-        new InvalidPositionError(board, invalidHolePositions[0])
-      );
-    });
-
-    it("adds holes to a given board", () => {
-      expect(addHolesToBoard(board, validHolePositions)).toEqual({
-        tiles: tilesWithHole,
-      });
-    });
-  });
-
-  describe("setTileToHole", () => {
+  describe("getTileOnBoard", () => {
     it("rejects an invalid tile position", () => {
-      expect(setTileToHole(board, invalidPosition)).toEqual(
+      expect(getTileOnBoard(board, invalidPosition)).toEqual(
         new InvalidPositionError(board, invalidPosition)
       );
     });
 
-    it("sets the tile at the given position on the board to a hole", () => {
-      expect(setTileToHole(board, validPosition)).toEqual({
-        tiles: tilesWithHole,
-      });
+    it("returns the tile at the requested position", () => {
+      expect(getTileOnBoard(boardWithHole, validPosition)).toEqual(hole);
     });
   });
 
@@ -162,15 +101,76 @@ describe("boardCreation", () => {
     });
   });
 
-  describe("getTileOnBoard", () => {
+  describe("setTileToHole", () => {
     it("rejects an invalid tile position", () => {
-      expect(getTileOnBoard(board, invalidPosition)).toEqual(
+      expect(setTileToHole(board, invalidPosition)).toEqual(
         new InvalidPositionError(board, invalidPosition)
       );
     });
 
-    it("returns the tile at the requested position", () => {
-      expect(getTileOnBoard(boardWithHole, validPosition)).toEqual(hole);
+    it("sets the tile at the given position on the board to a hole", () => {
+      expect(setTileToHole(board, validPosition)).toEqual({
+        tiles: tilesWithHole,
+      });
+    });
+  });
+
+  describe("addHolesToBoard", () => {
+    it("rejects a hole position not on the board", () => {
+      expect(addHolesToBoard(board, invalidHolePositions)).toEqual(
+        new InvalidPositionError(board, invalidHolePositions[0])
+      );
+    });
+
+    it("adds holes to a given board", () => {
+      expect(addHolesToBoard(board, validHolePositions)).toEqual({
+        tiles: tilesWithHole,
+      });
+    });
+  });
+
+  describe("createBlankBoard", () => {
+    it("rejects invalid dimensions", () => {
+      expect(createBlankBoard(0, 0, 1)).toEqual(
+        new InvalidBoardConstraintsError(0, 0)
+      );
+    });
+
+    it("creates a blank board with valid dimensions", () => {
+      expect(createBlankBoard(2, 2, 1)).toEqual(board);
+    });
+  });
+
+  describe("createHoledOneFishBoard", () => {
+    it("rejects invalid dimensions", () => {
+      expect(createHoledOneFishBoard(-1, -3, [], 1)).toEqual(
+        new InvalidBoardConstraintsError(-1, 0)
+      );
+    });
+
+    it("rejects invalid hole positions", () => {
+      expect(createHoledOneFishBoard(2, 2, invalidHolePositions, 1)).toEqual(
+        new InvalidPositionError(board, invalidHolePositions[0])
+      );
+    });
+
+    it("rejects a number of tiles after adding holes that is lower than the minimum one fish tiles", () => {
+      expect(createHoledOneFishBoard(2, 2, validHolePositions, 4)).toEqual(
+        new InvalidBoardConstraintsError(2, 2, validHolePositions.length, 4)
+      );
+    });
+
+    it("rejects a negative number of minimum 1-fish tiles", () => {
+      expect(createHoledOneFishBoard(2, 2, validHolePositions, -1)).toEqual(
+        new InvalidBoardConstraintsError(2, 2, validHolePositions.length, -1)
+      );
+    });
+
+    it("creates a holed 1-fish board with valid arguments", () => {
+      const expectedBoard: Board = boardWithHole;
+      expect(createHoledOneFishBoard(2, 2, validHolePositions, 1)).toEqual(
+        expectedBoard
+      );
     });
   });
 
@@ -179,7 +179,7 @@ describe("boardCreation", () => {
       expect(createNumberedBoard(tileArray)).toEqual(numberedBoard);
     });
 
-    it("returns the tile at the requested position", () => {
+    it("rreturns a board with specified fish on each tile, including holes", () => {
       expect(createNumberedBoard(tileArrayWithHoles)).toEqual(numberedBoardWithHoles);
     });
   });

@@ -8,7 +8,7 @@ import {
 import { movePenguinInPenguinPositions, movePenguin, placePenguin } from "../src/penguinPlacement";
 
 import { createHoledOneFishBoard } from "../src/boardCreation"
-import { createState } from "../src/stateCreation";
+import { createGameState } from "../src/gameStateCreation";
 
 describe("penguinMovement", () => {
   const player1: Player = { name: "foo", age: 20 };
@@ -27,7 +27,7 @@ describe("penguinMovement", () => {
     const player1Penguin: Penguin = { color: PenguinColor.Black };
     const penguinPositions: Map<BoardPosition, Penguin> = new Map([[validStartPosition, player1Penguin]]);
     const game: Game = {
-      ...createState(players, playerToColorMapping, board) as Game,
+      ...createGameState(players, playerToColorMapping, board) as Game,
       penguinPositions,
     };
 

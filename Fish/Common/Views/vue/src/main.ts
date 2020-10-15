@@ -7,7 +7,7 @@ import {
   PenguinColor,
 } from "../../../Controller/types/board";
 import { Game, Player } from "../../../Controller/types/state";
-import { createState } from "../../../Controller/src/stateCreation";
+import { createGameState } from "../../../Controller/src/gameStateCreation";
 import { createHoledOneFishBoard } from "../../../Controller/src/boardCreation";
 
 const player1: Player = { name: "foo", age: 21 };
@@ -20,7 +20,7 @@ const player2PenguinPosition2: BoardPosition = { row: 3, col: 0 };
 const player1Color: PenguinColor = PenguinColor.White;
 const player2Color: PenguinColor = PenguinColor.Red;
 const game: Game = {
-  ...(createState(
+  ...(createGameState(
     [player1, player2],
     new Map([
       [player1, PenguinColor.White],

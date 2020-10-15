@@ -11,7 +11,7 @@ import {
 import { createBlankBoard, createHoledOneFishBoard, setTileToHole } from "../src/boardCreation";
 import { Board, BoardPosition, Penguin, PenguinColor } from "../types/board";
 import { Game, Player } from "../types/state";
-import { createState } from "../src/stateCreation";
+import { createGameState } from "../src/gameStateCreation";
 import { IllegalPenguinPositionError, UnreachablePositionError, InvalidGameStateError, InvalidNumberOfPlayersError, InvalidPositionError } from "../types/errors";
 
 describe("validation", () => {
@@ -31,7 +31,7 @@ describe("validation", () => {
   const player1Penguin: Penguin = { color: PenguinColor.Black };
   const penguinPositions: Map<BoardPosition, Penguin> = new Map([[validStartPosition, player1Penguin]]);
   const game: Game = {
-    ...createState(players, playerToColorMapping, board) as Game,
+    ...createGameState(players, playerToColorMapping, board) as Game,
     penguinPositions,
   };
   const twoPenguinPositions: Map<BoardPosition, Penguin> = new Map(penguinPositions);
