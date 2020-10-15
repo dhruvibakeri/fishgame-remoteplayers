@@ -9,7 +9,7 @@
 <script lang="ts">
 import Vue from "vue";
 import Tile from "./Tile.vue";
-import { Board } from "../../../../../Common/Controller/types/board";
+import { Board } from "../../../../board";
 import { CSSAbsolutePosition, CSSElementSize } from "../types/visualization";
 
 export default Vue.extend({

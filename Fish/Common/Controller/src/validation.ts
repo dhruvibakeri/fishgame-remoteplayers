@@ -94,15 +94,19 @@ const isError = (anything: any): anything is Error => {
 /**
  * Determine whether the given end position is reachable from the given start position on the given Board.
  * Starting position must be on board and end position must be playable
- * 
- * @param board 
- * @param startPosition 
- * @param endPosition 
+ *
+ * @param board
+ * @param startPosition
+ * @param endPosition
  */
-const pathIsPlayable = (game: Game, startPosition: BoardPosition, endPosition: BoardPosition): boolean => {
+const pathIsPlayable = (
+  game: Game,
+  startPosition: BoardPosition,
+  endPosition: BoardPosition
+): boolean => {
   // Verify that the start position is on the board.
   if (!positionIsOnBoard(game.board, startPosition)) {
-    return false
+    return false;
   }
 
   //Verify that the end position is playable
@@ -110,9 +114,13 @@ const pathIsPlayable = (game: Game, startPosition: BoardPosition, endPosition: B
     return false;
   }
 
-  return getReachablePositions(game, startPosition).filter(
-    (position: BoardPosition) => position.col === endPosition.col && position.row === endPosition.row).length > 0;
-}
+  return (
+    getReachablePositions(game, startPosition).filter(
+      (position: BoardPosition) =>
+        position.col === endPosition.col && position.row === endPosition.row
+    ).length > 0
+  );
+};
 
 //TODO test
 /**
@@ -126,7 +134,7 @@ const pathIsPlayable = (game: Game, startPosition: BoardPosition, endPosition: B
 const playerHasUnplacedPenguin = (player: Player, game: Game): boolean => {
   const remainingPenguins = game.remainingUnplacedPenguins.get(player);
   return remainingPenguins ? remainingPenguins > 0 : false;
-}
+};
 
 /**
  * Determine if the given Player may move one of its Penguins on a starting
@@ -144,10 +152,19 @@ const validatePenguinMove = (
   player: Player,
   startPosition: BoardPosition,
   endPosition: BoardPosition
-): Penguin | InvalidGameStateError | InvalidPositionError | IllegalPenguinPositionError => {
+):
+  | Penguin
+  | InvalidGameStateError
+  | InvalidPositionError
+  | IllegalPenguinPositionError => {
   // Verify that startPosition and endPosition are connected by a straight, uninterrupted line
   if (!pathIsPlayable(game, startPosition, endPosition)) {
-    return new UnreachablePositionError(game, player, startPosition, endPosition);
+    return new UnreachablePositionError(
+      game,
+      player,
+      startPosition,
+      endPosition
+    );
   }
 
   // Verify that game has color mapping for player
@@ -157,12 +174,22 @@ const validatePenguinMove = (
 
   // Verify that penguin exists at starting position
   if (!game.penguinPositions.has(startPosition)) {
-    return new IllegalPenguinPositionError(game, player, startPosition, endPosition);
+    return new IllegalPenguinPositionError(
+      game,
+      player,
+      startPosition,
+      endPosition
+    );
   }
 
-  const penguinAtStart: Penguin | undefined = game.penguinPositions.get(startPosition);
-  const penguinAtStartColor: PenguinColor | undefined = penguinAtStart && penguinAtStart.color;
-  const playerColor: PenguinColor | undefined = game.playerToColorMapping.get(player)
+  const penguinAtStart: Penguin | undefined = game.penguinPositions.get(
+    startPosition
+  );
+  const penguinAtStartColor: PenguinColor | undefined =
+    penguinAtStart && penguinAtStart.color;
+  const playerColor: PenguinColor | undefined = game.playerToColorMapping.get(
+    player
+  );
 
   // Verify that player color and starting penguin color match
   if (playerColor !== penguinAtStartColor) {

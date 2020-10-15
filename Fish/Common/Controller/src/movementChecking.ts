@@ -1,5 +1,14 @@
-import { BoardPosition, VerticalDirection, HorizontalDirection, PenguinColor, Penguin } from "../../board";
-import { Game, Player } from "../../state";
+import {
+  BoardPosition,
+  VerticalDirection,
+  HorizontalDirection,
+  PenguinColor,
+  Penguin,
+} from "../../board";
+import { 
+  Game,
+  Player,
+ } from "../../state";
 import { positionIsPlayable } from "./validation";
 
 /**

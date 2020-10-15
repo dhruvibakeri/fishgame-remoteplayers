@@ -5,8 +5,8 @@ import {
   Board,
   BoardPosition,
   PenguinColor,
-} from "../../../Controller/types/board";
-import { Game, Player } from "../../../Controller/types/state";
+} from "../../../board";
+import { Game, Player } from "../../../state";
 import { createGameState } from "../../../Controller/src/gameStateCreation";
 import { createHoledOneFishBoard } from "../../../Controller/src/boardCreation";
 

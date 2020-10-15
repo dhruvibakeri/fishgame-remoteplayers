@@ -14,7 +14,7 @@ around the Player's rendering.
 
 <script lang="ts">
 import Vue from "vue";
-import { Player } from "../../../../Controller/types/state";
+import { Player } from "../../../../state";
 
 export default Vue.extend({
   name: "Player",

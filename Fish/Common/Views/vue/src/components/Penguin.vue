@@ -8,7 +8,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { BoardPosition } from "../../../../../Common/Controller/types/board";
+import { BoardPosition } from "../../../../board";
 import { CSSAbsolutePosition } from "../types/visualization";
 
 export default Vue.extend({

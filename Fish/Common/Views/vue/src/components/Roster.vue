@@ -20,7 +20,7 @@ turns within the Game's roster of players.
 
 <script lang="ts">
 import Vue from "vue";
-import { Game, Player as PlayerType } from "../../../../../Common/Controller/types/state";
+import { Game, Player as PlayerType } from "../../../../../Common/state";
 import Player from "./Player.vue";
 
 export default Vue.extend({

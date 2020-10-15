@@ -16,7 +16,7 @@ import Vue from "vue";
 import Board from "./Board.vue";
 import Penguin from "./Penguin.vue";
 import Roster from "./Roster.vue";
-import { Game } from "../../../../Controller/types/state";
+import { Game } from "../../../../state";
 
 export default Vue.extend({
   name: "Game",

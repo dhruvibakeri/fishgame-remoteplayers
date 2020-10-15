@@ -7,7 +7,7 @@
 <script lang="ts">
 import Vue from "vue";
 import Game from "./components/Game.vue";
-import { Game as GameState } from "../../../Controller/types/state";
+import { Game as GameState } from "../../../state";
 
 export default Vue.extend({
   name: "App",
