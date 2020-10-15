@@ -1,28 +1,47 @@
 <!-- Renders a single Hexagon tile with given size unless isActive is false, in which case the tile is hidden. -->
 <template lang="pug">
-    div Player Roster
-    div(v-for='player in players')
-      div(v-if='player === curPlayer') Current Player
-      Player(:player='player')
-      
+  .roster
+    div.title Players
+    .players
+      div(v-for='(player, index) in game.players' :key='index')
+        div.player-number=`${index + 1}.`
+        Player(
+          :name='player.name' 
+          :unplacedPenguins='game.remainingUnplacedPenguins.get(player)' 
+          :color='game.playerToColorMapping.get(player)'
+          :isCurPlayer='isCurPlayer(player)'
+        )
 </template>
 
 <script lang="ts">
 import Vue from "vue";
-import { Player as PlayerType } from "../../../../../Common/Controller/types/state";
+import { Game, Player as PlayerType } from "../../../../../Common/Controller/types/state";
 import Player from "./Player.vue";
 
 export default Vue.extend({
   name: "Roster",
   components: {
-    Player
+    Player,
   },
   props: {
-    players: { type: Object as () => Array<PlayerType>, required: true },
-    curPlayer: { type: Object as () => PlayerType, required: true }
+    game: { type: Object as () => Game, required: true },
+  },
+  methods: {
+    isCurPlayer(player: PlayerType) {
+      return this.game.curPlayer === player;
+    },
   },
 });
 </script>
 
 <style lang="scss">
+  .title {
+    font-size: 22px;
+  }
+  .players {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+  }
 </style>

@@ -1,5 +1,10 @@
 // Helper functions for validating logic
-import { InvalidGameStateError, InvalidPositionError, IllegalPenguinPositionError, UnreachablePositionError } from "../types/errors";
+import {
+  InvalidGameStateError,
+  InvalidPositionError,
+  IllegalPenguinPositionError,
+  UnreachablePositionError,
+} from "../types/errors";
 import { Player } from "../types/state";
 import { Game } from "../types/state";
 import { Board, BoardPosition, Penguin, PenguinColor } from "../types/board";
@@ -31,9 +36,11 @@ const positionIsOnBoard = (board: Board, position: BoardPosition): boolean => {
  * @return whether the given position is playable on the board
  */
 const positionIsPlayable = (game: Game, position: BoardPosition): boolean => {
-  return positionIsOnBoard(game.board, position) &&
-  game.board.tiles[position.row][position.col].numOfFish > 0 &&
-  !game.penguinPositions.has(position);
+  return (
+    positionIsOnBoard(game.board, position) &&
+    game.board.tiles[position.row][position.col].numOfFish > 0 &&
+    !game.penguinPositions.has(position)
+  );
 };
 
 /**
@@ -74,44 +81,52 @@ const isValidMinimumOneFishTiles = (
 
 /**
  * Typeguard for checking whether the given parameter is an Error.
- * 
+ *
  * @param anything the input to check against
  * @return whether the input is an error
  */
 const isError = (anything: any): anything is Error => {
   const error: Error = anything as Error;
   return error.message !== undefined && error.name !== undefined;
-}
+};
 
 /**
  * Determine whether the given end position is reachable from the given start position on the given Board.
- * @param board 
- * @param startPosition 
- * @param endPosition 
+ * @param board
+ * @param startPosition
+ * @param endPosition
  */
-const positionIsReachable = (game: Game, startPosition: BoardPosition, endPosition: BoardPosition): boolean => {
-  return getReachablePositions(game, startPosition).filter(
-    (position: BoardPosition) => position.col === endPosition.col && position.row === endPosition.row).length > 0;
-}
+const positionIsReachable = (
+  game: Game,
+  startPosition: BoardPosition,
+  endPosition: BoardPosition
+): boolean => {
+  return (
+    getReachablePositions(game, startPosition).filter(
+      (position: BoardPosition) =>
+        position.col === endPosition.col && position.row === endPosition.row
+    ).length > 0
+  );
+};
 
 //TODO test
 /**
  * Takes in a player and a game state, and checks if the player has at least one remaining
  * unplaced penguin in the given game state
- * 
+ *
  * @param player player to check for remaining unplaced penguins
  * @param game game state to check for remaining penguins for given player
  * @returns true if player has at least one unplaced penguin, returns false if they do not
  */
 const playerHasUnplacedPenguin = (player: Player, game: Game): boolean => {
-  const remainingPenguins: number = game.remainingUnplacedPenguins.get(player);
-  return  remainingPenguins > 0;
-}
+  const remainingPenguins = game.remainingUnplacedPenguins.get(player);
+  return remainingPenguins !== undefined && remainingPenguins > 0;
+};
 
 /**
  * Determine if the given Player may move one of its Penguins on a starting
  * position to a given end position on the board of the given Game state.
- * 
+ *
  * @param game the Game state
  * @param player the Player moving its Penguin
  * @param endPosition the Player's Penguin's end position after the move
@@ -120,11 +135,15 @@ const playerHasUnplacedPenguin = (player: Player, game: Game): boolean => {
  * @return the Penguin being moved if the move is valid or an error if not
  */
 const validatePenguinMove = (
-  game: Game, 
-  player: Player, 
+  game: Game,
+  player: Player,
   startPosition: BoardPosition,
   endPosition: BoardPosition
-): Penguin | InvalidGameStateError | InvalidPositionError | IllegalPenguinPositionError => {
+):
+  | Penguin
+  | InvalidGameStateError
+  | InvalidPositionError
+  | IllegalPenguinPositionError => {
   // Verify that the start position is on the board.
   if (!positionIsOnBoard(game.board, startPosition)) {
     return new InvalidPositionError(game.board, startPosition);
@@ -132,29 +151,52 @@ const validatePenguinMove = (
     return new InvalidPositionError(game.board, endPosition);
   }
 
+  // Verify that the end position is playable and reachable.
+  if (!positionIsPlayable(game, endPosition)) {
+    return new IllegalPenguinPositionError(
+      game,
+      player,
+      startPosition,
+      endPosition
+    );
+  } else if (!positionIsReachable(game, startPosition, endPosition)) {
+    return new UnreachablePositionError(
+      game,
+      player,
+      startPosition,
+      endPosition
+    );
+  }
+
   // Verify that the Player has a Penguin at the starting position.
-  const maybePlayerColor: PenguinColor | undefined = game.playerToColorMapping.get(player);
-  const maybePenguinAtStart: Penguin | undefined = game.penguinPositions.get(startPosition);
+  const maybePlayerColor:
+    | PenguinColor
+    | undefined = game.playerToColorMapping.get(player);
+  const maybePenguinAtStart: Penguin | undefined = game.penguinPositions.get(
+    startPosition
+  );
 
   if (maybePlayerColor === undefined) {
     return new InvalidGameStateError(game);
   }
 
-  const playerHasPenguinAtStart = maybePenguinAtStart !== undefined && maybePlayerColor === maybePenguinAtStart.color;
+  const playerHasPenguinAtStart =
+    maybePenguinAtStart && maybePlayerColor === maybePenguinAtStart.color;
 
-  if (!playerHasPenguinAtStart) {
-    return new IllegalPenguinPositionError(game, player, startPosition, endPosition);
+  // maybePenguinAtStart is checked again due to an issue with ESlint not
+  // recognizing that playerHasPenguinAtStart already checks this when
+  // checking that maybePenguinAtStart matches the return type.
+  if (maybePenguinAtStart && playerHasPenguinAtStart) {
+    return maybePenguinAtStart;
+  } else {
+    return new IllegalPenguinPositionError(
+      game,
+      player,
+      startPosition,
+      endPosition
+    );
   }
-
-  // Verify that the end position is playable and reachable.
-  if (!positionIsPlayable(game, endPosition)) {
-    return new IllegalPenguinPositionError(game, player, startPosition, endPosition);
-  } else if (!positionIsReachable(game, startPosition, endPosition)) {
-    return new UnreachablePositionError(game, player, startPosition, endPosition);
-  }
-
-  return maybePenguinAtStart;
-}
+};
 
 export {
   positionIsOnBoard,
@@ -164,5 +206,5 @@ export {
   positionIsReachable,
   validatePenguinMove,
   playerHasUnplacedPenguin,
-  isError
-}
+  isError,
+};
