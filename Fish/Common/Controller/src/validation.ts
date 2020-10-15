@@ -85,6 +85,8 @@ const isValidMinimumOneFishTiles = (
  * @param anything the input to check against
  * @return whether the input is an error
  */
+// disable warning about using `any` type
+// eslint-disable-next-line
 const isError = (anything: any): anything is Error => {
   const error: Error = anything as Error;
   return error.message !== undefined && error.name !== undefined;

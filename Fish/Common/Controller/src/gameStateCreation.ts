@@ -1,10 +1,8 @@
 import { Player, Game } from "../types/state";
 import { Board, PenguinColor } from "../types/board";
 import { 
-    InvalidBoardConstraintsError,
     InvalidNumberOfPlayersError,
 } from "../types/errors";
-import { createBlankBoard } from "./boardCreation";
 
 
 const MAX_NUMBER_OF_PLAYERS = 4;
