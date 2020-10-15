@@ -114,6 +114,10 @@ describe("validation", () => {
       expect(positionIsPlayable(game, holePosition)).toEqual(false);
     });
 
+    it("rejects a position that has a penguin already on it", () => {
+      expect(positionIsPlayable(game, validStartPosition)).toEqual(false);
+    })
+
     it("accepts a position that is on the board and is not a hole", () => {
       expect(positionIsPlayable(game, validEndPosition)).toEqual(true);
     });
@@ -136,7 +140,7 @@ describe("validation", () => {
       expect(isValidBoardSize(2, -4)).toEqual(false);
     });
 
-    it("accepts positve board sizez", () => {
+    it("accepts positve board size", () => {
       expect(isValidBoardSize(3, 3)).toEqual(true);
     });
   });
@@ -180,10 +184,45 @@ describe("validation", () => {
       expect(pathIsPlayable(game, validStartPosition, holePosition)).toEqual(false);
     });
 
-    it("accepts a reachable position", () => {
+    it("rejects a start position that is not on the board", () => {
+      expect(pathIsPlayable(game, { row: 7, col: 8 }, validEndPosition)).toEqual(false);
+    });
+
+    it("rejects an end position that is not on the board", () => {
+      expect(pathIsPlayable(game, validStartPosition, { row: 7, col: 8 })).toEqual(false);
+    });
+
+    it("rejects an end position that already has a penguin", () => {
+      expect(pathIsPlayable(game, validEndPosition, validStartPosition)).toEqual(false);
+    });
+
+    it("accepts a playable path", () => {
       expect(pathIsPlayable(game, validStartPosition, validEndPosition)).toEqual(true);
     });
   });
+
+  describe("playerHasUnplacedPenguin", () => {
+    const noUnplacedPenguins: Map<Player, number> = new Map([[player1, 0], [player2, 0]]);
+    const noUnplacedPenguinsGame: Game = {
+      ...game,
+      remainingUnplacedPenguins: noUnplacedPenguins,
+    };
+
+    it("returns false when player does not have any penguins", () => {
+      expect(playerHasUnplacedPenguin(player1, noUnplacedPenguinsGame)).toEqual(false);
+      expect(playerHasUnplacedPenguin(player2, noUnplacedPenguinsGame)).toEqual(false);
+    });
+
+    it("returns false when given player not in game", () => {
+      expect(playerHasUnplacedPenguin(player3, noUnplacedPenguinsGame)).toEqual(false);
+      expect(playerHasUnplacedPenguin(player3, game)).toEqual(false);
+    });
+
+    it("returns true when player has unplaced penguins", () => {
+      expect(playerHasUnplacedPenguin(player1, game)).toEqual(true);
+      expect(playerHasUnplacedPenguin(player2, game)).toEqual(true);
+    });
+  })
 
   describe("validatePenguinMove", () => {
     it("rejects a start position outside of the board", () => {
