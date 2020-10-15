@@ -21,7 +21,6 @@ import {
   UnreachablePositionError,
   InvalidGameStateError,
   InvalidNumberOfPlayersError,
-  InvalidPositionError,
 } from "../types/errors";
 
 describe("validation", () => {
