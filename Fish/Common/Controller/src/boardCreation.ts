@@ -1,4 +1,4 @@
-import { Board, BoardPosition, Tile } from "../types/board";
+import { Board, BoardPosition, Tile } from "../../board";
 import {
   isValidBoardSize,
   positionIsOnBoard,
@@ -69,9 +69,7 @@ const setTileOnBoard = (
     return currentTileOrError;
   } else {
     // Create a new tile, using the specified value for numOfFish.
-    const newTile: Tile = createTile(
-       numOfFish
-    );
+    const newTile: Tile = createTile(numOfFish);
 
     // Copy the existing board, changing just the new tile.
     const newBoard = {
@@ -222,29 +220,35 @@ const createHoledOneFishBoard = (
 /**
  * Create a Board given a rectangular, 2D array specifying the number of fish at the Tile at
  * each position. 0 fish on a tile represents a hole.
- * @param tileFish a 2D array specifying the number of fish at at the Tile at 
+ * @param tileFish a 2D array specifying the number of fish at at the Tile at
  * each position
  * @return either created Board if successful or any error that occurred.
  */
-const createNumberedBoard = (tileFish: number[][]): Board | InvalidBoardConstraintsError | InvalidPositionError => {
+const createNumberedBoard = (
+  tileFish: number[][]
+): Board | InvalidBoardConstraintsError | InvalidPositionError => {
   // Return an error of the board is empty.
   if (tileFish.length <= 0) {
     return new InvalidBoardConstraintsError(0, 0);
   }
-  
+
   // Begin with a blank board the same size as the given 2D array.
   const blankBoard = createBlankBoard(tileFish.length, tileFish[0].length, 0);
-  
+
   if (isError(blankBoard)) {
     return blankBoard;
   } else {
-    let curBoard = blankBoard
+    let curBoard = blankBoard;
 
     // For each given tile fish amount, set the corresponding Tile on the
     // created blank board to that fish amount.
     for (let row = 0; row < tileFish.length; row++) {
       for (let col = 0; col < tileFish[0].length; col++) {
-        const setTileBoard = setTileOnBoard(curBoard, {row, col}, tileFish[row][col]);
+        const setTileBoard = setTileOnBoard(
+          curBoard,
+          { row, col },
+          tileFish[row][col]
+        );
         if (isError(setTileBoard)) {
           return setTileBoard;
         } else {
@@ -254,7 +258,7 @@ const createNumberedBoard = (tileFish: number[][]): Board | InvalidBoardConstrai
     }
     return curBoard;
   }
-}
+};
 
 export {
   createHoledOneFishBoard,

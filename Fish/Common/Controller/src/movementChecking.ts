@@ -1,5 +1,9 @@
-import { BoardPosition, VerticalDirection, HorizontalDirection } from "../types/board";
-import { Game } from "../types/state";
+import {
+  BoardPosition,
+  VerticalDirection,
+  HorizontalDirection,
+} from "../../board";
+import { Game } from "../../state";
 import { positionIsPlayable } from "./validation";
 
 /**

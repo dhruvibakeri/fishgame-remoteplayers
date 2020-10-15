@@ -36,7 +36,7 @@ describe("Player.vue", () => {
 
     test("the player has the correct unplacedPenguins", () => {
       expect(playerUnplacedPenguins.text()).toBe(
-        `${unplacedPenguins} remaining`
+        `${unplacedPenguins} penguins left to place`
       );
     });
   });

@@ -1,6 +1,12 @@
-import { Board, BoardPosition, HorizontalDirection, VerticalDirection, PenguinColor } from "../types/board";
+import {
+  Board,
+  BoardPosition,
+  HorizontalDirection,
+  VerticalDirection,
+  PenguinColor,
+} from "../../board";
 import { createBlankBoard, setTileToHole } from "../src/boardCreation";
-import { Game, Player } from "../types/state";
+import { Game, Player } from "../../state";
 import {
   getNextPosDownLeft,
   getNextPosDownNeutral,
@@ -32,11 +38,15 @@ describe("movement", () => {
   const player3: Player = { name: "baz", age: 45 };
   const players: Array<Player> = [player3, player2, player1];
   const playerToColorMapping: Map<Player, PenguinColor> = new Map([
-    [player1, PenguinColor.Black], 
-    [player2, PenguinColor.Brown], 
+    [player1, PenguinColor.Black],
+    [player2, PenguinColor.Brown],
     [player3, PenguinColor.Red],
   ]);
-  const gameOrError: Game | InvalidNumberOfPlayersError = createGameState(players, playerToColorMapping, board);
+  const gameOrError: Game | InvalidNumberOfPlayersError = createGameState(
+    players,
+    playerToColorMapping,
+    board
+  );
   const game: Game = !isError(gameOrError) && gameOrError;
 
   describe("getNextPosDownLeft", () => {
@@ -80,7 +90,7 @@ describe("movement", () => {
       expect(getNextPosUpNeutral(center)).toEqual(up);
     });
   });
-  
+
   describe("getNextPosition", () => {
     it("increments in the up direction", () => {
       expect(
@@ -162,8 +172,15 @@ describe("movement", () => {
         row: 1,
         col: 1,
       }) as Board;
-      const gameWithHoleOrError: Game | InvalidNumberOfPlayersError = createGameState(players, playerToColorMapping, boardWithHole);
-      const gameWithHole: Game = !isError(gameWithHoleOrError) && gameWithHoleOrError;
+      const gameWithHoleOrError:
+        | Game
+        | InvalidNumberOfPlayersError = createGameState(
+        players,
+        playerToColorMapping,
+        boardWithHole
+      );
+      const gameWithHole: Game =
+        !isError(gameWithHoleOrError) && gameWithHoleOrError;
       const expectedReachablePositions: Array<BoardPosition> = [center];
       expect(
         getReachablePositionsInDirection(
@@ -191,7 +208,6 @@ describe("movement", () => {
       expect(new Set(getReachablePositions(game, center))).toEqual(
         expectedReachablePositions
       );
-      
     });
   });
 });
