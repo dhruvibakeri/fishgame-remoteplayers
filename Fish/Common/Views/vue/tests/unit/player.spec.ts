@@ -13,7 +13,7 @@ describe("Player.vue", () => {
     isCurPlayer: false,
   };
 
-  test("Renders a player that is not the current player", () => {
+  describe("renders a player that is not the current player", () => {
     const wrapper = mount(Player, {
       propsData,
     });
@@ -22,20 +22,26 @@ describe("Player.vue", () => {
     const playerName = wrapper.findAll(".player-name").at(0);
     const playerUnplacedPenguins = wrapper.findAll(".unplaced-penguins").at(0);
 
-    // The player is not the current player.
-    expect(playerComponent.props().isCurPlayer).toBe(false);
+    test("the player is not the current player", () => {
+      expect(playerComponent.props().isCurPlayer).toBe(false);
+    });
 
-    // The player has the correct name.
-    expect(playerName.text()).toBe(player.name);
+    test("the player has the correct name", () => {
+      expect(playerName.text()).toBe(player.name);
+    });
 
-    // The player has the correct color.
-    expect(playerComponent.props().color).toBe(color);
+    test("the player has the correct color", () => {
+      expect(playerComponent.props().color).toBe(color);
+    });
 
-    // The player has the correct unplacedPenguins.
-    expect(playerUnplacedPenguins.text()).toBe(`${unplacedPenguins} remaining`);
+    test("the player has the correct unplacedPenguins", () => {
+      expect(playerUnplacedPenguins.text()).toBe(
+        `${unplacedPenguins} remaining`
+      );
+    });
   });
 
-  test("Renders a player that is the current player", () => {
+  describe("renders a player that is the current player", () => {
     const wrapper = mount(Player, {
       propsData: {
         ...propsData,
@@ -43,12 +49,13 @@ describe("Player.vue", () => {
       },
     });
 
-    // The player is given the current player stylings.
-    expect(
-      wrapper
-        .findAll(".player")
-        .at(0)
-        .props().isCurPlayer
-    ).toBe(false);
+    test("the player is given the current player stylings", () => {
+      expect(
+        wrapper
+          .findAll(".player")
+          .at(0)
+          .props().isCurPlayer
+      ).toBe(false);
+    });
   });
 });
