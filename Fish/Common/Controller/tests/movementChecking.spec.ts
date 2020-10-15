@@ -12,7 +12,7 @@ import {
   getNextPosition,
   getReachablePositionsInDirection,
 } from "../src/movementChecking";
-import { createState } from "../src/stateCreation";
+import { createGameState } from "../src/gameStateCreation";
 import { InvalidNumberOfPlayersError } from "../types/errors";
 import { isError } from "../src/validation";
 
@@ -36,69 +36,51 @@ describe("movement", () => {
     [player2, PenguinColor.Brown], 
     [player3, PenguinColor.Red],
   ]);
-  const gameOrError: Game | InvalidNumberOfPlayersError = createState(players, playerToColorMapping, board);
+  const gameOrError: Game | InvalidNumberOfPlayersError = createGameState(players, playerToColorMapping, board);
   const game: Game = !isError(gameOrError) && gameOrError;
 
-  describe("getReachablePositions", () => {
-    it("gets reachable positions in all directions", () => {
-      const expectedReachablePositions: Set<BoardPosition> = new Set([
-        upLeft2,
-        upLeft,
-        downLeft,
-        up,
-        upRight,
-        upRight2,
-        downRight,
-      ]);
-
-      expect(new Set(getReachablePositions(game, center))).toEqual(
-        expectedReachablePositions
-      );
-      
+  describe("getNextPosDownLeft", () => {
+    it("increments in the down left direction", () => {
+      expect(getNextPosDownLeft(center)).toEqual(downLeft);
     });
   });
 
-  describe("getReachablePositionsInDirection", () => {
-    const start: BoardPosition = { row: 3, col: 0 };
-
-    it("gets reachable positions in a direction until hitting the board boundaries", () => {
-      const expectedReachablePositions: Set<BoardPosition> = new Set([
-        center,
-        upRight,
-        upRight2,
-      ]);
-
-      expect(
-        new Set(
-          getReachablePositionsInDirection(
-            game,
-            start,
-            VerticalDirection.Up,
-            HorizontalDirection.Right
-          )
-        )
-      ).toEqual(expectedReachablePositions);
-    });
-
-    it("gets reachable positions in a direction until hitting a hole", () => {
-      const boardWithHole: Board = setTileToHole(board, {
-        row: 1,
-        col: 1,
-      }) as Board;
-      const gameWithHoleOrError: Game | InvalidNumberOfPlayersError = createState(players, playerToColorMapping, boardWithHole);
-      const gameWithHole: Game = !isError(gameWithHoleOrError) && gameWithHoleOrError;
-      const expectedReachablePositions: Array<BoardPosition> = [center];
-      expect(
-        getReachablePositionsInDirection(
-          gameWithHole,
-          start,
-          VerticalDirection.Up,
-          HorizontalDirection.Right
-        )
-      ).toEqual(expectedReachablePositions);
+  describe("getNextPosDownRight", () => {
+    it("increments in the down right direction", () => {
+      expect(getNextPosDownRight(center)).toEqual(downRight);
     });
   });
 
+  describe("getNextPosDownNeutral", () => {
+    it("increments in the down direction", () => {
+      expect(getNextPosDownNeutral(center)).toEqual(down);
+    });
+  });
+
+  describe("getNextPosUpLeft", () => {
+    it("increments in the up left direction", () => {
+      expect(getNextPosUpLeft(center)).toEqual(upLeft);
+    });
+  });
+
+  describe("getNextPosUpLeft", () => {
+    it("increments in the up left direction", () => {
+      expect(getNextPosUpLeft(center)).toEqual(upLeft);
+    });
+  });
+
+  describe("getNextPosUpRight", () => {
+    it("increments in the up right direction", () => {
+      expect(getNextPosUpRight(center)).toEqual(upRight);
+    });
+  });
+
+  describe("getNextPosUpNeutral", () => {
+    it("increments in the up direction", () => {
+      expect(getNextPosUpNeutral(center)).toEqual(up);
+    });
+  });
+  
   describe("getNextPosition", () => {
     it("increments in the up direction", () => {
       expect(
@@ -153,39 +135,63 @@ describe("movement", () => {
     });
   });
 
-  describe("getNextPosUpNeutral", () => {
-    it("increments in the up direction", () => {
-      expect(getNextPosUpNeutral(center)).toEqual(up);
+  describe("getReachablePositionsInDirection", () => {
+    const start: BoardPosition = { row: 3, col: 0 };
+
+    it("gets reachable positions in a direction until hitting the board boundaries", () => {
+      const expectedReachablePositions: Set<BoardPosition> = new Set([
+        center,
+        upRight,
+        upRight2,
+      ]);
+
+      expect(
+        new Set(
+          getReachablePositionsInDirection(
+            game,
+            start,
+            VerticalDirection.Up,
+            HorizontalDirection.Right
+          )
+        )
+      ).toEqual(expectedReachablePositions);
+    });
+
+    it("gets reachable positions in a direction until hitting a hole", () => {
+      const boardWithHole: Board = setTileToHole(board, {
+        row: 1,
+        col: 1,
+      }) as Board;
+      const gameWithHoleOrError: Game | InvalidNumberOfPlayersError = createGameState(players, playerToColorMapping, boardWithHole);
+      const gameWithHole: Game = !isError(gameWithHoleOrError) && gameWithHoleOrError;
+      const expectedReachablePositions: Array<BoardPosition> = [center];
+      expect(
+        getReachablePositionsInDirection(
+          gameWithHole,
+          start,
+          VerticalDirection.Up,
+          HorizontalDirection.Right
+        )
+      ).toEqual(expectedReachablePositions);
     });
   });
 
-  describe("getNextPosUpRight", () => {
-    it("increments in the up right direction", () => {
-      expect(getNextPosUpRight(center)).toEqual(upRight);
-    });
-  });
+  describe("getReachablePositions", () => {
+    it("gets reachable positions in all directions", () => {
+      const expectedReachablePositions: Set<BoardPosition> = new Set([
+        upLeft2,
+        upLeft,
+        downLeft,
+        up,
+        upRight,
+        upRight2,
+        downRight,
+      ]);
 
-  describe("getNextPosUpLeft", () => {
-    it("increments in the up left direction", () => {
-      expect(getNextPosUpLeft(center)).toEqual(upLeft);
-    });
-  });
-
-  describe("getNextPosDownNeutral", () => {
-    it("increments in the down direction", () => {
-      expect(getNextPosDownNeutral(center)).toEqual(down);
-    });
-  });
-
-  describe("getNextPosDownRight", () => {
-    it("increments in the down right direction", () => {
-      expect(getNextPosDownRight(center)).toEqual(downRight);
-    });
-  });
-
-  describe("getNextPosDownLeft", () => {
-    it("increments in the down left direction", () => {
-      expect(getNextPosDownLeft(center)).toEqual(downLeft);
+      expect(new Set(getReachablePositions(game, center))).toEqual(
+        expectedReachablePositions
+      );
+      
     });
   });
 });

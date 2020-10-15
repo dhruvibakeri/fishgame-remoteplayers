@@ -20,7 +20,7 @@ export interface Player {
  * ordering which they will take turns
  * @param board the current Board of the game
  * @param curPlayer the player who's turn it currently is
- * @param unplacedPenguins a Map from Player to Number, the number represents how
+ * @param remainingUnplacedPenguins a Map from Player to Number, the number represents how
  * many penguins the player has left to place
  * @param penguinPositions a Map from BoardPosition to Penguin tracking all
  * penguins that have been placed on the board (value) and their positions (key).

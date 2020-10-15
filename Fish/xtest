@@ -1,0 +1,3 @@
+#!/bin/bash
+cd Common/Views/vue; npm run test:unit
+cd Common/Controlloer; npm run test

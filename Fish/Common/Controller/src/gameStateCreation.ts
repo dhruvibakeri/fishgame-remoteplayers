@@ -44,7 +44,7 @@ const buildUnplacedPenguinMap = (players: Array<Player>): Map<Player, number> =>
  * @param board the board to be played on within this game
  * @return The new game state with given players, game, and playerToColorMapping
  */
-const createState = (players: Array<Player>, playerToColorMapping: Map<Player, PenguinColor>, board: Board): Game | InvalidNumberOfPlayersError => {
+const createGameState = (players: Array<Player>, playerToColorMapping: Map<Player, PenguinColor>, board: Board): Game | InvalidNumberOfPlayersError => {
     // Error check whether the number of players given is valid.
     if (players.length < MIN_NUMBER_OF_PLAYERS || players.length > MAX_NUMBER_OF_PLAYERS) {
         return new InvalidNumberOfPlayersError(players.length);
@@ -64,11 +64,30 @@ const createState = (players: Array<Player>, playerToColorMapping: Map<Player, P
     };
 }
 
+/**
+ * Creates a sample game state with the given board FOR TESTING PURPOSES
+ * 
+ * @param board board to use for game state creation
+ */
+const createTestGameState = (board: Board): Game | InvalidNumberOfPlayersError => {
+    
+    const samplePlayer1: Player = { name: "foo", age: 21 };
+    const samplePlayer2: Player = { name: "bar", age: 20 };
+    const samplePlayers: Array<Player> = [samplePlayer1, samplePlayer2];
+    const samplePlayerToColorMapping: Map<Player, PenguinColor> = new Map([
+      [samplePlayer1, PenguinColor.Black],
+      [samplePlayer2, PenguinColor.Brown],
+    ]);
+    const game: Game | InvalidNumberOfPlayersError = createGameState(samplePlayers, samplePlayerToColorMapping, board);
+    return game;
+}
+
 export {
     MAX_NUMBER_OF_PLAYERS,
     sortPlayersByAge,
-    createState,
+    createGameState,
     buildUnplacedPenguinMap,
+    createTestGameState,
 }
 
 
