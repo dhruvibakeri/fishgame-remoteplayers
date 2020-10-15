@@ -1,14 +1,9 @@
 import { mount } from "@vue/test-utils";
-import { Game as GameState, Player } from "../../../../Controller/types/state";
+import { Game as GameState, Player } from "../../../../state";
 import Game from "../../src/components/Game.vue";
 import { createGameState } from "../../../../Controller/src/gameStateCreation";
 import { createHoledOneFishBoard } from "../../../../Controller/src/boardCreation";
-import {
-  PenguinColor,
-  BoardPosition,
-  Board,
-  Penguin,
-} from "../../../../Controller/types/board";
+import { PenguinColor, BoardPosition, Board, Penguin } from "../../../../board";
 
 describe("Game.vue", () => {
   const player1: Player = { name: "foo", age: 20 };

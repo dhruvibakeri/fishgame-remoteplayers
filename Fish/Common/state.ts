@@ -16,6 +16,19 @@ export interface Player {
 /**
  * A Game is a structure representing the current game state of a fish game.
  *
+ * NOTE: This Game state is subject to change in regards to adding further
+ * functionality as the assignments demand them. We have opted per milestone
+ * to offer ONLY the requested functionalities in order to save our effort
+ * and avoid having to do excessive refactors, meaning that this definition
+ * is by no means exhaustive to all representations needed for the final
+ * product of a Fish game.
+ *
+ * If something has not be required yet within the assignment prompt or was
+ * not required for the implementation of the requirements for the latest milestone,
+ * it will not have been added yet. This does not mean we do not intend to add
+ * that functionality. See `game-state.md` within the `Planning` folder for
+ * our initial design of an entire complete Game state.
+ *
  * @param players the array of Players participating in this game, in the
  * ordering which they will take turns
  * @param board the current Board of the game

@@ -1,5 +1,5 @@
 import { mount } from "@vue/test-utils";
-import { PenguinColor } from "../../../../Controller/types/board";
+import { PenguinColor } from "../../../../board";
 import Player from "../../src/components/Player.vue";
 
 describe("Player.vue", () => {

@@ -1,4 +1,4 @@
-import { Board, BoardPosition, Tile } from "../types/board";
+import { Board, BoardPosition, Tile } from "../../board";
 import {
   addHolesToBoard,
   createBlankBoard,
@@ -34,10 +34,28 @@ describe("boardCreation", () => {
   const boardWithHole: Board = { tiles: tilesWithHole };
   const validPosition: BoardPosition = { row: 1, col: 0 };
   const validHolePositions: Array<BoardPosition> = [validPosition];
-  const tileArray: number[][] = [[1,5,1],[5,1,5]];
-  const numberedBoard: Board = { tiles: [[tile, tile5Fish, tile],[tile5Fish, tile, tile5Fish]]};
-  const tileArrayWithHoles: number[][] = [[3,0,5],[3,5,1],[1,0,1]];
-  const numberedBoardWithHoles: Board = { tiles: [[tile3Fish, hole0Fish, tile5Fish],[tile3Fish, tile5Fish, tile], [tile, hole0Fish, tile]]};
+  const tileArray: number[][] = [
+    [1, 5, 1],
+    [5, 1, 5],
+  ];
+  const numberedBoard: Board = {
+    tiles: [
+      [tile, tile5Fish, tile],
+      [tile5Fish, tile, tile5Fish],
+    ],
+  };
+  const tileArrayWithHoles: number[][] = [
+    [3, 0, 5],
+    [3, 5, 1],
+    [1, 0, 1],
+  ];
+  const numberedBoardWithHoles: Board = {
+    tiles: [
+      [tile3Fish, hole0Fish, tile5Fish],
+      [tile3Fish, tile5Fish, tile],
+      [tile, hole0Fish, tile],
+    ],
+  };
 
   describe("createTile", () => {
     it("creates a tile without a hole", () => {
@@ -73,9 +91,7 @@ describe("boardCreation", () => {
     });
 
     it("changes a tile on the board to not a hole", () => {
-      expect(setTileOnBoard(boardWithHole, validPosition, 1)).toEqual(
-        board
-      );
+      expect(setTileOnBoard(boardWithHole, validPosition, 1)).toEqual(board);
     });
 
     it("changes the number of fish on a tile", () => {
@@ -85,9 +101,7 @@ describe("boardCreation", () => {
         [newTile, tile],
       ];
       const newBoard: Board = { tiles };
-      expect(setTileOnBoard(board, validPosition, 3)).toEqual(
-        newBoard
-      );
+      expect(setTileOnBoard(board, validPosition, 3)).toEqual(newBoard);
     });
 
     it("changes both a tile's hole state and number of fish", () => {
@@ -180,7 +194,9 @@ describe("boardCreation", () => {
     });
 
     it("rreturns a board with specified fish on each tile, including holes", () => {
-      expect(createNumberedBoard(tileArrayWithHoles)).toEqual(numberedBoardWithHoles);
+      expect(createNumberedBoard(tileArrayWithHoles)).toEqual(
+        numberedBoardWithHoles
+      );
     });
   });
 });

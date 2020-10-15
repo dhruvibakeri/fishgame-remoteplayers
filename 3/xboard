@@ -1,0 +1,1 @@
+node ../Fish/Common/Controller/build/src/xboard.js <&0

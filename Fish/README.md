@@ -4,11 +4,85 @@
 
 These additions are for the assignment, [3 - The Game State](https://felleisen.org/matthias/4500-f20/3.html). The purpose of this assignment is to design and implement data representations for a Fish game's game state, be able to bridge between data representations via a test harness, and lastly design a representation of a full Fish game.
 
+<details>
+  <summary>Click to see the new elements:</summary>
+  
+- `Fish` : Directory containing the entire Fish project
+  - `Common`
+    - `Controller`
+      - `src`
+        - `boardCreation.ts` : TypeScript file with functions for creating a board
+        - `gameStateCreation.ts` : TypeScript file with functions for creating a Game state
+        - `movementChecking.ts` : TypeScript file with functions related to finding reachable positions on the game board
+        - `penguinPlacement.ts` : TypeScript file with functions related to moving and placing penguins within a Game
+        - `validation.ts` : TypeScript file with functions which validate various aspects and inputs of the requested functionalities
+        - `xboard.ts` : TypeScript file with implementation for the assignment test harness
+      - `tests` : Directory containing test files for implementations
+        - `boardCreation.spec.ts` : `boardCreation.ts` test file
+        - `gameStateCreation.spec.ts` : `gameStateCreation.ts` test file
+        - `movementChecking.spec.ts` : `movementChecking.ts` test file
+        - `penguinPlacement.spec.ts` : `penguinPlacement.ts` test file
+        - `validation.spec.ts` : `validation.ts` test file
+    - `Views`
+      - `vue`
+        - `src`
+          - `components` : Directory containing Vue components used in displaying a Game
+            - `Game.vue` : Vue component for displaying an entire Game state
+            - `Player.vue` : Vue component for displaying a Player's information and Game state information
+            - `Roster.vue` : Vue component for displaying the entire roster of Players within a Game state
+          - `App.vue` : Primary Vue component which displays the entire game state
+        - `tests` : Directory containing all front end tests
+          - `unit` : Directory containing all front end unit tests
+            - `game.spec.ts` : Test file containing tests for Game component
+            - `player.spec.ts` : Test file containing tests for Player component
+            - `roster.spec.ts` : Test file containing tests for Roster component
+    - `board.ts` : TypeScript file containing definitions for board data representations
+    - `state.ts` : TypeScript file containing definitions for game state data representations
+    - `controller-test` : Bash script for running the test suite within `Controller`
+    - `view-test` : Bash script for running the test suite within `Views/Vue`
+    - `view-run` : Bash script for spinning up the view in order to view a sample Game state rendering as requested in the assignment
+  - `Planning` : Directory containing all planning documents for the Fish project
+    - `games.md` : Design document for planning the data representation for full games
+  - `Makefile` : File for downloading dependencies and setting permissions across the entire Fish project
+  - `xtest` : Bash script for running the Fish project's entire test suite across the controller and view
+
+</details>
+<br/>
+
 ### How To Test
 
 #### Our test suite
 
+To run all tests, run the following from the `Fish` directory:
+
+```
+scl enable rh-nodejs10 bash
+make
+./xtest
+```
+
+To view a sample rendering of the Game state, run the following in the `Common` directory:
+
+```
+scl enable rh-nodejs10 bash
+make
+npm run serve
+```
+
+and open browser at `localhost:8080`.
+
 #### The test harness
+
+As requested within the assignment, we have created a test harness available in `libertyhill/3`. It consumes test data like those within `3/Test` (any file marked as input such like `<n>-in.json`) via STDIN and outputs via STDOUT.
+
+To run the harness from the `3` directory, run the following:
+
+```
+make
+./xboard < Tests/<n>-in.json
+```
+
+---
 
 ## 2 &mdash; The Game Pieces
 
@@ -97,6 +171,8 @@ npm run test:unit
 
 NOTE: If you're having issues installing npm packages on khoury machines, try clearing the cache using `npm cache clean` and installing again.
 We attempted to make a makefile in the Common directory that installed packages for both Controller and Views, but ran into issues with exceeding stack size on khoury machines. You may have success with these files, but if not please follow the instructions above to install dependencies and run visualization/tests separately so as to not overwhelm the capabilities of the vm. The `Makefile`, `view-run` `view-test` and `controller-test` files work on non-vm.
+
+---
 
 ## 1 &mdash; Dot Game
 
