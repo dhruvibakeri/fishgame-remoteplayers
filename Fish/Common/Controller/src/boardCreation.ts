@@ -1,4 +1,4 @@
-import { Board, BoardPosition, Tile } from "../types/board";
+import { Board, BoardPosition, Tile } from "../../board";
 import {
   isValidBoardSize,
   positionIsOnBoard,

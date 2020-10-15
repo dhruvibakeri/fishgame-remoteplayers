@@ -1,6 +1,6 @@
-import { Board, BoardPosition, HorizontalDirection, VerticalDirection, PenguinColor } from "../types/board";
+import { Board, BoardPosition, HorizontalDirection, VerticalDirection, PenguinColor } from "../../board";
 import { createBlankBoard, setTileToHole } from "../src/boardCreation";
-import { Game, Player } from "../types/state";
+import { Game, Player } from "../../state";
 import {
   getNextPosDownLeft,
   getNextPosDownNeutral,
@@ -11,10 +11,12 @@ import {
   getReachablePositions,
   getNextPosition,
   getReachablePositionsInDirection,
+  playerCanMove,
 } from "../src/movementChecking";
 import { createGameState } from "../src/gameStateCreation";
 import { InvalidNumberOfPlayersError } from "../types/errors";
 import { isError } from "../src/validation";
+import { placePenguin } from "../src/penguinPlacement";
 
 describe("movement", () => {
   const board: Board = createBlankBoard(4, 3, 1) as Board;
@@ -192,6 +194,38 @@ describe("movement", () => {
         expectedReachablePositions
       );
       
+    });
+  });
+
+  describe("playerCanMove", () => {
+    it("returns false if no players have placed penguins", () => {
+      expect(playerCanMove(player1, game)).toEqual(
+        false
+      );
+    });
+
+    it("returns false if player has not placed any penguins", () => {
+      const gameWithPenguinPlaced = placePenguin(player1, game, center) as Game;
+      expect(playerCanMove(player2, gameWithPenguinPlaced)).toEqual(
+        false
+      );
+    });
+
+    // it("returns false if penguin is surrounded by holes", () => {
+    //   expect(playerCanMove(player1, game)).toEqual(
+    //     false
+    //   );
+    // });
+
+    // it("returns false if penguin is surrounded by holes and penguins", () => {
+    //   expect(playerCanMove(player1, game)).toEqual(
+    //     false
+    //   );
+    // });
+
+    it("returns true if player has penguin placed and penguin has at least one possible move", () => {
+      const gameWithPenguinPlaced = placePenguin(player1, game, center) as Game;
+      expect(playerCanMove(player1, gameWithPenguinPlaced)).toEqual(true);
     });
   });
 });

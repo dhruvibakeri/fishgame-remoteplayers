@@ -5,9 +5,8 @@ import {
   IllegalPenguinPositionError,
   UnreachablePositionError,
 } from "../types/errors";
-import { Player } from "../types/state";
-import { Game } from "../types/state";
-import { Board, BoardPosition, Penguin, PenguinColor } from "../types/board";
+import { Player, Game } from "../../state";
+import { Board, BoardPosition, Penguin, PenguinColor } from "../../board";
 import { getReachablePositions } from "./movementChecking";
 
 /**

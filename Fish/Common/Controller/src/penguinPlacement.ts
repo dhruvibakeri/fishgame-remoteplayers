@@ -1,5 +1,5 @@
-import { Player, Game } from "../types/state";
-import { BoardPosition, Penguin } from "../types/board";
+import { Player, Game } from "../../state";
+import { BoardPosition, Penguin } from "../../board";
 import {
   InvalidPositionError,
   InvalidGameStateError,

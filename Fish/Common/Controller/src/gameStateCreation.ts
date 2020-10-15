@@ -1,5 +1,5 @@
-import { Player, Game } from "../types/state";
-import { Board, PenguinColor } from "../types/board";
+import { Player, Game } from "../../state";
+import { Board, PenguinColor } from "../../board";
 import { 
     InvalidNumberOfPlayersError,
 } from "../types/errors";

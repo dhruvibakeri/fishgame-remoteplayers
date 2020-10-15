@@ -1,5 +1,5 @@
-import { Board, BoardPosition } from "./board";
-import { Game, Player } from "./state";
+import { Board, BoardPosition } from "../../board";
+import { Game, Player } from "../../state";
 
 /**
  * Error used to represent the use of out-of-bounds positions for a given board.

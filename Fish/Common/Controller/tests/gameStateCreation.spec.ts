@@ -1,4 +1,4 @@
-import { Board, PenguinColor } from "../types/board";
+import { Board, PenguinColor } from "../../board";
 import { Player, Game } from "../types/state";
 import {
   InvalidNumberOfPlayersError,
