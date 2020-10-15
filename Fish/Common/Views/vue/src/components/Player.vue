@@ -1,9 +1,15 @@
-<!-- Renders a single Hexagon tile with given size unless isActive is false, in which case the tile is hidden. -->
+<!-- 
+Renders a single Player. 
+A rendered Player consist of the Player's name, an indicator of the color of 
+their Penguins, and a count of how many Penguins they have left to place.
+Whether this player is the current player is also denoted by a black border 
+around the Player's rendering.
+-->
 <template lang="pug">
   .player(:class='{current: isCurPlayer}')
     div.player-name {{player.name}}
     div.color-indicator(:style='colorStyle')
-    div.unplaced-penguins {{unplacedPenguins}} remaining
+    div.unplaced-penguins {{unplacedPenguins}} penguins left to place
 </template>
 
 <script lang="ts">
@@ -19,6 +25,10 @@ export default Vue.extend({
     isCurPlayer: { type: Boolean, required: true },
   },
   computed: {
+    /** 
+     * Used to dynamically change the color of the player's color indicator 
+     * based upon the player's supplied color.
+     */ 
     colorStyle() {
       return {
         ['background-color']: `${this.color}`,
@@ -35,6 +45,11 @@ export default Vue.extend({
     flex-direction: row;
     gap: 5px;
     min-width: 160px;
+    align-items: center;
+  }
+  .player-name {
+    font-size: 20px;
+    font-weight: 900;
   }
   .color-indicator {
     height: 15px;

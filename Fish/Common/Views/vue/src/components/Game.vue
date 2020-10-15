@@ -1,4 +1,8 @@
-<!-- Renders a single Game. -->
+<!-- 
+Renders a single Game. 
+A rendered Game consists of the Game's board, Penguins rendered on the board
+at each of the Game's specified Penguin positions, and a Roster of all the players.
+-->
 <template lang="pug">
     .game
         Board(:board='game.board')
