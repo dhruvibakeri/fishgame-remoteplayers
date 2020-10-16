@@ -1,10 +1,6 @@
 import { Board, PenguinColor } from "../../board";
-<<<<<<< HEAD
-import { Player, Game } from "../types/state";
-=======
 import { Player, Game } from "../../state";
 import { InvalidNumberOfPlayersError } from "../types/errors";
->>>>>>> c551b0b301ebe4e9d35ed45076c4157493123e8e
 import {
   sortPlayersByAge,
   createGameState,

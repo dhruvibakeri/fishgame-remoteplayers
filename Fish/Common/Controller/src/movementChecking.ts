@@ -181,6 +181,7 @@ const getReachablePositionsInDirection = (
   // Keep moving in the given direction, accumulating positions so long as they
   // are playable.
   while (positionIsPlayable(game, nextPosition)) {
+    // console.log(`position is playable: {row: ${nextPosition.row}, col: ${nextPosition.col}}`);
     reachableTiles.push({ col: nextPosition.col, row: nextPosition.row });
     nextPosition = getNextPosition(
       nextPosition,
@@ -235,12 +236,16 @@ const getReachablePositions = (
  */
 const playerCanMove = (player: Player, game: Game): boolean => {
   const playerColor: PenguinColor = game.playerToColorMapping.get(player) as PenguinColor;
+  let canMove = false;
   game.penguinPositions.forEach((penguin: Penguin, position: BoardPosition) => {
+    // console.log(getReachablePositions(game, position));
+    // console.log(game.penguinPositions);
     if (penguin.color === playerColor && getReachablePositions(game, position).length > 0) {
-      return true;
+      canMove = true;
     }
   });
-  return false;
+
+  return canMove;
 }
 
 /**
@@ -251,12 +256,13 @@ const playerCanMove = (player: Player, game: Game): boolean => {
  * no players can move their penguins
  */
 const anyPlayersCanMove = (game: Game): boolean => {
+  let canMove = false;
   game.players.forEach((player: Player) => {
     if (playerCanMove(player, game)) {
-      return true;
+      canMove = true;
     }
   });
-  return false;
+  return canMove;
 }
 
 export {
