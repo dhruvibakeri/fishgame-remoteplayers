@@ -55,11 +55,7 @@ Select ONE of the following choices by deleting the other two options.
 
 A) My partner and I contributed equally to this assignment.
 
-B) My partner and I contributed not _exactly_ equally, but _roughly_
-equally to this assignment.
-
-C) My partner and I did not contribute roughly equally to this
-assignment; one of us contributed significantly more.
+My partner and I made sure to work together and contribute equally to this and all previous assignments. We meet over zoom almost every day for a couple hours to discuss the assignment requirements and pair program. We both have about the same skill level with JavaScript/TypeScript so our partnership has gone well so far.
 
 If you chose C, please give some further explanation below describing
 the state of your partnership and whether and how you have been or are
