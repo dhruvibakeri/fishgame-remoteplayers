@@ -58,19 +58,16 @@ class InvalidBoardConstraintsError extends Error {
 }
 
 /**
- * Error used to represent an out-of-bounds number of players used to create a 
+ * Error used to represent an out-of-bounds number of players used to create a
  * game state, that is a number less than 2 or greater than 4.
  */
 class InvalidNumberOfPlayersError extends Error {
   numOfPlayers: number;
   message: string;
 
-  constructor(
-    numOfPlayers: number, 
-    message?: string
-  ) {
+  constructor(numOfPlayers: number, message?: string) {
     super();
-    this.numOfPlayers = numOfPlayers
+    this.numOfPlayers = numOfPlayers;
     if (message) {
       this.message = message;
     } else {
@@ -119,7 +116,7 @@ class IllegalPenguinPositionError extends Error {
  */
 class UnreachablePositionError extends IllegalPenguinPositionError {
   constructor(
-    game: Game, 
+    game: Game,
     player: Player,
     startPosition: BoardPosition,
     endPosition: BoardPosition,
@@ -136,10 +133,7 @@ class InvalidGameStateError extends Error {
   game: Game;
   message: string;
 
-  constructor(
-    game: Game,
-    message?: string
-  ) {
+  constructor(game: Game, message?: string) {
     super();
     this.game = game;
     if (message) {
@@ -151,11 +145,11 @@ class InvalidGameStateError extends Error {
   }
 }
 
-export { 
-  InvalidPositionError, 
-  InvalidBoardConstraintsError, 
+export {
+  InvalidPositionError,
+  InvalidBoardConstraintsError,
   InvalidNumberOfPlayersError,
   IllegalPenguinPositionError,
-  UnreachablePositionError, 
+  UnreachablePositionError,
   InvalidGameStateError,
 };

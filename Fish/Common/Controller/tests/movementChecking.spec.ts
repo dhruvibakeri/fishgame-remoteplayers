@@ -215,16 +215,12 @@ describe("movement", () => {
 
   describe("playerCanMove", () => {
     it("returns false if no players have placed penguins", () => {
-      expect(playerCanMove(player1, game)).toEqual(
-        false
-      );
+      expect(playerCanMove(player1, game)).toEqual(false);
     });
 
     it("returns false if player has not placed any penguins", () => {
       const gameWithPenguinPlaced = placePenguin(player1, game, center) as Game;
-      expect(playerCanMove(player2, gameWithPenguinPlaced)).toEqual(
-        false
-      );
+      expect(playerCanMove(player2, gameWithPenguinPlaced)).toEqual(false);
     });
 
     it("returns false if penguin is surrounded by holes", () => {

@@ -3,7 +3,6 @@ import { Player, Game } from "../../state";
 import {
   IllegalPenguinPositionError,
   InvalidGameStateError,
-  InvalidPositionError,
 } from "../types/errors";
 import {
   movePenguinInPenguinPositions,

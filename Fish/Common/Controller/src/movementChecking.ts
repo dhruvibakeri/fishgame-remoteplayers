@@ -5,10 +5,7 @@ import {
   PenguinColor,
   Penguin,
 } from "../../board";
-import { 
-  Game,
-  Player,
- } from "../../state";
+import { Game, Player } from "../../state";
 import { positionIsPlayable } from "./validation";
 
 /**
@@ -181,7 +178,6 @@ const getReachablePositionsInDirection = (
   // Keep moving in the given direction, accumulating positions so long as they
   // are playable.
   while (positionIsPlayable(game, nextPosition)) {
-    // console.log(`position is playable: {row: ${nextPosition.row}, col: ${nextPosition.col}}`);
     reachableTiles.push({ col: nextPosition.col, row: nextPosition.row });
     nextPosition = getNextPosition(
       nextPosition,
@@ -229,7 +225,7 @@ const getReachablePositions = (
 /**
  * Takes in a player and a game state and determines if the player can move any of their penguins
  * in the given game
- * 
+ *
  * @param player Player to check for remaining moves
  * @param game Game state to check for remaining moves
  * @returns True if given player can make at least one move with at least one of their penguins
@@ -238,8 +234,6 @@ const playerCanMove = (player: Player, game: Game): boolean => {
   const playerColor: PenguinColor = game.playerToColorMapping.get(player) as PenguinColor;
   let canMove = false;
   game.penguinPositions.forEach((penguin: Penguin, position: BoardPosition) => {
-    // console.log(getReachablePositions(game, position));
-    // console.log(game.penguinPositions);
     if (penguin.color === playerColor && getReachablePositions(game, position).length > 0) {
       canMove = true;
     }
@@ -250,7 +244,7 @@ const playerCanMove = (player: Player, game: Game): boolean => {
 
 /**
  * Determines if any of the players has at least one move left to make in given game state
- * 
+ *
  * @param game Game state to use
  * @returns True if at least one player has at least one remaining move, returns false if
  * no players can move their penguins
