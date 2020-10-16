@@ -5,7 +5,7 @@ import {
   VerticalDirection,
   PenguinColor,
 } from "../../board";
-import { createBlankBoard, setTileToHole } from "../src/boardCreation";
+import { createBlankBoard, createNumberedBoard, setTileToHole } from "../src/boardCreation";
 import { Game, Player } from "../../state";
 import {
   getNextPosDownLeft,
@@ -223,17 +223,30 @@ describe("movement", () => {
       expect(playerCanMove(player2, gameWithPenguinPlaced)).toEqual(false);
     });
 
-    // it("returns false if penguin is surrounded by holes", () => {
-    //   expect(playerCanMove(player1, game)).toEqual(
-    //     false
-    //   );
-    // });
+    it("returns false if penguin is surrounded by holes", () => {
+      const holeBoard: Board = createNumberedBoard([[0,0,0],[0,0,5],[0,0,0]]) as Board;
+      const holeGame: Game = {
+        ...game,
+        board: holeBoard,
+      }
+      const holeGameWithPenguinPlaced = placePenguin(player1, holeGame, {col: 2, row: 1}) as Game;
+      expect(playerCanMove(player1, holeGameWithPenguinPlaced)).toEqual(
+        false
+      );
+    });
 
-    // it("returns false if penguin is surrounded by holes and penguins", () => {
-    //   expect(playerCanMove(player1, game)).toEqual(
-    //     false
-    //   );
-    // });
+    it("returns false if penguin is surrounded by holes and penguins", () => {
+      const holeBoard: Board = createNumberedBoard([[0,0,1],[0,0,5],[0,0,0]]) as Board;
+      const holeGame: Game = {
+        ...game,
+        board: holeBoard,
+      }
+      const holeGameWithPenguinPlaced = placePenguin(player1, holeGame, {col: 2, row: 1}) as Game;
+      const holeGameWithPenguinsPlaced = placePenguin(player2, holeGameWithPenguinPlaced, {col: 2, row: 0}) as Game;
+      expect(playerCanMove(player1, holeGameWithPenguinsPlaced)).toEqual(
+        false
+      );
+    });
 
     it("returns true if player has penguin placed and penguin has at least one possible move", () => {
       const gameWithPenguinPlaced = placePenguin(player1, game, center) as Game;

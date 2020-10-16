@@ -128,7 +128,7 @@ describe("validation", () => {
     });
 
     it("rejects a position that has a penguin already on it", () => {
-      expect(positionIsPlayable(game, validStartPosition)).toEqual(false);
+      expect(positionIsPlayable(game, { col: 0, row: 0 })).toEqual(false);
     });
 
     it("accepts a position that is on the board and is not a hole", () => {
