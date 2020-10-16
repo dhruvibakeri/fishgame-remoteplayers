@@ -218,6 +218,7 @@ const validatePenguinMove = (
 
 export {
   positionIsOnBoard,
+  hasPenguinOnPosition,
   positionIsPlayable,
   isValidBoardSize,
   isValidMinimumOneFishTiles,

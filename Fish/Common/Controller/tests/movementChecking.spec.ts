@@ -18,6 +18,7 @@ import {
   getNextPosition,
   getReachablePositionsInDirection,
   playerCanMove,
+  anyPlayersCanMove,
 } from "../src/movementChecking";
 import { createGameState } from "../src/gameStateCreation";
 import { InvalidNumberOfPlayersError } from "../types/errors";
@@ -251,6 +252,40 @@ describe("movement", () => {
     it("returns true if player has penguin placed and penguin has at least one possible move", () => {
       const gameWithPenguinPlaced = placePenguin(player1, game, center) as Game;
       expect(playerCanMove(player1, gameWithPenguinPlaced)).toEqual(true);
+    });
+  });
+
+  describe("anyPlayersCanMove", () => {
+    it("returns false if no players have placed penguins", () => {
+      expect(anyPlayersCanMove(game)).toEqual(false);
+    });
+
+    it("returns false if penguin surrounded by holes", () => {
+      const holeBoard: Board = createNumberedBoard([[0,0,0],[0,0,5],[0,0,0]]) as Board;
+      const holeGame: Game = {
+        ...game,
+        board: holeBoard,
+      }
+      const holeGameWithPenguinPlaced = placePenguin(player1, holeGame, {col: 2, row: 1}) as Game;
+      expect(anyPlayersCanMove(holeGameWithPenguinPlaced)).toEqual(false);
+    });
+
+    it("returns false if penguin is surrounded by holes and penguins", () => {
+      const holeBoard: Board = createNumberedBoard([[0,0,1],[0,0,5],[0,0,0]]) as Board;
+      const holeGame: Game = {
+        ...game,
+        board: holeBoard,
+      }
+      const holeGameWithPenguinPlaced = placePenguin(player1, holeGame, {col: 2, row: 1}) as Game;
+      const holeGameWithPenguinsPlaced = placePenguin(player2, holeGameWithPenguinPlaced, {col: 2, row: 0}) as Game;
+      expect(anyPlayersCanMove(holeGameWithPenguinsPlaced)).toEqual(
+        false
+      );
+    });
+
+    it("returns true if at least one player has penguin placed and penguin has at least one possible move", () => {
+      const gameWithPenguinPlaced = placePenguin(player1, game, center) as Game;
+      expect(anyPlayersCanMove(gameWithPenguinPlaced)).toEqual(true);
     });
   });
 });

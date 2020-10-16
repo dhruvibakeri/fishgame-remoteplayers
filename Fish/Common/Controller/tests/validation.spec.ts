@@ -7,6 +7,7 @@ import {
   validatePenguinMove,
   playerHasUnplacedPenguin,
   isError,
+  hasPenguinOnPosition,
 } from "../src/validation";
 import {
   createBlankBoard,
@@ -114,6 +115,16 @@ describe("validation", () => {
 
     it("accepts a position at the x and y bounds", () => {
       expect(testPositionIsOnBoard(3, 3, 2, 2)).toEqual(true);
+    });
+  });
+
+  describe("positionIsPlayable", () => {
+    it("returns true if penguin is on given position", () => {
+      expect(hasPenguinOnPosition(game, { col: 0, row: 0 })).toEqual(true);
+    });
+
+    it("returns false if penguin is not on given position", () => {
+      expect(hasPenguinOnPosition(game, { col: 1, row: 0})).toEqual(false);
     });
   });
 
