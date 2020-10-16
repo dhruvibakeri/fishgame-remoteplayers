@@ -15,7 +15,7 @@ import { getReachablePositions } from "./movementChecking";
  *
  * @param board the board to be checking against
  * @param position the position to be checked
- * @return whether the given position is on the board
+ * @returns whether the given position is on the board
  */
 const positionIsOnBoard = (board: Board, position: BoardPosition): boolean => {
   const boardRows = board.tiles.length;
