@@ -129,7 +129,7 @@ const addHolesToBoard = (
 
 /**
  * Create a board of the given size, with all tiles active and containing the
- * given number of fish.
+ * given number of fish. Board size cannot exceed 25 tiles
  *
  * @param columns the number of columns for the created board
  * @param rows the number of rows for the created board
@@ -143,6 +143,10 @@ const createBlankBoard = (
   fishPerTile: number
 ): Board | InvalidBoardConstraintsError => {
   if (!isValidBoardSize(columns, rows)) {
+    return new InvalidBoardConstraintsError(columns, rows);
+  }
+
+  if (rows * columns > 25) {
     return new InvalidBoardConstraintsError(columns, rows);
   }
 

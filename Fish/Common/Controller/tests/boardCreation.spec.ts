@@ -24,7 +24,15 @@ describe("boardCreation", () => {
     [tile, tile],
     [tile, tile],
   ];
+  const tiles25: Array<Array<Tile>> = [
+    [tile, tile, tile, tile, tile],
+    [tile, tile, tile, tile, tile],
+    [tile, tile, tile, tile, tile],
+    [tile, tile, tile, tile, tile],
+    [tile, tile, tile, tile, tile],
+  ];
   const board: Board = { tiles };
+  const board25: Board = { tiles: tiles25 };
   const hole: Tile = { numOfFish: 0 };
   const hole0Fish: Tile = { numOfFish: 0 };
   const tilesWithHole: Array<Array<Tile>> = [
@@ -150,8 +158,15 @@ describe("boardCreation", () => {
       );
     });
 
+    it("rejects board with more than 25 tiles", () => {
+      expect(createBlankBoard(6, 5, 1)).toEqual(
+        new InvalidBoardConstraintsError(6, 5)
+      );
+    });
+
     it("creates a blank board with valid dimensions", () => {
       expect(createBlankBoard(2, 2, 1)).toEqual(board);
+      expect(createBlankBoard(5, 5, 1)).toEqual(board25);
     });
   });
 
