@@ -38,8 +38,6 @@ These additions are for the assignment, [3 - The Game State](https://felleisen.o
             - `roster.spec.ts` : Test file containing tests for Roster component
     - `board.ts` : TypeScript file containing definitions for board data representations
     - `state.ts` : TypeScript file containing definitions for game state data representations
-    - `controller-test` : Bash script for running the test suite within `Controller`
-    - `view-test` : Bash script for running the test suite within `Views/Vue`
     - `view-run` : Bash script for spinning up the view in order to view a sample Game state rendering as requested in the assignment
   - `Planning` : Directory containing all planning documents for the Fish project
     - `games.md` : Design document for planning the data representation for full games
@@ -61,12 +59,13 @@ make
 ./xtest
 ```
 
-To view a sample rendering of the Game state, run the following in the `Common` directory:
+To view a sample rendering of the Game state, run the following in the `Fish` directory:
 
 ```
 scl enable rh-nodejs10 bash
 make
-npm run serve
+cd Common/
+./view-run
 ```
 
 and open browser at `localhost:8080`.
