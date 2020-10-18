@@ -6,8 +6,8 @@ at each of the Game's specified Penguin positions, and a Roster of all the playe
 <template lang="pug">
     .game
         Board(:board='game.board')
-        div(v-for='[position, penguin] of Array.from(game.penguinPositions)' :key='`${position.col}-${position.row}`')
-            Penguin(:color='penguin.color' :position='position' :tileSize='80')
+        div(v-for='[positionKey, penguin] of Array.from(game.penguinPositions)' :key='positionKey')
+            Penguin(:color='penguin.color' :position='game.penguinPositions.get(positionKey)' :tileSize='80')
         Roster(:game='game')
 </template>
 

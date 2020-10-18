@@ -1,4 +1,4 @@
-import { Player, Game } from "../../state";
+import { Player, Game, getPositionKey } from "../../state";
 import { BoardPosition, Penguin } from "../../board";
 import {
   InvalidPositionError,
@@ -23,23 +23,21 @@ import {
  * @return the new updated position mapping
  */
 const movePenguinInPenguinPositions = (
-  penguinPositions: Map<BoardPosition, Penguin>,
+  penguinPositions: Map<string, Penguin>,
   penguin: Penguin,
   endPosition: BoardPosition,
   startPosition?: BoardPosition
-): Map<BoardPosition, Penguin> => {
+): Map<string, Penguin> => {
   // Copy the given position mapping.
-  const newPenguinPositions: Map<BoardPosition, Penguin> = new Map(
-    penguinPositions
-  );
+  const newPenguinPositions: Map<string, Penguin> = new Map(penguinPositions);
 
   // Remove the Penguin at the start position.
   if (startPosition) {
-    newPenguinPositions.delete(startPosition);
+    newPenguinPositions.delete(getPositionKey(startPosition));
   }
 
   // Add the Penguin to its end position.
-  newPenguinPositions.set(endPosition, penguin);
+  newPenguinPositions.set(getPositionKey(endPosition), penguin);
 
   return newPenguinPositions;
 };
@@ -76,20 +74,20 @@ const placePenguin = (
   }
 
   // Create penguin to be placed
-  const penguinToPlace = { color: game.playerToColorMapping.get(player) };
+  const penguinToPlace = { color: game.playerToColorMapping.get(player.name) };
 
   // Decrement count of unplaced penguins for player
-  const newUnplacedPenguins: Map<Player, number> = new Map(
+  const newUnplacedPenguins: Map<string, number> = new Map(
     game.remainingUnplacedPenguins
   );
   newUnplacedPenguins.set(
-    player,
-    game.remainingUnplacedPenguins.get(player) - 1
+    player.name,
+    game.remainingUnplacedPenguins.get(player.name) - 1
   );
 
   // Place penguin
   const updatedPenguinPositions: Map<
-    BoardPosition,
+    string,
     Penguin
   > = movePenguinInPenguinPositions(
     game.penguinPositions,

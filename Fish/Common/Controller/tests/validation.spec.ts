@@ -15,7 +15,7 @@ import {
   setTileToHole,
 } from "../src/boardCreation";
 import { Board, BoardPosition, Penguin, PenguinColor } from "../../board";
-import { Game, Player } from "../../state";
+import { Game, getPositionKey, Player } from "../../state";
 import { createGameState } from "../src/gameStateCreation";
 import {
   IllegalPenguinPositionError,
@@ -29,9 +29,9 @@ describe("validation", () => {
   const player2: Player = { name: "bar", age: 30 };
   const player3: Player = { name: "baz", age: 42 };
   const players: Array<Player> = [player1, player2];
-  const playerToColorMapping: Map<Player, PenguinColor> = new Map([
-    [player1, PenguinColor.Black],
-    [player2, PenguinColor.Brown],
+  const playerToColorMapping: Map<string, PenguinColor> = new Map([
+    [player1.name, PenguinColor.Black],
+    [player2.name, PenguinColor.Brown],
   ]);
   const holePosition: BoardPosition = { col: 1, row: 0 };
   const holePositions: Array<BoardPosition> = [holePosition];
@@ -39,17 +39,17 @@ describe("validation", () => {
   const validEndPosition: BoardPosition = { col: 0, row: 1 };
   const board: Board = createHoledOneFishBoard(2, 2, holePositions, 1) as Board;
   const player1Penguin: Penguin = { color: PenguinColor.Black };
-  const penguinPositions: Map<BoardPosition, Penguin> = new Map([
-    [validStartPosition, player1Penguin],
+  const penguinPositions: Map<string, Penguin> = new Map([
+    [getPositionKey(validStartPosition), player1Penguin],
   ]);
   const game: Game = {
     ...(createGameState(players, playerToColorMapping, board) as Game),
     penguinPositions,
   };
-  const twoPenguinPositions: Map<BoardPosition, Penguin> = new Map(
-    penguinPositions
-  );
-  twoPenguinPositions.set(validEndPosition, { color: PenguinColor.White });
+  const twoPenguinPositions: Map<string, Penguin> = new Map(penguinPositions);
+  twoPenguinPositions.set(getPositionKey(validEndPosition), {
+    color: PenguinColor.White,
+  });
   const gameWithTwoPenguins: Game = {
     ...game,
     penguinPositions: twoPenguinPositions,
@@ -124,7 +124,7 @@ describe("validation", () => {
     });
 
     it("returns false if penguin is not on given position", () => {
-      expect(hasPenguinOnPosition(game, { col: 1, row: 0})).toEqual(false);
+      expect(hasPenguinOnPosition(game, { col: 1, row: 0 })).toEqual(false);
     });
   });
 
@@ -238,9 +238,9 @@ describe("validation", () => {
   });
 
   describe("playerHasUnplacedPenguin", () => {
-    const noUnplacedPenguins: Map<Player, number> = new Map([
-      [player1, 0],
-      [player2, 0],
+    const noUnplacedPenguins: Map<string, number> = new Map([
+      [player1.name, 0],
+      [player2.name, 0],
     ]);
     const noUnplacedPenguinsGame: Game = {
       ...game,

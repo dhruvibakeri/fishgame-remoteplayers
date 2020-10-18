@@ -12,8 +12,8 @@ turns within the Game's roster of players.
         div.player-number {{index + 1}}.
         Player(
           :player='player' 
-          :unplacedPenguins='game.remainingUnplacedPenguins.get(player)' 
-          :color='game.playerToColorMapping.get(player)'
+          :unplacedPenguins='game.remainingUnplacedPenguins.get(player.name)' 
+          :color='game.playerToColorMapping.get(player.name)'
           :isCurPlayer='isCurPlayer(player)'
         )
 </template>
