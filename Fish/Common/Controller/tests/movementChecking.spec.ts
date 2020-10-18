@@ -5,7 +5,11 @@ import {
   VerticalDirection,
   PenguinColor,
 } from "../../board";
-import { createBlankBoard, createNumberedBoard, setTileToHole } from "../src/boardCreation";
+import {
+  createBlankBoard,
+  createNumberedBoard,
+  setTileToHole,
+} from "../src/boardCreation";
 import { Game, Player } from "../../state";
 import {
   getNextPosDownLeft,
@@ -40,10 +44,10 @@ describe("movement", () => {
   const player2: Player = { name: "bar", age: 30 };
   const player3: Player = { name: "baz", age: 45 };
   const players: Array<Player> = [player3, player2, player1];
-  const playerToColorMapping: Map<Player, PenguinColor> = new Map([
-    [player1, PenguinColor.Black],
-    [player2, PenguinColor.Brown],
-    [player3, PenguinColor.Red],
+  const playerToColorMapping: Map<string, PenguinColor> = new Map([
+    [player1.name, PenguinColor.Black],
+    [player2.name, PenguinColor.Brown],
+    [player3.name, PenguinColor.Red],
   ]);
   const gameOrError: Game | InvalidNumberOfPlayersError = createGameState(
     players,
@@ -225,28 +229,42 @@ describe("movement", () => {
     });
 
     it("returns false if penguin is surrounded by holes", () => {
-      const holeBoard: Board = createNumberedBoard([[0,0,0],[0,0,5],[0,0,0]]) as Board;
+      const holeBoard: Board = createNumberedBoard([
+        [0, 0, 0],
+        [0, 0, 5],
+        [0, 0, 0],
+      ]) as Board;
       const holeGame: Game = {
         ...game,
         board: holeBoard,
-      }
-      const holeGameWithPenguinPlaced = placePenguin(player1, holeGame, {col: 2, row: 1}) as Game;
-      expect(playerCanMove(player1, holeGameWithPenguinPlaced)).toEqual(
-        false
-      );
+      };
+      const holeGameWithPenguinPlaced = placePenguin(player1, holeGame, {
+        col: 2,
+        row: 1,
+      }) as Game;
+      expect(playerCanMove(player1, holeGameWithPenguinPlaced)).toEqual(false);
     });
 
     it("returns false if penguin is surrounded by holes and penguins", () => {
-      const holeBoard: Board = createNumberedBoard([[0,0,1],[0,0,5],[0,0,0]]) as Board;
+      const holeBoard: Board = createNumberedBoard([
+        [0, 0, 1],
+        [0, 0, 5],
+        [0, 0, 0],
+      ]) as Board;
       const holeGame: Game = {
         ...game,
         board: holeBoard,
-      }
-      const holeGameWithPenguinPlaced = placePenguin(player1, holeGame, {col: 2, row: 1}) as Game;
-      const holeGameWithPenguinsPlaced = placePenguin(player2, holeGameWithPenguinPlaced, {col: 2, row: 0}) as Game;
-      expect(playerCanMove(player1, holeGameWithPenguinsPlaced)).toEqual(
-        false
-      );
+      };
+      const holeGameWithPenguinPlaced = placePenguin(player1, holeGame, {
+        col: 2,
+        row: 1,
+      }) as Game;
+      const holeGameWithPenguinsPlaced = placePenguin(
+        player2,
+        holeGameWithPenguinPlaced,
+        { col: 2, row: 0 }
+      ) as Game;
+      expect(playerCanMove(player1, holeGameWithPenguinsPlaced)).toEqual(false);
     });
 
     it("returns true if player has penguin placed and penguin has at least one possible move", () => {
@@ -261,26 +279,42 @@ describe("movement", () => {
     });
 
     it("returns false if penguin surrounded by holes", () => {
-      const holeBoard: Board = createNumberedBoard([[0,0,0],[0,0,5],[0,0,0]]) as Board;
+      const holeBoard: Board = createNumberedBoard([
+        [0, 0, 0],
+        [0, 0, 5],
+        [0, 0, 0],
+      ]) as Board;
       const holeGame: Game = {
         ...game,
         board: holeBoard,
-      }
-      const holeGameWithPenguinPlaced = placePenguin(player1, holeGame, {col: 2, row: 1}) as Game;
+      };
+      const holeGameWithPenguinPlaced = placePenguin(player1, holeGame, {
+        col: 2,
+        row: 1,
+      }) as Game;
       expect(anyPlayersCanMove(holeGameWithPenguinPlaced)).toEqual(false);
     });
 
     it("returns false if penguin is surrounded by holes and penguins", () => {
-      const holeBoard: Board = createNumberedBoard([[0,0,1],[0,0,5],[0,0,0]]) as Board;
+      const holeBoard: Board = createNumberedBoard([
+        [0, 0, 1],
+        [0, 0, 5],
+        [0, 0, 0],
+      ]) as Board;
       const holeGame: Game = {
         ...game,
         board: holeBoard,
-      }
-      const holeGameWithPenguinPlaced = placePenguin(player1, holeGame, {col: 2, row: 1}) as Game;
-      const holeGameWithPenguinsPlaced = placePenguin(player2, holeGameWithPenguinPlaced, {col: 2, row: 0}) as Game;
-      expect(anyPlayersCanMove(holeGameWithPenguinsPlaced)).toEqual(
-        false
-      );
+      };
+      const holeGameWithPenguinPlaced = placePenguin(player1, holeGame, {
+        col: 2,
+        row: 1,
+      }) as Game;
+      const holeGameWithPenguinsPlaced = placePenguin(
+        player2,
+        holeGameWithPenguinPlaced,
+        { col: 2, row: 0 }
+      ) as Game;
+      expect(anyPlayersCanMove(holeGameWithPenguinsPlaced)).toEqual(false);
     });
 
     it("returns true if at least one player has penguin placed and penguin has at least one possible move", () => {

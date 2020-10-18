@@ -5,7 +5,7 @@ import {
   PenguinColor,
   Penguin,
 } from "../../board";
-import { Game, Player } from "../../state";
+import { Game, getPositionFromKey, Player } from "../../state";
 import { positionIsPlayable } from "./validation";
 
 /**
@@ -231,16 +231,16 @@ const getReachablePositions = (
  * @returns True if given player can make at least one move with at least one of their penguins
  */
 const playerCanMove = (player: Player, game: Game): boolean => {
-  const playerColor: PenguinColor = game.playerToColorMapping.get(player) as PenguinColor;
-  let canMove = false;
-  game.penguinPositions.forEach((penguin: Penguin, position: BoardPosition) => {
-    if (penguin.color === playerColor && getReachablePositions(game, position).length > 0) {
-      canMove = true;
-    }
-  });
-
-  return canMove;
-}
+  const playerColor: PenguinColor = game.playerToColorMapping.get(
+    player.name
+  ) as PenguinColor;
+  return Array.from(game.penguinPositions)
+    .filter(([, penguin]) => penguin.color === playerColor)
+    .some(([positionKey]) => {
+      const position: BoardPosition = getPositionFromKey(positionKey);
+      return getReachablePositions(game, position).length > 0;
+    });
+};
 
 /**
  * Determines if any of the players has at least one move left to make in given game state
@@ -257,7 +257,7 @@ const anyPlayersCanMove = (game: Game): boolean => {
     }
   });
   return canMove;
-}
+};
 
 export {
   getReachablePositions,

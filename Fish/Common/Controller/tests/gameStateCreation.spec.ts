@@ -46,47 +46,47 @@ describe("stateModification", () => {
   describe("buildUnplacedPenguinMap", () => {
     it("builds map of player to number, with each player assigned 4 penguins", () => {
       const players: Array<Player> = [player1, player2];
-      const unplacedPenguins = new Map([
-        [player1, 4],
-        [player2, 4],
+      const unplacedPenguins: Map<string, number> = new Map([
+        [player1.name, 4],
+        [player2.name, 4],
       ]);
       expect(buildUnplacedPenguinMap(players)).toEqual(unplacedPenguins);
     });
 
     it("builds map of player to number, with each player assigned 2 penguins", () => {
       const players: Array<Player> = [player1, player2, player3, player4];
-      const unplacedPenguins = new Map([
-        [player1, 2],
-        [player2, 2],
-        [player3, 2],
-        [player4, 2],
+      const unplacedPenguins: Map<string, number> = new Map([
+        [player1.name, 2],
+        [player2.name, 2],
+        [player3.name, 2],
+        [player4.name, 2],
       ]);
       expect(buildUnplacedPenguinMap(players)).toEqual(unplacedPenguins);
     });
   });
 
   describe("createGameState", () => {
-    const playerToColorMapping3Players: Map<Player, PenguinColor> = new Map([
-      [player1, PenguinColor.Black],
-      [player2, PenguinColor.Brown],
-      [player3, PenguinColor.Red],
+    const playerToColorMapping3Players: Map<string, PenguinColor> = new Map([
+      [player1.name, PenguinColor.Black],
+      [player2.name, PenguinColor.Brown],
+      [player3.name, PenguinColor.Red],
     ]);
     const unplacedPenguins3Players = new Map([
-      [player1, 3],
-      [player2, 3],
-      [player3, 3],
+      [player1.name, 3],
+      [player2.name, 3],
+      [player3.name, 3],
     ]);
-    const playerToColorMapping4Players: Map<Player, PenguinColor> = new Map([
-      [player1, PenguinColor.Black],
-      [player2, PenguinColor.Brown],
-      [player3, PenguinColor.Red],
-      [player4, PenguinColor.White],
+    const playerToColorMapping4Players: Map<string, PenguinColor> = new Map([
+      [player1.name, PenguinColor.Black],
+      [player2.name, PenguinColor.Brown],
+      [player3.name, PenguinColor.Red],
+      [player4.name, PenguinColor.White],
     ]);
     const unplacedPenguins4Players = new Map([
-      [player1, 2],
-      [player2, 2],
-      [player3, 2],
-      [player4, 2],
+      [player1.name, 2],
+      [player2.name, 2],
+      [player3.name, 2],
+      [player4.name, 2],
     ]);
 
     it("rejects an empty list of players", () => {
@@ -153,9 +153,9 @@ describe("stateModification", () => {
     const samplePlayer1: Player = { name: "foo", age: 21 };
     const samplePlayer2: Player = { name: "bar", age: 20 };
     const samplePlayers: Array<Player> = [samplePlayer1, samplePlayer2];
-    const samplePlayerToColorMapping: Map<Player, PenguinColor> = new Map([
-      [samplePlayer1, PenguinColor.Black],
-      [samplePlayer2, PenguinColor.Brown],
+    const samplePlayerToColorMapping: Map<string, PenguinColor> = new Map([
+      [samplePlayer1.name, PenguinColor.Black],
+      [samplePlayer2.name, PenguinColor.Brown],
     ]);
     const expectedGameState:
       | Game
