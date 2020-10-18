@@ -1,1 +1,2 @@
+#! /bin/bash
 node ../Fish/Common/Controller/build/Controller/src/xboard.js <&0

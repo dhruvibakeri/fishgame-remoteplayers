@@ -1,0 +1,2 @@
+#! /bin/bash
+node ../Fish/Common/Controller/build/Controller/src/xstate.js <&0
