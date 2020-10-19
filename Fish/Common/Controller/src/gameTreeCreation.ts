@@ -1,5 +1,10 @@
 import { Game, getPositionFromKey } from "../../state";
-import { GameTree, Movement, LazyGameTree, getMovementKey } from "../../game-tree";
+import {
+  GameTree,
+  Movement,
+  LazyGameTree,
+  getMovementKey,
+} from "../../game-tree";
 import { PenguinColor, Penguin, BoardPosition } from "../../board";
 import { getReachablePositions } from "./movementChecking";
 import { movePenguin } from "./penguinPlacement";
@@ -18,16 +23,15 @@ const createGameTree = (game: Game): GameTree => {
 const generatePotentialMoveMapping = (
   game: Game
 ): Map<string, LazyGameTree> => {
-  const currentPlayerPenguinPositions: Array<[
-    BoardPosition,
-    Penguin
-  ]> = getCurrentPlayerPenguinPositions(game);
+  const currentPlayerPenguinPositions: Array<BoardPosition> = getCurrentPlayerPenguinPositions(
+    game
+  );
 
   // Get the reachable positions for each of their penguin positions
   const penguinPosToReachablePositions: Array<[
     BoardPosition,
     Array<BoardPosition>
-  ]> = currentPlayerPenguinPositions.map(([position]) => [
+  ]> = currentPlayerPenguinPositions.map((position: BoardPosition) => [
     position,
     getReachablePositions(game, position),
   ]);
@@ -87,41 +91,37 @@ const createLazyGameTree = (game: Game, movement: Movement): LazyGameTree => {
   return () => createGameTree(newGameState);
 };
 
-const getCurrentPlayerPenguinPositions = (
-  game: Game
-): Array<[BoardPosition, Penguin]> => {
+const getCurrentPlayerPenguinPositions = (game: Game): Array<BoardPosition> => {
   const currentPlayerColor: PenguinColor = game.playerToColorMapping.get(
     game.curPlayer.name
   );
-  const penguinPositionArray: Array<[string, Penguin]> = Array.from(
-    game.penguinPositions
-  );
-  const currentPlayerPenguins: Array<[
+  const isCurrentPlayerPenguin = ([positionKey, penguin]: [
     string,
     Penguin
-  ]> = penguinPositionArray.filter(
-    ([, penguin]) => penguin.color === currentPlayerColor
-  );
-  const currentPlayerPenguinsAndPositions: Array<[
-    BoardPosition,
-    Penguin
-  ]> = currentPlayerPenguins.map(([positionKey, penguin]) => [
-    getPositionFromKey(positionKey),
-    penguin,
-  ]);
-  return currentPlayerPenguinsAndPositions;
-};
+  ]): boolean => penguin.color === currentPlayerColor;
 
+  const getPosition = ([positionKey, penguin]: [
+    string,
+    Penguin
+  ]): BoardPosition => getPositionFromKey(positionKey);
+
+  return Array.from(game.penguinPositions)
+    .filter(isCurrentPlayerPenguin)
+    .map(getPosition);
+};
 
 /**
  * Checks if given movement can be made with the given game state. If it can, returns the resulting
  * game state of the move on the current game state, otherwise returns IllegalMovementError
- * 
+ *
  * @param game Starting state
  * @param movement Movement to check if legal or not
  * @returns Game state if movement is legal, returns IllegalMovementError if not legal
  */
-const isMovementLegal = (game: Game, movement: Movement): Game | IllegalMovementError => {
+const isMovementLegal = (
+  game: Game,
+  movement: Movement
+): Game | IllegalMovementError => {
   const gameTree = createGameTree(game);
   const movementKey = getMovementKey(movement);
 
@@ -137,7 +137,7 @@ const isMovementLegal = (game: Game, movement: Movement): Game | IllegalMovement
   ) as Game;
 
   return newGameState;
-}
+};
 
 export {
   createGameTree,
@@ -146,4 +146,4 @@ export {
   createLazyGameTree,
   getCurrentPlayerPenguinPositions,
   isMovementLegal,
-}
+};
