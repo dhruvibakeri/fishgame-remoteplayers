@@ -1,4 +1,3 @@
-import getStdin from "get-stdin";
 import { createNumberedBoard } from "./boardCreation";
 import { getReachablePositions } from "./movementChecking";
 import { isError } from "./validation";
@@ -10,20 +9,7 @@ import {
   InvalidBoardConstraintsError,
   InvalidPositionError,
 } from "../types/errors";
-
-interface InputBoardPosn {
-  position: number[];
-  board: number[][];
-}
-
-/**
- * Read and parse JSON input from STDIN
- */
-const readStdin = async (): Promise<InputBoardPosn> => {
-  const input: string = await getStdin();
-  const parsed = JSON.parse(input);
-  return parsed;
-};
+import { InputBoardPosn, readStdin } from "./testHarnessInput";
 
 /**
  * Takes in a 2D array of numbers, which represents the numbe of fish on each tile of a board game, and
@@ -58,6 +44,6 @@ const getNumReachableFromBoard = (
   return 0;
 };
 
-readStdin().then((parsed: InputBoardPosn) => {
+readStdin<InputBoardPosn>().then((parsed: InputBoardPosn) => {
   console.log(getNumReachableFromBoard(parsed.board, parsed.position));
 });

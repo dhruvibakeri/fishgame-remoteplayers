@@ -40,9 +40,9 @@ describe("movement", () => {
   const down: BoardPosition = { row: 4, col: 1 };
   const downRight: BoardPosition = { row: 3, col: 1 };
   const downLeft: BoardPosition = { row: 3, col: 0 };
-  const player1: Player = { name: "foo", age: 20 };
-  const player2: Player = { name: "bar", age: 30 };
-  const player3: Player = { name: "baz", age: 45 };
+  const player1: Player = { name: "foo", age: 20, score: 0 };
+  const player2: Player = { name: "bar", age: 30, score: 0 };
+  const player3: Player = { name: "baz", age: 45, score: 0 };
   const players: Array<Player> = [player3, player2, player1];
   const playerToColorMapping: Map<string, PenguinColor> = new Map([
     [player1.name, PenguinColor.Black],

@@ -1,5 +1,6 @@
 import { BoardPosition } from "../../board";
 import { getPositionFromKey, getPositionKey } from "../../state";
+import { InvalidKeyError } from "../types/errors";
 
 describe("state.ts", () => {
   const position: BoardPosition = {
@@ -19,6 +20,25 @@ describe("state.ts", () => {
       expect(getPositionFromKey(positionKey)).toEqual(position);
     });
 
-    // TODO test invalid key given
+    it("rejects an invalid key", () => {
+      expect(getPositionFromKey("1,")).toEqual(
+        new InvalidKeyError("1,", "BoardPosition")
+      );
+      expect(getPositionFromKey("1,2.3")).toEqual(
+        new InvalidKeyError("1,2.3", "BoardPosition")
+      );
+      expect(getPositionFromKey("1,2,3")).toEqual(
+        new InvalidKeyError("1,2,3", "BoardPosition")
+      );
+      expect(getPositionFromKey("")).toEqual(
+        new InvalidKeyError("", "BoardPosition")
+      );
+      expect(getPositionFromKey("hello1,2")).toEqual(
+        new InvalidKeyError("hello1,2", "BoardPosition")
+      );
+      expect(getPositionFromKey("1,2hello")).toEqual(
+        new InvalidKeyError("1,2hello", "BoardPosition")
+      );
+    });
   });
 });

@@ -1,5 +1,6 @@
 import { BoardPosition } from "./board";
 import { Game } from "./state";
+import { InvalidKeyError } from "./Controller/types/errors";
 
 /**
  * A Movement represents a move by a Player of one of their Penguins from a
@@ -44,21 +45,35 @@ interface GameTree {
 const getMovementKey = (movement: Movement): string => {
   return `${movement.startPosition.col},${movement.startPosition.row},${movement.endPosition.col},${movement.endPosition.row}`;
 };
-  
-// TODO test
-const getMovementFromKey = (key: string): Movement => {
+
+/**
+ * creates a Movement from given key
+ */
+const getMovementFromKey = (key: string): Movement | InvalidKeyError => {
   const colsAndRows: Array<string> = key.split(",");
-  // Validate input
+  const parsedColsAndRows: Array<number> = colsAndRows.map(parseInt);
+
+  // Validate key
+  let isKeyValidMovement = parsedColsAndRows.length === 4;
+  parsedColsAndRows.forEach((cur: number) => {
+    if (isNaN(cur)) {
+      isKeyValidMovement = false;
+    }
+  });
+
+  if (!isKeyValidMovement) {
+    return new InvalidKeyError(key, "Movement");
+  }
 
   return {
     startPosition: {
-        col: parseInt(colsAndRows[0]),
-        row: parseInt(colsAndRows[1]),
+      col: parsedColsAndRows[0],
+      row: parsedColsAndRows[1],
     },
     endPosition: {
-        col: parseInt(colsAndRows[2]),
-        row: parseInt(colsAndRows[3]),
-    }
+      col: parsedColsAndRows[2],
+      row: parsedColsAndRows[3],
+    },
   };
 };
 

@@ -82,8 +82,8 @@ const createGameState = (
 const createTestGameState = (
   board: Board
 ): Game | InvalidNumberOfPlayersError => {
-  const samplePlayer1: Player = { name: "foo", age: 21 };
-  const samplePlayer2: Player = { name: "bar", age: 20 };
+  const samplePlayer1: Player = { name: "foo", age: 21, score: 0 };
+  const samplePlayer2: Player = { name: "bar", age: 20, score: 0 };
   const samplePlayers: Array<Player> = [samplePlayer1, samplePlayer2];
   const samplePlayerToColorMapping: Map<string, PenguinColor> = new Map([
     [samplePlayer1.name, PenguinColor.Black],

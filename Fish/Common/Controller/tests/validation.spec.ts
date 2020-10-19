@@ -25,9 +25,9 @@ import {
 } from "../types/errors";
 
 describe("validation", () => {
-  const player1: Player = { name: "foo", age: 20 };
-  const player2: Player = { name: "bar", age: 30 };
-  const player3: Player = { name: "baz", age: 42 };
+  const player1: Player = { name: "foo", age: 20, score: 0 };
+  const player2: Player = { name: "bar", age: 30, score: 0 };
+  const player3: Player = { name: "baz", age: 42, score: 0 };
   const players: Array<Player> = [player1, player2];
   const playerToColorMapping: Map<string, PenguinColor> = new Map([
     [player1.name, PenguinColor.Black],

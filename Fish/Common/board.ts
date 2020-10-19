@@ -81,3 +81,54 @@ export enum HorizontalDirection {
   Left = "Left",
   Neutral = "Neutral",
 }
+
+/**
+ * MovementDirection represents a valid direction of a movement within a Fish
+ * game, taking into account its hexagonal board layout. A movement may be
+ * desribed as the union of a vertical direciton and a horizontal direction,
+ * ultimately pointing the direction of a movement orthogonal to any of the
+ * sides on a hexagon.
+ *
+ * @param verticalDirection the vertical direction of this movement
+ * @param horizontalDirection the horizontal direction of this movement
+ */
+export interface MovementDirection {
+  readonly verticalDirection: VerticalDirection;
+  readonly horizontalDirection: HorizontalDirection;
+}
+
+/**
+ * The following constants denote the six possible directions to possibly move
+ * in within a fish game on a hexagonal board, represented as MovementDirections.
+ */
+export const DIRECTIONS = {
+  NORTH: {
+    verticalDirection: VerticalDirection.Up,
+    horizontalDirection: HorizontalDirection.Neutral,
+  },
+
+  NORTHEAST: {
+    verticalDirection: VerticalDirection.Up,
+    horizontalDirection: HorizontalDirection.Right,
+  },
+
+  SOUTHEAST: {
+    verticalDirection: VerticalDirection.Down,
+    horizontalDirection: HorizontalDirection.Right,
+  },
+
+  SOUTH: {
+    verticalDirection: VerticalDirection.Down,
+    horizontalDirection: HorizontalDirection.Neutral,
+  },
+
+  SOUTHWEST: {
+    verticalDirection: VerticalDirection.Down,
+    horizontalDirection: HorizontalDirection.Left,
+  },
+
+  NORTHWEST: {
+    verticalDirection: VerticalDirection.Up,
+    horizontalDirection: HorizontalDirection.Left,
+  },
+};

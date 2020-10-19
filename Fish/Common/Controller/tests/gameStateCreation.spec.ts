@@ -11,10 +11,10 @@ import {
 import { createBlankBoard } from "../src/boardCreation";
 
 describe("stateModification", () => {
-  const player1: Player = { name: "foo", age: 20 };
-  const player2: Player = { name: "bar", age: 30 };
-  const player3: Player = { name: "baz", age: 45 };
-  const player4: Player = { name: "bat", age: 65 };
+  const player1: Player = { name: "foo", age: 20, score: 0 };
+  const player2: Player = { name: "bar", age: 30, score: 0 };
+  const player3: Player = { name: "baz", age: 45, score: 0 };
+  const player4: Player = { name: "bat", age: 65, score: 0 };
   const board: Board = createBlankBoard(2, 2, 1) as Board;
 
   describe("sortPlayersByAge", () => {
@@ -150,8 +150,8 @@ describe("stateModification", () => {
   });
 
   describe("createTestGameState", () => {
-    const samplePlayer1: Player = { name: "foo", age: 21 };
-    const samplePlayer2: Player = { name: "bar", age: 20 };
+    const samplePlayer1: Player = { name: "foo", age: 21, score: 0 };
+    const samplePlayer2: Player = { name: "bar", age: 20, score: 0 };
     const samplePlayers: Array<Player> = [samplePlayer1, samplePlayer2];
     const samplePlayerToColorMapping: Map<string, PenguinColor> = new Map([
       [samplePlayer1.name, PenguinColor.Black],

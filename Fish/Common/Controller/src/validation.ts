@@ -192,6 +192,11 @@ const validatePenguinMove = (
     );
   }
 
+  // Verify that the player trying to move is the current player
+  if (player !== game.curPlayer) {
+    return new InvalidGameStateError(game);
+  }
+
   const penguinAtStart: Penguin | undefined = game.penguinPositions.get(
     getPositionKey(startPosition)
   );

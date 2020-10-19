@@ -9,6 +9,7 @@ import {
   InvalidBoardConstraintsError,
   InvalidPositionError,
 } from "../types/errors";
+import { InputBoard } from "./testHarnessInput";
 
 const DEFAULT_FISH_PER_TILE = 1;
 
@@ -229,7 +230,7 @@ const createHoledOneFishBoard = (
  * @return either created Board if successful or any error that occurred.
  */
 const createNumberedBoard = (
-  tileFish: number[][]
+  tileFish: InputBoard
 ): Board | InvalidBoardConstraintsError | InvalidPositionError => {
   // Return an error of the board is empty.
   if (tileFish.length <= 0) {

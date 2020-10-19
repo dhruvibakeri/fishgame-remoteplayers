@@ -1,4 +1,5 @@
 import { Board, BoardPosition, Penguin, PenguinColor } from "./board";
+import { InvalidKeyError } from "./Controller/types/errors";
 
 /**
  * A Player is a structure representing a single Player within a Game. It
@@ -7,10 +8,12 @@ import { Board, BoardPosition, Penguin, PenguinColor } from "./board";
  *
  * @param name the Player's name used to identify a player, this must be unique across players within a single Game.
  * @param age the Player's age used to set the ordering of turns
+ * @param score the Player's score during the game
  */
 interface Player {
   readonly name: string;
   readonly age: number;
+  readonly score: number;
 }
 
 /**
@@ -61,9 +64,22 @@ const getPositionKey = (boardPosition: BoardPosition): string => {
 };
 
 // TODO test
-const getPositionFromKey = (key: string): BoardPosition => {
+const getPositionFromKey = (key: string): BoardPosition | InvalidKeyError => {
   const colAndRow: Array<string> = key.split(",");
-  // Validate input
+  const parsedColAndRow: Array<number> = colAndRow.map(parseInt);
+  console.log(parsedColAndRow);
+
+  // Validate key
+  let isKeyValidBoardPosition = parsedColAndRow.length === 2;
+  parsedColAndRow.forEach((cur: number) => {
+    if (isNaN(cur)) {
+      isKeyValidBoardPosition = false;
+    }
+  });
+
+  if (!isKeyValidBoardPosition) {
+    return new InvalidKeyError(key, "BoardPosition");
+  }
 
   return {
     col: parseInt(colAndRow[0]),

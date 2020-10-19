@@ -167,6 +167,27 @@ class IllegalMovementError extends Error {
   }
 }
 
+/**
+ * Error used to represent an invalid existing game state.
+ */
+class InvalidKeyError extends Error {
+  key: string;
+  value: string;
+  message: string;
+
+  constructor(key: string, value: string, message?: string) {
+    super();
+    this.key = key;
+    this.value = value;
+    if (message) {
+      this.message = message;
+    } else {
+      this.message = `Invalid key string "${key}" for type ${value}`;
+    }
+    this.stack = new Error().stack;
+  }
+}
+
 export {
   InvalidPositionError,
   InvalidBoardConstraintsError,
@@ -175,4 +196,5 @@ export {
   UnreachablePositionError,
   InvalidGameStateError,
   IllegalMovementError,
+  InvalidKeyError,
 };

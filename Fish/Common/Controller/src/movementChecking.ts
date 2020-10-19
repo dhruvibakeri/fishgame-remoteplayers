@@ -237,7 +237,11 @@ const playerCanMove = (player: Player, game: Game): boolean => {
   return Array.from(game.penguinPositions)
     .filter(([, penguin]) => penguin.color === playerColor)
     .some(([positionKey]) => {
-      const position: BoardPosition = getPositionFromKey(positionKey);
+      // We can type cast here as BoardPosition because by definition penguinPosition keys are
+      // valid BoardPositions
+      const position: BoardPosition = getPositionFromKey(
+        positionKey
+      ) as BoardPosition;
       return getReachablePositions(game, position).length > 0;
     });
 };
