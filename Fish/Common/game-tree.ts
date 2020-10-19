@@ -38,7 +38,28 @@ type LazyGameTree = () => GameTree;
  */
 interface GameTree {
   readonly gameState: Game;
-  readonly potentialMoves: Map<Movement, LazyGameTree>;
+  readonly potentialMoves: Map<string, LazyGameTree>;
 }
 
-export { Movement, LazyGameTree, GameTree };
+const getMovementKey = (movement: Movement): string => {
+  return `${movement.startPosition.col},${movement.startPosition.row},${movement.endPosition.col},${movement.endPosition.row}`;
+};
+  
+// TODO test
+const getMovementFromKey = (key: string): Movement => {
+  const colsAndRows: Array<string> = key.split(",");
+  // Validate input
+
+  return {
+    startPosition: {
+        col: parseInt(colsAndRows[0]),
+        row: parseInt(colsAndRows[1]),
+    },
+    endPosition: {
+        col: parseInt(colsAndRows[2]),
+        row: parseInt(colsAndRows[3]),
+    }
+  };
+};
+
+export { Movement, LazyGameTree, GameTree, getMovementKey, getMovementFromKey };

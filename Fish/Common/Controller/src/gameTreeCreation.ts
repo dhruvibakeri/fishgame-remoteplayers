@@ -1,8 +1,9 @@
 import { Game, getPositionFromKey } from "../../state";
-import { GameTree, Movement, LazyGameTree } from "../../game-tree";
+import { GameTree, Movement, LazyGameTree, getMovementKey } from "../../game-tree";
 import { PenguinColor, Penguin, BoardPosition } from "../../board";
 import { getReachablePositions } from "./movementChecking";
 import { movePenguin } from "./penguinPlacement";
+import { IllegalMovementError } from "../types/errors";
 
 /**
  *
@@ -16,7 +17,7 @@ const createGameTree = (game: Game): GameTree => {
 
 const generatePotentialMoveMapping = (
   game: Game
-): Map<Movement, LazyGameTree> => {
+): Map<string, LazyGameTree> => {
   const currentPlayerPenguinPositions: Array<[
     BoardPosition,
     Penguin
@@ -41,9 +42,9 @@ const generatePotentialMoveMapping = (
 const getPotentialMovesFromReachablePositions = (
   game: Game,
   reachablePositions: Array<[BoardPosition, Array<BoardPosition>]>
-): Map<Movement, LazyGameTree> => {
+): Map<string, LazyGameTree> => {
   // Turn each reachable position into a movement
-  const allMovements: Array<[Movement, LazyGameTree]> = reachablePositions
+  const allMovements: Array<[string, LazyGameTree]> = reachablePositions
     .map(
       (
         startPositionToReachablePositions: [BoardPosition, Array<BoardPosition>]
@@ -66,7 +67,7 @@ const getPotentialMovesFromReachablePositions = (
       ...movements,
     ])
     .map((movement: Movement) => [
-      movement,
+      getMovementKey(movement),
       createLazyGameTree(game, movement),
     ]);
 
@@ -110,3 +111,39 @@ const getCurrentPlayerPenguinPositions = (
   ]);
   return currentPlayerPenguinsAndPositions;
 };
+
+
+/**
+ * Checks if given movement can be made with the given game state. If it can, returns the resulting
+ * game state of the move on the current game state, otherwise returns IllegalMovementError
+ * 
+ * @param game Starting state
+ * @param movement Movement to check if legal or not
+ * @returns Game state if movement is legal, returns IllegalMovementError if not legal
+ */
+const isMovementLegal = (game: Game, movement: Movement): Game | IllegalMovementError => {
+  const gameTree = createGameTree(game);
+  const movementKey = getMovementKey(movement);
+
+  if (!gameTree.potentialMoves.has(movementKey)) {
+    return new IllegalMovementError(game, movement);
+  }
+
+  const newGameState = movePenguin(
+    game,
+    game.curPlayer,
+    movement.startPosition,
+    movement.endPosition
+  ) as Game;
+
+  return newGameState;
+}
+
+export {
+  createGameTree,
+  generatePotentialMoveMapping,
+  getPotentialMovesFromReachablePositions,
+  createLazyGameTree,
+  getCurrentPlayerPenguinPositions,
+  isMovementLegal,
+}
