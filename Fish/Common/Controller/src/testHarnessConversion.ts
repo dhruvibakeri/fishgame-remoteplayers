@@ -94,21 +94,24 @@ const inputPositionToBoardPosition = (
 const inputPlayersToPenguinPositions = (
   players: Array<InputPlayer>
 ): Map<string, Penguin> => {
-  const pairs: Array<[string, Penguin]> = players.reduce(
-    (acc: Array<[string, Penguin]>, inputPlayer: InputPlayer) => {
-      const penguinPositions: Array<[
-        string,
-        Penguin
-      ]> = inputPlayer.places.map((inputPosition: InputPosition) => [
-        getPositionKey(inputPositionToBoardPosition(inputPosition)),
-        { color: inputPlayer.color },
-      ]);
-      return [...acc, ...penguinPositions];
-    },
-    []
-  );
+  // Get an array of tuples from hashed BoardPositions to Penguins
+  // representing all of the Penguin positions for the given InputPlayer.
+  const inputPlayerToPenguinPositions = (
+    inputPlayer: InputPlayer
+  ): Array<[string, Penguin]> =>
+    inputPlayer.places.map((inputPosition: InputPosition) => [
+      getPositionKey(inputPositionToBoardPosition(inputPosition)),
+      { color: inputPlayer.color },
+    ]);
 
-  return new Map(pairs);
+  // Create an array of tuples from hashed BoardPositions to Penguins
+  // representing all of the Penguin positions across the given
+  // array of InputPlayers.
+  const allPenguinPosition: Array<[string, Penguin]> = players
+    .map(inputPlayerToPenguinPositions)
+    .reduce((arr1, arr2) => [...arr1, ...arr2]);
+
+  return new Map(allPenguinPosition);
 };
 
 /**
@@ -120,15 +123,18 @@ const inputPlayersToPenguinPositions = (
  * @return the successfully transformed Game state or an error
  */
 const inputStateToGameState = (inputState: InputState): Game | Error => {
+  // Derive information from the InputState necessary to create a Game.
   const board = createNumberedBoard(inputState.board);
   const players = inputState.players.map(inputPlayerToPlayer);
   const colorMapping = inputPlayersToColorMapping(inputState.players);
   const penguinPositions = inputPlayersToPenguinPositions(inputState.players);
 
+  // If an error occurred, short circuit and return the error.
   if (isError(board)) {
     return board;
   }
 
+  // Create the Game.
   return {
     ...createGameState(players, colorMapping, board),
     penguinPositions,
@@ -148,6 +154,7 @@ const boardPositionToInputPosition = (
 /**
  * For a given Player within a given Game, derive the positions of all that
  * player's Penguins in the form of an array of InputPositions.
+ *
  * @param game the Game to derive from
  * @param player the player to get the places for
  * @return the array of InputPositions representing the given player's Penguins
@@ -172,6 +179,12 @@ const gameStateToInputPlayers = (game: Game): Array<InputPlayer> =>
     };
   });
 
+/**
+ * Transform the given Board to an InputBoard.
+ *
+ * @param board the Board to transform
+ * @return the transformed InputBoard
+ */
 const boardToInputBoard = (board: Board): InputBoard =>
   board.tiles.map((row: Array<Tile>) =>
     row.map((tile: Tile) => tile.numOfFish)
