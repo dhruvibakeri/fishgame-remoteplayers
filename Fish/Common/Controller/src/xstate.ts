@@ -61,8 +61,6 @@ const tryToMakeMove = (
     endPosition
   );
 
-  console.log(makeMoveOrError);
-
   if (isError(makeMoveOrError)) {
     // If the move could not be made, return false.
     return false;

@@ -2,18 +2,18 @@
     "players": [
         {
             "color": "red",
-            "score": 0,
+            "score": 5,
             "places": [[2, 0], [1, 1]]
         },
         {
             "color": "brown",
-            "score": 0,
+            "score": 6,
             "places": [[2, 1], [1, 2]]
         }
     ],
     "board": [
         [5, 0, 5],
-        [4, 1, 4],
-        [0, 2, 5]
+        [0, 1, 4],
+        [3, 2, 5]
     ]
 }

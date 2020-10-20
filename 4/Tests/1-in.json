@@ -2,12 +2,12 @@
     "players": [
         {
             "color": "red",
-            "score": 0,
+            "score": 4,
             "places": [[2, 0], [1, 1]]
         },
         {
             "color": "brown",
-            "score": 0,
+            "score": 9,
             "places": [[2, 2], [1, 2]]
         }
     ],

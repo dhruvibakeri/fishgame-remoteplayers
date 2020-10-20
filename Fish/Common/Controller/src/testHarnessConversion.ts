@@ -81,7 +81,7 @@ const inputPlayersToColorMapping = (
 const inputPositionToBoardPosition = (
   inputPosition: InputPosition
 ): BoardPosition => {
-  return { row: inputPosition[1], col: inputPosition[0] };
+  return { row: inputPosition[0], col: inputPosition[1] };
 };
 
 /**

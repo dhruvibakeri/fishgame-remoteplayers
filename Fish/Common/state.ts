@@ -66,8 +66,9 @@ const getPositionKey = (boardPosition: BoardPosition): string => {
 // TODO test
 const getPositionFromKey = (key: string): BoardPosition | InvalidKeyError => {
   const colAndRow: Array<string> = key.split(",");
-  const parsedColAndRow: Array<number> = colAndRow.map(parseInt);
-  console.log(parsedColAndRow);
+  const parsedColAndRow: Array<number> = colAndRow.map((numString: string) =>
+    parseInt(numString)
+  );
 
   // Validate key
   let isKeyValidBoardPosition = parsedColAndRow.length === 2;
