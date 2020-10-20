@@ -5,13 +5,15 @@ import {
   LazyGameTree,
   getMovementKey,
 } from "../../game-tree";
-import { PenguinColor, Penguin, BoardPosition } from "../../board";
+import { Penguin, BoardPosition } from "../../board";
 import { getReachablePositions } from "./movementChecking";
 import { movePenguin } from "./penguinPlacement";
-import { IllegalMovementError } from "../types/errors";
 
 /**
+ * Given a Game state, return its corresponding GameTree.
  *
+ * @param game the Game state
+ * @return the state's corresponding GameTree
  */
 const createGameTree = (game: Game): GameTree => {
   return {
@@ -20,66 +22,55 @@ const createGameTree = (game: Game): GameTree => {
   };
 };
 
+/**
+ * Given a Game state, generate a mapping from each of its current Player's
+ * possible Movements to their resulting LazyGameTrees.
+ *
+ * @param game the Game state
+ * @return a mapping from potential Movements to their resulting LazyGameTrees
+ */
 const generatePotentialMoveMapping = (
   game: Game
 ): Map<string, LazyGameTree> => {
-  const currentPlayerPenguinPositions: Array<BoardPosition> = getCurrentPlayerPenguinPositions(
-    game
-  );
-
-  // Get the reachable positions for each of their penguin positions
-  const penguinPosToReachablePositions: Array<[
-    BoardPosition,
-    Array<BoardPosition>
-  ]> = currentPlayerPenguinPositions.map((position: BoardPosition) => [
-    position,
-    getReachablePositions(game, position),
-  ]);
-
-  // Create the mapping for the movement to each of those positions
-  return getPotentialMovesFromReachablePositions(
-    game,
-    penguinPosToReachablePositions
-  );
-};
-
-const getPotentialMovesFromReachablePositions = (
-  game: Game,
-  reachablePositions: Array<[BoardPosition, Array<BoardPosition>]>
-): Map<string, LazyGameTree> => {
-  // Turn each reachable position into a movement
-  const allMovements: Array<[string, LazyGameTree]> = reachablePositions
-    .map(
-      (
-        startPositionToReachablePositions: [BoardPosition, Array<BoardPosition>]
-      ) => {
-        const startPosition: BoardPosition =
-          startPositionToReachablePositions[0];
-        const reachableFromStart: Array<BoardPosition> =
-          startPositionToReachablePositions[1];
-        const movements = reachableFromStart.map(
-          (endPosition: BoardPosition) => {
-            return { startPosition, endPosition };
-          }
-        );
-
-        return movements;
+  // From the given starting position, get all the possible Movements from it.
+  const startPositionToPotentialMovements = (
+    startPosition: BoardPosition
+  ): Array<Movement> =>
+    getReachablePositions(game, startPosition).map(
+      (reachablePosition: BoardPosition) => {
+        return { startPosition: startPosition, endPosition: reachablePosition };
       }
-    )
-    .reduce(
-      (acc: Array<Movement>, movements: Array<Movement>) => [
-        ...acc,
-        ...movements,
-      ],
-      []
-    )
-    .map((movement: Movement) => [
-      getMovementKey(movement),
-      createLazyGameTree(game, movement),
-    ]);
+    );
 
-  return new Map(allMovements);
+  // For the current Player of the Game state, get an array of tuples from
+  // each of the Player's potential Movements to their resulting LazyGameTrees.
+  const movementsToLazyGameTrees: Array<[
+    string,
+    LazyGameTree
+  ]> = getPlayerPenguinPositions(game, game.curPlayer)
+    .map(startPositionToPotentialMovements)
+    .reduce((arr1, arr2) => [...arr1, ...arr2], []) // Flatten the array.
+    .map((movement: Movement) => movementToLazyGameTree(game, movement));
+
+  // Create a mapping from each potential Movement to their resulting LazyGameTree.
+  return new Map(movementsToLazyGameTrees);
 };
+
+/**
+ * Given a Game state and a Movement, return a tuple from a hash of the
+ * Movement to its resulting LazyGameTree.
+ *
+ * @param game the Game state
+ * @param movement the Movement
+ * @return a tuple from a hashed Movement to its LazyGameTree
+ */
+const movementToLazyGameTree = (
+  game: Game,
+  movement: Movement
+): [string, LazyGameTree] => [
+  getMovementKey(movement),
+  createLazyGameTree(game, movement),
+];
 
 const createLazyGameTree = (game: Game, movement: Movement): LazyGameTree => {
   // This resulting game state is guaranteed to receive valid inputs as it is
@@ -98,32 +89,26 @@ const getPlayerPenguinPositions = (
   game: Game,
   player: Player
 ): Array<BoardPosition> => {
+  // Get the given Player's color.
   const playerColor = game.playerToColorMapping.get(player.name);
-  const isPlayersPenguin = ([positionKey, penguin]: [
-    string,
-    Penguin
-  ]): boolean => penguin.color === playerColor;
+
+  // Determine if the given penguinPositions entry is of the given Player's color.
+  const isPlayersPenguin = ([, penguin]: [string, Penguin]): boolean =>
+    penguin.color === playerColor;
 
   // We can type cast here as BoardPosition because by definition penguinPosition keys are
-  // valid BoardPositions
-  const getPosition = ([positionKey, penguin]: [
-    string,
-    Penguin
-  ]): BoardPosition => getPositionFromKey(positionKey) as BoardPosition;
+  // valid BoardPositions. From a penguinPositions entry, get the BoardPosition.
+  const getBoardPosition = ([positionKey]: [string, Penguin]): BoardPosition =>
+    getPositionFromKey(positionKey) as BoardPosition;
 
   return Array.from(game.penguinPositions)
     .filter(isPlayersPenguin)
-    .map(getPosition);
+    .map(getBoardPosition);
 };
-
-const getCurrentPlayerPenguinPositions = (game: Game): Array<BoardPosition> =>
-  getPlayerPenguinPositions(game, game.curPlayer);
 
 export {
   createGameTree,
   generatePotentialMoveMapping,
-  getPotentialMovesFromReachablePositions,
   createLazyGameTree,
   getPlayerPenguinPositions,
-  getCurrentPlayerPenguinPositions,
 };
