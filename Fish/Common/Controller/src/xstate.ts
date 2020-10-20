@@ -4,11 +4,11 @@ import { InputState, readStdin } from "./testHarnessInput";
 import { isError } from "./validation";
 import { movePenguin } from "./penguinPlacement";
 import { getNextPosition } from "./movementChecking";
-import { getCurrentPlayerPenguinPositions } from "./gameTreeCreation";
 import {
   gameToInputState,
   inputStateToGameState,
 } from "./testHarnessConversion";
+import { getPlayerPenguinPositions } from "./gameTreeCreation";
 
 /**
  * The order of directions to try and move in as part of the silly player
@@ -36,7 +36,10 @@ const tryToMakeMove = (
   direction: MovementDirection,
   game: Game
 ): Game | false => {
-  const currentPlayerPenguinPositions = getCurrentPlayerPenguinPositions(game);
+  const currentPlayerPenguinPositions = getPlayerPenguinPositions(
+    game,
+    game.curPlayer
+  );
 
   // If there are no penguins to move, return false.
   if (currentPlayerPenguinPositions.length <= 0) {
@@ -46,7 +49,7 @@ const tryToMakeMove = (
   // Derive the ending position from the position of the first penguin.
   // This is done by moving a single step in the specified direction
   // from this position.
-  const firstPenguinStartPosition = getCurrentPlayerPenguinPositions(game)[0];
+  const firstPenguinStartPosition = currentPlayerPenguinPositions[0];
   const endPosition = getNextPosition(
     firstPenguinStartPosition,
     direction.verticalDirection,
