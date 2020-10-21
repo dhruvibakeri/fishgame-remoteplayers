@@ -12,8 +12,7 @@ turns within the Game's roster of players.
         div.player-number {{index + 1}}.
         Player(
           :player='player' 
-          :unplacedPenguins='game.remainingUnplacedPenguins.get(player.name)' 
-          :color='game.playerToColorMapping.get(player.name)'
+          :unplacedPenguins='game.remainingUnplacedPenguins.get(player.color)' 
           :isCurPlayer='isCurPlayer(player)'
         )
 </template>
@@ -39,7 +38,7 @@ export default Vue.extend({
      * @return whether the given player is the current player.
      */
     isCurPlayer(player: PlayerType) {
-      return this.game.curPlayer === player;
+      return this.game.players[this.game.curPlayerIndex].color === player.color;
     },
   },
 });

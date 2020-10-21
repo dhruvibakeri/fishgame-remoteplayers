@@ -21,7 +21,6 @@ export default Vue.extend({
   props: {
     player: { type: Object as () => Player, required: true },
     unplacedPenguins: { type: Number, required: true },
-    color: { type: String, required: true },
     isCurPlayer: { type: Boolean, required: true },
   },
   computed: {
@@ -31,7 +30,7 @@ export default Vue.extend({
      */ 
     colorStyle() {
       return {
-        ['background-color']: `${this.color}`,
+        ['background-color']: `${this.player.color}`,
       };
     },
   },
