@@ -47,15 +47,31 @@ interface Game {
   readonly remainingUnplacedPenguins: Map<PenguinColor, number>;
   readonly scores: Map<PenguinColor, number>;
 }
-// TODO test
+
+/**
+ * Get the current player's score from the given Game state.
+ *
+ * @param game the Game state to retrieve from
+ * @return the current player's score
+ */
 const getCurrentPlayerScore = (game: Game): number =>
   game.scores.get(getCurrentPlayerColor(game));
 
-// TODO test
+/**
+ * Get the current player's color from the given Game state.
+ *
+ * @param game the Game state to retrieve from
+ * @return the current player's color
+ */
 const getCurrentPlayerColor = (game: Game): PenguinColor =>
-  game.players[game.curPlayerIndex].color;
+  getCurrentPlayer(game).color;
 
-// TODO test
+/**
+ * Get the current player from the given Game state.
+ *
+ * @param game the Game state to retrieve from
+ * @return the current player
+ */
 const getCurrentPlayer = (game: Game): Player =>
   game.players[game.curPlayerIndex];
 
