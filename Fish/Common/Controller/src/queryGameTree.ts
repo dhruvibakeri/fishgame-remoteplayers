@@ -1,11 +1,6 @@
 import { Game, getCurrentPlayer } from "../../state";
-import {
-  GameTree,
-  Movement,
-  LazyGameTree,
-  getMovementKey,
-} from "../../game-tree";
-import { movePenguin } from "./penguinPlacement";
+import { GameTree, Movement, PotentialMovement } from "../../game-tree";
+import { movePenguin, positionsAreEqual } from "./penguinPlacement";
 import { IllegalMovementError } from "../types/errors";
 import { createGameTree } from "./gameTreeCreation";
 
@@ -22,9 +17,22 @@ const isMovementLegal = (
   movement: Movement
 ): Game | IllegalMovementError => {
   const gameTree: GameTree = createGameTree(game);
-  const movementKey = getMovementKey(movement);
+  // Determine if the movement is legal by comparing it to the possible
+  // movements within the GameTree's potential moves and seeing if it
+  // exists there.
+  const isLegalMove = gameTree.potentialMoves.some(
+    (potentialMove: PotentialMovement) =>
+      positionsAreEqual(
+        movement.startPosition,
+        potentialMove.movement.startPosition
+      ) &&
+      positionsAreEqual(
+        movement.endPosition,
+        potentialMove.movement.endPosition
+      )
+  );
 
-  if (!gameTree.potentialMoves.has(movementKey)) {
+  if (!isLegalMove) {
     return new IllegalMovementError(game, movement);
   }
 
@@ -51,10 +59,8 @@ const mapOverReachableStates = <T = unknown>(
   fn: (game: Game) => T
 ): Array<T> => {
   const gameTree: GameTree = createGameTree(game);
-  const getGameTreeFromPotentialMove = ([, lazyGameTree]: [
-    string,
-    LazyGameTree
-  ]) => lazyGameTree();
+  const getGameTreeFromPotentialMove = (potentialMove: PotentialMovement) =>
+    potentialMove.resultingGameTree();
 
   return Array.from(gameTree.potentialMoves)
     .map(getGameTreeFromPotentialMove)

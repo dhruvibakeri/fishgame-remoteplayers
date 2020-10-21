@@ -1,6 +1,5 @@
 import { BoardPosition } from "./board";
 import { Game } from "./state";
-import { InvalidKeyError } from "./Controller/types/errors";
 
 /**
  * A Movement represents a move by a Player of one of their Penguins from a
@@ -23,6 +22,20 @@ interface Movement {
 type LazyGameTree = () => GameTree;
 
 /**
+ * A PotentialMovement represents a potential move from a Game state and all
+ * possible moves from that point. It is made up of an action and the results
+ * and a tree of results from that action, which is not evaluated until called.
+ *
+ * @param movement the Movement from a Game state
+ * @param resultingGameTree a LazyGameTree which is the resulting tree of states
+ * and moves that result from making the movement
+ */
+interface PotentialMovement {
+  readonly movement: Movement;
+  readonly resultingGameTree: LazyGameTree;
+}
+
+/**
  * A GameTree represents an entire Fish game. In other words, it contains from
  * the first movement turn to when there are no more possible moves for any players,
  * all the possible moves and states within an entire game in a tree structure.
@@ -39,42 +52,7 @@ type LazyGameTree = () => GameTree;
  */
 interface GameTree {
   readonly gameState: Game;
-  readonly potentialMoves: Map<string, LazyGameTree>;
+  readonly potentialMoves: Array<PotentialMovement>;
 }
 
-const getMovementKey = (movement: Movement): string => {
-  return `${movement.startPosition.col},${movement.startPosition.row},${movement.endPosition.col},${movement.endPosition.row}`;
-};
-
-/**
- * creates a Movement from given key
- */
-const getMovementFromKey = (key: string): Movement | InvalidKeyError => {
-  const colsAndRows: Array<string> = key.split(",");
-  const parsedColsAndRows: Array<number> = colsAndRows.map(parseInt);
-
-  // Validate key
-  let isKeyValidMovement = parsedColsAndRows.length === 4;
-  parsedColsAndRows.forEach((cur: number) => {
-    if (isNaN(cur)) {
-      isKeyValidMovement = false;
-    }
-  });
-
-  if (!isKeyValidMovement) {
-    return new InvalidKeyError(key, "Movement");
-  }
-
-  return {
-    startPosition: {
-      col: parsedColsAndRows[0],
-      row: parsedColsAndRows[1],
-    },
-    endPosition: {
-      col: parsedColsAndRows[2],
-      row: parsedColsAndRows[3],
-    },
-  };
-};
-
-export { Movement, LazyGameTree, GameTree, getMovementKey, getMovementFromKey };
+export { Movement, LazyGameTree, PotentialMovement, GameTree };
