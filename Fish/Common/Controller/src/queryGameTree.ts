@@ -1,4 +1,4 @@
-import { Game, getPositionFromKey, Player } from "../../state";
+import { Game } from "../../state";
 import {
   GameTree,
   Movement,
@@ -51,7 +51,7 @@ const mapOverReachableStates = <T = unknown>(
   fn: (game: Game) => T
 ): Array<T> => {
   const gameTree: GameTree = createGameTree(game);
-  const getGameTreeFromPotentialMove = ([movementKey, lazyGameTree]: [
+  const getGameTreeFromPotentialMove = ([, lazyGameTree]: [
     string,
     LazyGameTree
   ]) => lazyGameTree();

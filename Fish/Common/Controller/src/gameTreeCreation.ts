@@ -52,6 +52,8 @@ const generatePotentialMoveMapping = (
     .reduce((arr1, arr2) => [...arr1, ...arr2], []) // Flatten the array.
     .map((movement: Movement) => movementToLazyGameTree(game, movement));
 
+  console.log(movementsToLazyGameTrees);
+
   // Create a mapping from each potential Movement to their resulting LazyGameTree.
   return new Map(movementsToLazyGameTrees);
 };
@@ -72,6 +74,15 @@ const movementToLazyGameTree = (
   createLazyGameTree(game, movement),
 ];
 
+/**
+ * Given a Game state and a Movement, create the resulting LazyGameTree
+ * corresponding to the current player of the given state making that
+ * Movement.
+ *
+ * @param game the Game state
+ * @param movement the Movement to apply
+ * @return the resultng LazyGameTree
+ */
 const createLazyGameTree = (game: Game, movement: Movement): LazyGameTree => {
   // This resulting game state is guaranteed to receive valid inputs as it is
   // only used for GameTree creation, which uses penguins and reachable positions
@@ -85,6 +96,12 @@ const createLazyGameTree = (game: Game, movement: Movement): LazyGameTree => {
   return () => createGameTree(newGameState);
 };
 
+/**
+ * Get all of a given Player's penguin positions within a given Game state.
+ *
+ * @param game the Game state to fetch positions from
+ * @param player the player to fetch penguin positions for
+ */
 const getPlayerPenguinPositions = (
   game: Game,
   player: Player
@@ -109,6 +126,7 @@ const getPlayerPenguinPositions = (
 export {
   createGameTree,
   generatePotentialMoveMapping,
+  movementToLazyGameTree,
   createLazyGameTree,
   getPlayerPenguinPositions,
 };
