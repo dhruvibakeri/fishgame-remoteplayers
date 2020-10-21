@@ -1,5 +1,4 @@
-import { Board, BoardPosition, Penguin, PenguinColor } from "./board";
-import { InvalidKeyError } from "./Controller/types/errors";
+import { Board, BoardPosition, PenguinColor } from "./board";
 
 /**
  * A Player is a structure representing a single Player within a Game. It
@@ -7,13 +6,11 @@ import { InvalidKeyError } from "./Controller/types/errors";
  * game.
  *
  * @param name the Player's name used to identify a player, this must be unique across players within a single Game.
- * @param age the Player's age used to set the ordering of turns
- * @param score the Player's score during the game
+ * @param color this Player's assigned color
  */
 interface Player {
   readonly name: string;
-  readonly age: number;
-  readonly score: number;
+  readonly color: PenguinColor;
 }
 
 /**
@@ -35,57 +32,37 @@ interface Player {
  * @param players the array of Players participating in this game, in the
  * ordering which they will take turns
  * @param board the current Board of the game
- * @param curPlayer the player who's turn it currently is
- * @param remainingUnplacedPenguins a Map from a Player's name to a number, the number represents how
+ * @param curPlayerIndex the index of the Player who's turn it currently is
+ * @param penguinPositions a Map from each PenguinColor to the BoardPositions
+ * of each of that color's Penguins
+ * @param remainingUnplacedPenguins a Map from a player's color to a number, the number represents how
  * many penguins the player has left to place
- * @param penguinPositions a Map from BoardPosition to Penguin tracking all
- * penguins that have been placed on the board (value) and their positions (key).
- * @param playerToColorMapping a Map from player to PenguinColor to represent the
- * player's penguin color
+ * @param scores a Map from each PenguinColor to that Player's score
  */
 interface Game {
   readonly players: Array<Player>;
   readonly board: Board;
-  readonly curPlayer: Player;
-  readonly remainingUnplacedPenguins: Map<string, number>;
-  readonly penguinPositions: Map<string, Penguin>;
-  readonly playerToColorMapping: Map<string, PenguinColor>;
+  readonly curPlayerIndex: number;
+  readonly penguinPositions: Map<PenguinColor, Array<BoardPosition>>;
+  readonly remainingUnplacedPenguins: Map<PenguinColor, number>;
+  readonly scores: Map<PenguinColor, number>;
 }
+// TODO test
+const getCurrentPlayerScore = (game: Game): number =>
+  game.scores.get(getCurrentPlayerColor(game));
 
 // TODO test
-/**
- * Given a BoardPosition, return its key string used to identify the
- * position.
- * @param boardPosition the BoardPosition to get the key from
- * @return the key
- */
-const getPositionKey = (boardPosition: BoardPosition): string => {
-  return `${boardPosition.col},${boardPosition.row}`;
-};
+const getCurrentPlayerColor = (game: Game): PenguinColor =>
+  game.players[game.curPlayerIndex].color;
 
 // TODO test
-const getPositionFromKey = (key: string): BoardPosition | InvalidKeyError => {
-  const colAndRow: Array<string> = key.split(",");
-  const parsedColAndRow: Array<number> = colAndRow.map((numString: string) =>
-    parseInt(numString)
-  );
+const getCurrentPlayer = (game: Game): Player =>
+  game.players[game.curPlayerIndex];
 
-  // Validate key
-  let isKeyValidBoardPosition = parsedColAndRow.length === 2;
-  parsedColAndRow.forEach((cur: number) => {
-    if (isNaN(cur)) {
-      isKeyValidBoardPosition = false;
-    }
-  });
-
-  if (!isKeyValidBoardPosition) {
-    return new InvalidKeyError(key, "BoardPosition");
-  }
-
-  return {
-    col: parseInt(colAndRow[0]),
-    row: parseInt(colAndRow[1]),
-  };
+export {
+  Player,
+  Game,
+  getCurrentPlayerScore,
+  getCurrentPlayerColor,
+  getCurrentPlayer,
 };
-
-export { Player, Game, getPositionKey, getPositionFromKey };

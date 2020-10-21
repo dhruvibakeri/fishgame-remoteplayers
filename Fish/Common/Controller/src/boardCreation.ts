@@ -265,6 +265,26 @@ const createNumberedBoard = (
   }
 };
 
+// TODO test
+/**
+ * Get the number of fish on the tile at the given position on the given board.
+ *
+ * @param board the board the tile is on
+ * @param position the position of the tile
+ * @return the number of fish on that tile
+ */
+const getFishNumberFromPosition = (
+  board: Board,
+  position: BoardPosition
+): number => {
+  const tileOrError = getTileOnBoard(board, position);
+  if (!isError(tileOrError)) {
+    return tileOrError.numOfFish;
+  } else {
+    return 0;
+  }
+};
+
 export {
   createHoledOneFishBoard,
   createBlankBoard,
@@ -274,4 +294,5 @@ export {
   setTileOnBoard,
   getTileOnBoard,
   createNumberedBoard,
+  getFishNumberFromPosition,
 };

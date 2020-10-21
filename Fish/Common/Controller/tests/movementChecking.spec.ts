@@ -40,18 +40,12 @@ describe("movement", () => {
   const down: BoardPosition = { row: 4, col: 1 };
   const downRight: BoardPosition = { row: 3, col: 1 };
   const downLeft: BoardPosition = { row: 3, col: 0 };
-  const player1: Player = { name: "foo", age: 20, score: 0 };
-  const player2: Player = { name: "bar", age: 30, score: 0 };
-  const player3: Player = { name: "baz", age: 45, score: 0 };
+  const player1: Player = { name: "foo", color: PenguinColor.Black };
+  const player2: Player = { name: "bar", color: PenguinColor.Brown };
+  const player3: Player = { name: "baz", color: PenguinColor.Red };
   const players: Array<Player> = [player3, player2, player1];
-  const playerToColorMapping: Map<string, PenguinColor> = new Map([
-    [player1.name, PenguinColor.Black],
-    [player2.name, PenguinColor.Brown],
-    [player3.name, PenguinColor.Red],
-  ]);
   const gameOrError: Game | InvalidNumberOfPlayersError = createGameState(
     players,
-    playerToColorMapping,
     board
   );
   const game: Game = !isError(gameOrError) && gameOrError;
@@ -181,11 +175,7 @@ describe("movement", () => {
       }) as Board;
       const gameWithHoleOrError:
         | Game
-        | InvalidNumberOfPlayersError = createGameState(
-        players,
-        playerToColorMapping,
-        boardWithHole
-      );
+        | InvalidNumberOfPlayersError = createGameState(players, boardWithHole);
       const gameWithHole: Game =
         !isError(gameWithHoleOrError) && gameWithHoleOrError;
       const expectedReachablePositions: Array<BoardPosition> = [center];

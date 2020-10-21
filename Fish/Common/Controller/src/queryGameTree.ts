@@ -1,4 +1,4 @@
-import { Game } from "../../state";
+import { Game, getCurrentPlayer } from "../../state";
 import {
   GameTree,
   Movement,
@@ -30,7 +30,7 @@ const isMovementLegal = (
 
   const newGameState = movePenguin(
     game,
-    game.curPlayer,
+    getCurrentPlayer(game),
     movement.startPosition,
     movement.endPosition
   ) as Game;

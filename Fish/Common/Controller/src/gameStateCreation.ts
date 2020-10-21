@@ -1,53 +1,47 @@
 import { Player, Game } from "../../state";
-import { Board, PenguinColor } from "../../board";
+import { Board, BoardPosition, PenguinColor } from "../../board";
 import { InvalidNumberOfPlayersError } from "../types/errors";
 
 const MAX_NUMBER_OF_PLAYERS = 4;
 const MIN_NUMBER_OF_PLAYERS = 2;
 
+// TODO test
 /**
- * Sort the given array of Players by age, ascending.
+ * Get the next player's index for the given game.
  *
- * @param players the array of Players to sort
- * @returns array of Players sorted in ascending order by age
+ * @param game the game to get the next player's index from
+ * @return the next player's index
  */
-const sortPlayersByAge = (players: Array<Player>): Array<Player> => {
-  return players.sort(
-    (playerA: Player, playerB: Player) => playerA.age - playerB.age
-  );
-};
+const getNextPlayerIndex = (game: Game): number =>
+  (game.curPlayerIndex + 1) % game.players.length;
 
 /**
  * Creates a mapping from the given array of Players to their initial amount of
  * unplaced penguins for initial game state. Adds 6 - players.length penguins for each player.
  * @param players Array of players for which to create penguins
- * @param playerToColorMapping Mapping of players to colors, used to assign penguin colors
  * @return Array of penguins. Contains 6 - players.length penguins of each color in playerToColorMapping
  */
 const buildUnplacedPenguinMap = (
   players: Array<Player>
-): Map<string, number> => {
-  const unplacedPenguins: Map<string, number> = new Map();
+): Map<PenguinColor, number> => {
+  const unplacedPenguins: Map<PenguinColor, number> = new Map();
   const numPenguins: number = 6 - players.length;
   for (const player of players) {
-    unplacedPenguins.set(player.name, numPenguins);
+    unplacedPenguins.set(player.color, numPenguins);
   }
 
   return unplacedPenguins;
 };
 
 /**
- * Create a new Game state given an array of Players, their color mappings, and
- * a created board.
+ * Create a new Game state given an array of Players and a created board.
  *
  * @param players the array of Players playing this game
- * @param playerToColorMapping a bijection from Players and their PenguinColors
  * @param board the board to be played on within this game
- * @return The new game state with given players, game, and playerToColorMapping
+ * @return The new game state with given player and board
  */
 const createGameState = (
   players: Array<Player>,
-  playerToColorMapping: Map<string, PenguinColor>,
   board: Board
 ): Game | InvalidNumberOfPlayersError => {
   // Error check whether the number of players given is valid.
@@ -58,20 +52,36 @@ const createGameState = (
     return new InvalidNumberOfPlayersError(players.length);
   }
 
-  // Sort the players by age to get the ordering.
-  const playerOrdering: Array<Player> = sortPlayersByAge(players);
-  const unplacedPenguins: Map<string, number> = buildUnplacedPenguinMap(
-    players
-  );
-
   return {
-    players: playerOrdering,
+    players,
     board,
-    curPlayer: playerOrdering[0],
-    remainingUnplacedPenguins: unplacedPenguins,
-    penguinPositions: new Map(),
-    playerToColorMapping,
+    curPlayerIndex: 0,
+    penguinPositions: createEmptyPenguinPositions(players),
+    remainingUnplacedPenguins: buildUnplacedPenguinMap(players),
+    scores: createEmptyScoreSheet(players),
   };
+};
+
+// TODO test
+const createEmptyScoreSheet = (
+  players: Array<Player>
+): Map<PenguinColor, number> => {
+  const playerColorToZero: Array<[
+    PenguinColor,
+    number
+  ]> = players.map((player: Player) => [player.color, 0]);
+  return new Map(playerColorToZero);
+};
+
+// TODO
+const createEmptyPenguinPositions = (
+  players: Array<Player>
+): Map<PenguinColor, Array<BoardPosition>> => {
+  const playerColorToEmpty: Array<[
+    PenguinColor,
+    Array<BoardPosition>
+  ]> = players.map((player: Player) => [player.color, []]);
+  return new Map(playerColorToEmpty);
 };
 
 /**
@@ -82,16 +92,11 @@ const createGameState = (
 const createTestGameState = (
   board: Board
 ): Game | InvalidNumberOfPlayersError => {
-  const samplePlayer1: Player = { name: "foo", age: 21, score: 0 };
-  const samplePlayer2: Player = { name: "bar", age: 20, score: 0 };
+  const samplePlayer1: Player = { name: "foo", color: PenguinColor.Black };
+  const samplePlayer2: Player = { name: "bar", color: PenguinColor.Brown };
   const samplePlayers: Array<Player> = [samplePlayer1, samplePlayer2];
-  const samplePlayerToColorMapping: Map<string, PenguinColor> = new Map([
-    [samplePlayer1.name, PenguinColor.Black],
-    [samplePlayer2.name, PenguinColor.Brown],
-  ]);
   const game: Game | InvalidNumberOfPlayersError = createGameState(
     samplePlayers,
-    samplePlayerToColorMapping,
     board
   );
   return game;
@@ -99,8 +104,10 @@ const createTestGameState = (
 
 export {
   MAX_NUMBER_OF_PLAYERS,
-  sortPlayersByAge,
+  getNextPlayerIndex,
   createGameState,
-  buildUnplacedPenguinMap,
   createTestGameState,
+  createEmptyScoreSheet,
+  createEmptyPenguinPositions,
+  buildUnplacedPenguinMap,
 };

@@ -3,9 +3,8 @@ import {
   VerticalDirection,
   HorizontalDirection,
   PenguinColor,
-  Penguin,
 } from "../../board";
-import { Game, getPositionFromKey, Player } from "../../state";
+import { Game, Player } from "../../state";
 import { positionIsPlayable } from "./validation";
 
 /**
@@ -231,19 +230,12 @@ const getReachablePositions = (
  * @returns True if given player can make at least one move with at least one of their penguins
  */
 const playerCanMove = (player: Player, game: Game): boolean => {
-  const playerColor: PenguinColor = game.playerToColorMapping.get(
-    player.name
-  ) as PenguinColor;
-  return Array.from(game.penguinPositions)
-    .filter(([, penguin]) => penguin.color === playerColor)
-    .some(([positionKey]) => {
-      // We can type cast here as BoardPosition because by definition penguinPosition keys are
-      // valid BoardPositions
-      const position: BoardPosition = getPositionFromKey(
-        positionKey
-      ) as BoardPosition;
-      return getReachablePositions(game, position).length > 0;
-    });
+  return game.penguinPositions
+    .get(player.color)
+    .some(
+      (position: BoardPosition) =>
+        getReachablePositions(game, position).length > 0
+    );
 };
 
 /**
@@ -253,15 +245,14 @@ const playerCanMove = (player: Player, game: Game): boolean => {
  * @returns True if at least one player has at least one remaining move, returns false if
  * no players can move their penguins
  */
-const anyPlayersCanMove = (game: Game): boolean => {
-  let canMove = false;
-  game.players.forEach((player: Player) => {
-    if (playerCanMove(player, game)) {
-      canMove = true;
-    }
-  });
-  return canMove;
-};
+const anyPlayersCanMove = (game: Game): boolean =>
+  Array.from(game.penguinPositions)
+    .map(([, positions]: [PenguinColor, Array<BoardPosition>]) => positions)
+    .reduce((arr1, arr2) => [...arr1, ...arr2])
+    .some(
+      (position: BoardPosition) =>
+        getReachablePositions(game, position).length > 0
+    );
 
 export {
   getReachablePositions,

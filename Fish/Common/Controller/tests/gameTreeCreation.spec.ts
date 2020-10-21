@@ -4,7 +4,6 @@ import { Game, Player } from "../../state";
 import {
   createLazyGameTree,
   generatePotentialMoveMapping,
-  getPlayerPenguinPositions,
   movementToLazyGameTree,
 } from "../src/gameTreeCreation";
 import { GameTree, LazyGameTree, Movement } from "../../game-tree";
@@ -42,64 +41,6 @@ describe("gameTreeCreation", () => {
   const movement3: Movement = {
     startPosition: { col: 2, row: 2 },
     endPosition: { col: 2, row: 1 },
-  };
-  const penguinPositionsBeforeMovement: Array<[string, Penguin]> = [
-    ["0,0", { color: PenguinColor.Black }],
-    ["1,2", { color: PenguinColor.Brown }],
-    ["2,2", { color: PenguinColor.Black }],
-  ];
-  const penguinPositionsAfterMovement1: Array<[string, Penguin]> = [
-    ["1,2", { color: PenguinColor.Brown }],
-    ["2,2", { color: PenguinColor.Black }],
-    ["0,1", { color: PenguinColor.Black }],
-  ];
-  const penguinPositionsAfterMovement2: Array<[string, Penguin]> = [
-    ["1,2", { color: PenguinColor.Brown }],
-    ["2,2", { color: PenguinColor.Black }],
-    ["0,2", { color: PenguinColor.Black }],
-  ];
-  const penguinPositionsAfterMovement3: Array<[string, Penguin]> = [
-    ["0,0", { color: PenguinColor.Black }],
-    ["1,2", { color: PenguinColor.Brown }],
-    ["2,1", { color: PenguinColor.Black }],
-  ];
-  const player1BeforeMovement: Player = {
-    name: "foo",
-    age: 21,
-    score: 0,
-  };
-  const player1AfterMovement: Player = {
-    name: "foo",
-    age: 21,
-    score: 1,
-  };
-  const player2: Player = { name: "bar", age: 25, score: 0 };
-  const playersBeforeMovement = [player1AfterMovement, player2];
-  const playersAfterMovement = [player1AfterMovement, player2];
-  const gameBeforeMovement: Game = {
-    ...(createTestGameState(boardBeforeMovement) as Game),
-    penguinPositions: new Map(penguinPositionsBeforeMovement),
-    players: playersBeforeMovement,
-    curPlayer: player1BeforeMovement,
-  };
-  console.log(gameBeforeMovement.curPlayer);
-  const gameAfterMovement1: Game = {
-    ...(createTestGameState(boardAfterMovement1Or2) as Game),
-    penguinPositions: new Map(penguinPositionsAfterMovement1),
-    players: playersAfterMovement,
-    curPlayer: player1AfterMovement,
-  };
-  const gameAfterMovement2: Game = {
-    ...(createTestGameState(boardAfterMovement1Or2) as Game),
-    penguinPositions: new Map(penguinPositionsAfterMovement2),
-    players: playersAfterMovement,
-    curPlayer: player1AfterMovement,
-  };
-  const gameAfterMovement3: Game = {
-    ...(createTestGameState(boardAfterMovement3) as Game),
-    penguinPositions: new Map(penguinPositionsAfterMovement3),
-    players: playersAfterMovement,
-    curPlayer: player1AfterMovement,
   };
 
   describe("createGameTree", () => {});

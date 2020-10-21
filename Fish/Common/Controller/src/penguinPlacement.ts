@@ -1,5 +1,10 @@
-import { Player, Game, getPositionKey } from "../../state";
-import { BoardPosition, Penguin, Board } from "../../board";
+import {
+  Player,
+  Game,
+  getCurrentPlayerScore,
+  getCurrentPlayerColor,
+} from "../../state";
+import { BoardPosition, Board, PenguinColor } from "../../board";
 import {
   InvalidPositionError,
   InvalidGameStateError,
@@ -11,46 +16,8 @@ import {
   positionIsPlayable,
   validatePenguinMove,
 } from "./validation";
-import { setTileToHole } from "./boardCreation";
-
-/**
- * Returns the number of fish on the tile at the given position
- *
- * @param game Game state to find board tile position
- * @param position tile position to find fish number at
- * @returns number representing the number of fish at the given position
- */
-const getCurPlayerIndex = (game: Game): number => {
-  return game.players.findIndex((player: Player) => player === game.curPlayer);
-};
-
-/**
- * Takes in the game state and returns the player that should be the next curPlayer
- *
- * @param game Game to find next player
- * @returns player that would be the next curPlayer for the given game state
- */
-const getNextPlayer = (game: Game): Player => {
-  const nextPlayerIndex = getCurPlayerIndex(game) + 1;
-  if (nextPlayerIndex === game.players.length) {
-    return game.players[0];
-  }
-  return game.players[nextPlayerIndex];
-};
-
-/**
- * Returns the number of fish on the tile at the given position
- *
- * @param game Game state to find board tile position
- * @param position tile position to find fish number
- * @returns number representing the number of fish at the given position
- */
-const getFishNumberFromPosition = (
-  game: Game,
-  position: BoardPosition
-): number => {
-  return game.board.tiles[position.row][position.col].numOfFish;
-};
+import { getFishNumberFromPosition, setTileToHole } from "./boardCreation";
+import { getNextPlayerIndex } from "./gameStateCreation";
 
 /**
  * Adds score to current player based on the number of fish at the given tile that
@@ -58,54 +25,80 @@ const getFishNumberFromPosition = (
  *
  * @param game Game state to find fish score and current player
  * @param landingPosition board position penguin is going to land
- * @returns Current player with additional points from number of fish at given landingPosition
+ * @returns the updated scoresheet from updating the current player's score.
  */
 const updatePlayerScore = (
   game: Game,
   landingPosition: BoardPosition
-): Player => {
+): Map<PenguinColor, number> => {
   const newPlayerScore =
-    game.curPlayer.score + getFishNumberFromPosition(game, landingPosition);
-  return { ...game.curPlayer, score: newPlayerScore };
+    getCurrentPlayerScore(game) +
+    getFishNumberFromPosition(game.board, landingPosition);
+  const updatedScores = new Map(game.scores);
+  updatedScores.set(getCurrentPlayerColor(game), newPlayerScore);
+  return updatedScores;
 };
+
+// TODO test
+/**
+ * Determine whether the two given positions have the same row and col values.
+ *
+ * @param position1 the first position to compare
+ * @param position2 the second position to compare
+ * @return whether the two positions are logically equivalent
+ */
+const positionsAreEqual = (
+  position1: BoardPosition,
+  position2: BoardPosition
+): boolean =>
+  position1.col === position2.col && position1.row === position2.row;
 
 /**
  * Place a Penguin at the given end position, optionally also removing the
  * Penguin at a given start position.
  *
  * @param penguinPositions the Penguin position mapping
- * @param penguin the Penguin to move to the end position
+ * @param color the color of the Penguin to place
  * @param endPosition the end position to add the Penguin to
  * @param startPosition the starting position to clear within the mapping
  * @return the new updated position mapping
  */
 const movePenguinInPenguinPositions = (
   game: Game,
-  penguin: Penguin,
+  color: PenguinColor,
   endPosition: BoardPosition,
   startPosition?: BoardPosition
-): Map<string, Penguin> => {
+): Map<PenguinColor, Array<BoardPosition>> => {
   // Copy the given position mapping.
-  const newPenguinPositions: Map<string, Penguin> = new Map(
-    game.penguinPositions
-  );
+  const newPenguinPositions = new Map(game.penguinPositions);
 
   // Remove the Penguin at the start position.
   if (startPosition) {
-    newPenguinPositions.delete(getPositionKey(startPosition));
+    newPenguinPositions.set(
+      color,
+      newPenguinPositions
+        .get(color)
+        .filter(
+          (position: BoardPosition) =>
+            !positionsAreEqual(position, startPosition)
+        )
+    );
   }
 
   // Add the Penguin to its end position.
-  newPenguinPositions.set(getPositionKey(endPosition), penguin);
+  newPenguinPositions.set(color, [
+    ...newPenguinPositions.get(color),
+    endPosition,
+  ]);
 
   return newPenguinPositions;
 };
 
 /**
- * Places a penguin on behalf of a player. Takes in a penguin, position, and game state,
+ * Places a penguin on behalf of a player. Takes in a player, position, and game state,
  * and places the penguin at the given position if it is a valid position.
  *
- * @param penguin Penguin to be placed
+ * @param player the player placing the penguin
  * @param game Current game state
  * @param position Position at which to place the penguin
  * @return the Game state with the updated board or an error
@@ -133,42 +126,35 @@ const placePenguin = (
   }
 
   // Validate that player is the current player (it's currently the given player's turn)
-  if (player !== game.curPlayer) {
+  if (player.color !== getCurrentPlayerColor(game)) {
     return new InvalidGameStateError(
       game,
       "Player attempting to play out of turn"
     );
   }
 
-  // Create penguin to be placed
-  const penguinToPlace = { color: game.playerToColorMapping.get(player.name) };
-
   // Decrement count of unplaced penguins for player
-  const newUnplacedPenguins: Map<string, number> = new Map(
+  const newUnplacedPenguins: Map<PenguinColor, number> = new Map(
     game.remainingUnplacedPenguins
   );
   newUnplacedPenguins.set(
-    player.name,
-    game.remainingUnplacedPenguins.get(player.name) - 1
+    player.color,
+    game.remainingUnplacedPenguins.get(player.color) - 1
   );
 
-  // Place penguin
-  const updatedPenguinPositions: Map<
-    string,
-    Penguin
-  > = movePenguinInPenguinPositions(game, penguinToPlace, position);
-
-  // Find next curPlayer
-  const nextCurPlayer = getNextPlayer(game);
-
-  // Update current player score
-  game.players[getCurPlayerIndex(game)] = updatePlayerScore(game, position);
+  // Place penguin.
+  const updatedPenguinPositions = movePenguinInPenguinPositions(
+    game,
+    player.color,
+    position
+  );
 
   return {
     ...game,
-    curPlayer: nextCurPlayer,
-    remainingUnplacedPenguins: newUnplacedPenguins,
+    curPlayerIndex: getNextPlayerIndex(game),
     penguinPositions: updatedPenguinPositions,
+    remainingUnplacedPenguins: newUnplacedPenguins,
+    scores: updatePlayerScore(game, position),
   };
 };
 
@@ -193,8 +179,8 @@ const movePenguin = (
   | IllegalPenguinPositionError
   | InvalidGameStateError => {
   // Validate the move and get the Penguin being moved.
-  const playerPenguinOrError:
-    | Penguin
+  const isValidOrError:
+    | true
     | IllegalPenguinPositionError
     | InvalidGameStateError
     | InvalidPositionError = validatePenguinMove(
@@ -204,48 +190,39 @@ const movePenguin = (
     endPosition
   );
 
-  if (isError(playerPenguinOrError)) {
+  if (isError(isValidOrError)) {
     // If the move was invalid, return the error.
-    return playerPenguinOrError;
+    return isValidOrError;
   } else {
     // If the move is valid, update the Game state's Penguin position
     // mapping and return the new state.
     const updatedPenguinPositions = movePenguinInPenguinPositions(
       game,
-      playerPenguinOrError,
+      player.color,
       endPosition,
       startPosition
     );
-
-    // Find next curPlayer
-    const nextCurPlayer = getNextPlayer(game);
 
     // Update board (turn tile penguin will be leaving into a hole)
     // setTileToHole will always return board because we've already verified that startPosition is a
     // valid board position earlier in this function
     const newBoard = setTileToHole(game.board, startPosition) as Board;
 
-    // Update player score
-    game.players[getCurPlayerIndex(game)] = updatePlayerScore(
-      game,
-      endPosition
-    );
-
     return {
       ...game,
       board: newBoard,
-      curPlayer: nextCurPlayer,
+      curPlayerIndex: getNextPlayerIndex(game),
       penguinPositions: updatedPenguinPositions,
+      scores: updatePlayerScore(game, endPosition),
     };
   }
 };
 
 export {
+  positionsAreEqual,
   movePenguinInPenguinPositions,
   placePenguin,
   movePenguin,
-  getCurPlayerIndex,
-  getNextPlayer,
   getFishNumberFromPosition,
   updatePlayerScore,
 };

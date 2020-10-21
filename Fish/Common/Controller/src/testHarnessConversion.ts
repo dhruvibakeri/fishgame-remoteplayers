@@ -1,8 +1,7 @@
-import { PenguinColor, BoardPosition, Penguin, Board, Tile } from "../../board";
-import { Player, getPositionKey, Game } from "../../state";
+import { PenguinColor, BoardPosition, Board, Tile } from "../../board";
+import { Player, Game } from "../../state";
 import { createNumberedBoard } from "./boardCreation";
 import { createGameState } from "./gameStateCreation";
-import { getPlayerPenguinPositions } from "./gameTreeCreation";
 import {
   InputPlayer,
   InputPosition,
@@ -31,45 +30,16 @@ const getInputPlayerName = (inputPlayer: InputPlayer): string => {
  * Transform the given InputPlayer into a Player.
  *
  * To reconcile differences in the structure of an InputPlayer and a Player,
- * the inputPlayer's color is used as the Player's identifying name while
- * the position of the InputPlayer within the InputState's players is used
- * as the Player's age.
+ * the inputPlayer's color is used as the Player's name.
  *
  * @param inputPlayer the InputPlayer to transform
- * @param index the position of the InputPlayer within the InputState it was
- * taken from
  * @return the transformed Player
  */
-const inputPlayerToPlayer = (
-  inputPlayer: InputPlayer,
-  index: number
-): Player => {
+const inputPlayerToPlayer = (inputPlayer: InputPlayer): Player => {
   return {
     name: getInputPlayerName(inputPlayer),
-    age: index,
-    score: inputPlayer.score,
+    color: inputPlayer.color,
   };
-};
-
-/**
- * Transform the given array of InputPlayers into a color mapping for a game state.
- * This follows the same
- *
- * @param players the array of InputPlayers to transform
- * @return the transformed color mapping
- */
-const inputPlayersToColorMapping = (
-  players: Array<InputPlayer>
-): Map<string, PenguinColor> => {
-  const playerNameToColor: Array<[
-    string,
-    PenguinColor
-  ]> = players.map((inputPlayer: InputPlayer) => [
-    getInputPlayerName(inputPlayer),
-    inputPlayer.color,
-  ]);
-
-  return new Map(playerNameToColor);
 };
 
 /**
@@ -93,26 +63,13 @@ const inputPositionToBoardPosition = (
  */
 const inputPlayersToPenguinPositions = (
   players: Array<InputPlayer>
-): Map<string, Penguin> => {
-  // Get an array of tuples from hashed BoardPositions to Penguins
-  // representing all of the Penguin positions for the given InputPlayer.
-  const inputPlayerToPenguinPositions = (
-    inputPlayer: InputPlayer
-  ): Array<[string, Penguin]> =>
-    inputPlayer.places.map((inputPosition: InputPosition) => [
-      getPositionKey(inputPositionToBoardPosition(inputPosition)),
-      { color: inputPlayer.color },
-    ]);
-
-  // Create an array of tuples from hashed BoardPositions to Penguins
-  // representing all of the Penguin positions across the given
-  // array of InputPlayers.
-  const allPenguinPosition: Array<[string, Penguin]> = players
-    .map(inputPlayerToPenguinPositions)
-    .reduce((arr1, arr2) => [...arr1, ...arr2]);
-
-  return new Map(allPenguinPosition);
-};
+): Map<PenguinColor, Array<BoardPosition>> =>
+  new Map(
+    players.map((inputPlayer: InputPlayer) => [
+      inputPlayer.color,
+      inputPlayer.places.map(inputPositionToBoardPosition),
+    ])
+  );
 
 /**
  * Attempt to transform the given InputState into a Game state, returning
@@ -126,7 +83,6 @@ const inputStateToGameState = (inputState: InputState): Game | Error => {
   // Derive information from the InputState necessary to create a Game.
   const board = createNumberedBoard(inputState.board);
   const players = inputState.players.map(inputPlayerToPlayer);
-  const colorMapping = inputPlayersToColorMapping(inputState.players);
   const penguinPositions = inputPlayersToPenguinPositions(inputState.players);
 
   // If an error occurred, short circuit and return the error.
@@ -136,7 +92,7 @@ const inputStateToGameState = (inputState: InputState): Game | Error => {
 
   // Create the Game.
   return {
-    ...createGameState(players, colorMapping, board),
+    ...createGameState(players, board),
     penguinPositions,
   };
 };
@@ -160,7 +116,7 @@ const boardPositionToInputPosition = (
  * @return the array of InputPositions representing the given player's Penguins
  */
 const getPlayerPlaces = (game: Game, player: Player): Array<InputPosition> => {
-  const playerPenguinPositions = getPlayerPenguinPositions(game, player);
+  const playerPenguinPositions = game.penguinPositions.get(player.color);
   return playerPenguinPositions.map(boardPositionToInputPosition);
 };
 
@@ -173,8 +129,8 @@ const getPlayerPlaces = (game: Game, player: Player): Array<InputPosition> => {
 const gameStateToInputPlayers = (game: Game): Array<InputPlayer> =>
   game.players.map((player: Player) => {
     return {
-      color: game.playerToColorMapping.get(player.name),
-      score: player.score,
+      color: player.color,
+      score: game.scores.get(player.color),
       places: getPlayerPlaces(game, player),
     };
   });

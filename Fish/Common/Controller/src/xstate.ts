@@ -1,5 +1,5 @@
 import { DIRECTIONS, MovementDirection } from "../../board";
-import { Game } from "../../state";
+import { Game, getCurrentPlayer, getCurrentPlayerColor } from "../../state";
 import { InputState, readStdin } from "./testHarnessInput";
 import { isError } from "./validation";
 import { movePenguin } from "./penguinPlacement";
@@ -8,7 +8,6 @@ import {
   gameToInputState,
   inputStateToGameState,
 } from "./testHarnessConversion";
-import { getPlayerPenguinPositions } from "./gameTreeCreation";
 
 /**
  * The order of directions to try and move in as part of the silly player
@@ -36,9 +35,8 @@ const tryToMakeMove = (
   direction: MovementDirection,
   game: Game
 ): Game | false => {
-  const currentPlayerPenguinPositions = getPlayerPenguinPositions(
-    game,
-    game.curPlayer
+  const currentPlayerPenguinPositions = game.penguinPositions.get(
+    getCurrentPlayerColor(game)
   );
 
   // If there are no penguins to move, return false.
@@ -59,7 +57,7 @@ const tryToMakeMove = (
   // Attempt to make the move.
   const makeMoveOrError: Game | Error = movePenguin(
     game,
-    game.curPlayer,
+    getCurrentPlayer(game),
     firstPenguinStartPosition,
     endPosition
   );

@@ -5,9 +5,10 @@ import {
   IllegalPenguinPositionError,
   UnreachablePositionError,
 } from "../types/errors";
-import { Player, Game, getPositionKey } from "../../state";
-import { Board, BoardPosition, Penguin, PenguinColor } from "../../board";
+import { Player, Game, getCurrentPlayerColor } from "../../state";
+import { Board, BoardPosition, PenguinColor } from "../../board";
 import { getReachablePositions } from "./movementChecking";
+import { positionsAreEqual } from "./penguinPlacement";
 
 /**
  * Given a board and a position, determine whether that position is within the
@@ -34,7 +35,13 @@ const positionIsOnBoard = (board: Board, position: BoardPosition): boolean => {
  * @returns True if there is a penguin at the given position, false if not
  */
 const hasPenguinOnPosition = (game: Game, position: BoardPosition): boolean => {
-  return game.penguinPositions.get(getPositionKey(position)) !== undefined;
+  return Array.from(
+    game.penguinPositions
+  ).some(([, positions]: [PenguinColor, Array<BoardPosition>]) =>
+    positions.some((playerPosition: BoardPosition) =>
+      positionsAreEqual(position, playerPosition)
+    )
+  );
 };
 
 /**
@@ -142,7 +149,7 @@ const pathIsPlayable = (
  * @returns true if player has at least one unplaced penguin, returns false if they do not
  */
 const playerHasUnplacedPenguin = (player: Player, game: Game): boolean => {
-  const remainingPenguins = game.remainingUnplacedPenguins.get(player.name);
+  const remainingPenguins = game.remainingUnplacedPenguins.get(player.color);
   return remainingPenguins ? remainingPenguins > 0 : false;
 };
 
@@ -155,7 +162,7 @@ const playerHasUnplacedPenguin = (player: Player, game: Game): boolean => {
  * @param endPosition the Player's Penguin's end position after the move
  * @param startPosition the Player's Penguin's current position, not required if
  * penguin is being placed on the board before game starts
- * @return the Penguin being moved if the move is valid or an error if not
+ * @return true or an error corresponding to the invalidity of the move
  */
 const validatePenguinMove = (
   game: Game,
@@ -163,7 +170,7 @@ const validatePenguinMove = (
   startPosition: BoardPosition,
   endPosition: BoardPosition
 ):
-  | Penguin
+  | true
   | InvalidGameStateError
   | InvalidPositionError
   | IllegalPenguinPositionError => {
@@ -177,13 +184,14 @@ const validatePenguinMove = (
     );
   }
 
-  // Verify that game has color mapping for player
-  if (!game.playerToColorMapping.has(player.name)) {
-    return new InvalidGameStateError(game);
-  }
-
-  // Verify that penguin exists at starting position
-  if (!game.penguinPositions.has(getPositionKey(startPosition))) {
+  // Verify that the player has a penguin exists at starting position
+  if (
+    !game.penguinPositions
+      .get(player.color)
+      .some((position: BoardPosition) =>
+        positionsAreEqual(position, startPosition)
+      )
+  ) {
     return new IllegalPenguinPositionError(
       game,
       player,
@@ -193,25 +201,11 @@ const validatePenguinMove = (
   }
 
   // Verify that the player trying to move is the current player
-  if (player !== game.curPlayer) {
+  if (player.color !== getCurrentPlayerColor(game)) {
     return new InvalidGameStateError(game);
   }
 
-  const penguinAtStart: Penguin | undefined = game.penguinPositions.get(
-    getPositionKey(startPosition)
-  );
-  const penguinAtStartColor: PenguinColor | undefined =
-    penguinAtStart && penguinAtStart.color;
-  const playerColor: PenguinColor | undefined = game.playerToColorMapping.get(
-    player.name
-  );
-
-  // Verify that player color and starting penguin color match
-  if (playerColor !== penguinAtStartColor) {
-    return new InvalidGameStateError(game);
-  }
-
-  return penguinAtStart || new InvalidGameStateError(game);
+  return true;
 };
 
 export {

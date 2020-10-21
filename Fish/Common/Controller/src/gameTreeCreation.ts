@@ -1,4 +1,4 @@
-import { Game, getPositionFromKey, Player } from "../../state";
+import { Game, getCurrentPlayerColor, Player } from "../../state";
 import {
   GameTree,
   Movement,
@@ -47,7 +47,8 @@ const generatePotentialMoveMapping = (
   const movementsToLazyGameTrees: Array<[
     string,
     LazyGameTree
-  ]> = getPlayerPenguinPositions(game, game.curPlayer)
+  ]> = game.penguinPositions
+    .get(getCurrentPlayerColor(game))
     .map(startPositionToPotentialMovements)
     .reduce((arr1, arr2) => [...arr1, ...arr2], []) // Flatten the array.
     .map((movement: Movement) => movementToLazyGameTree(game, movement));
@@ -89,38 +90,11 @@ const createLazyGameTree = (game: Game, movement: Movement): LazyGameTree => {
   // that have already been validated.
   const newGameState = movePenguin(
     game,
-    game.curPlayer,
+    game.players[game.curPlayerIndex],
     movement.startPosition,
     movement.endPosition
   ) as Game;
   return () => createGameTree(newGameState);
-};
-
-/**
- * Get all of a given Player's penguin positions within a given Game state.
- *
- * @param game the Game state to fetch positions from
- * @param player the player to fetch penguin positions for
- */
-const getPlayerPenguinPositions = (
-  game: Game,
-  player: Player
-): Array<BoardPosition> => {
-  // Get the given Player's color.
-  const playerColor = game.playerToColorMapping.get(player.name);
-
-  // Determine if the given penguinPositions entry is of the given Player's color.
-  const isPlayersPenguin = ([, penguin]: [string, Penguin]): boolean =>
-    penguin.color === playerColor;
-
-  // We can type cast here as BoardPosition because by definition penguinPosition keys are
-  // valid BoardPositions. From a penguinPositions entry, get the BoardPosition.
-  const getBoardPosition = ([positionKey]: [string, Penguin]): BoardPosition =>
-    getPositionFromKey(positionKey) as BoardPosition;
-
-  return Array.from(game.penguinPositions)
-    .filter(isPlayersPenguin)
-    .map(getBoardPosition);
 };
 
 export {
@@ -128,5 +102,4 @@ export {
   generatePotentialMoveMapping,
   movementToLazyGameTree,
   createLazyGameTree,
-  getPlayerPenguinPositions,
 };
