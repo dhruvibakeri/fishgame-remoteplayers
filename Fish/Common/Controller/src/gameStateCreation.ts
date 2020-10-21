@@ -1,6 +1,9 @@
 import { Player, Game } from "../../state";
 import { Board, BoardPosition, PenguinColor } from "../../board";
-import { InvalidNumberOfPlayersError } from "../types/errors";
+import {
+  InvalidGameStateError,
+  InvalidNumberOfPlayersError,
+} from "../types/errors";
 
 const MAX_NUMBER_OF_PLAYERS = 4;
 const MIN_NUMBER_OF_PLAYERS = 2;
@@ -43,13 +46,19 @@ const buildUnplacedPenguinMap = (
 const createGameState = (
   players: Array<Player>,
   board: Board
-): Game | InvalidNumberOfPlayersError => {
+): Game | InvalidNumberOfPlayersError | InvalidGameStateError => {
   // Error check whether the number of players given is valid.
   if (
     players.length < MIN_NUMBER_OF_PLAYERS ||
     players.length > MAX_NUMBER_OF_PLAYERS
   ) {
     return new InvalidNumberOfPlayersError(players.length);
+  }
+
+  // TODO test
+  // Error check that all player colors are unique
+  if (new Set(players.map((player) => player.color)).size !== players.length) {
+    return new InvalidGameStateError();
   }
 
   return {
@@ -91,14 +100,14 @@ const createEmptyPenguinPositions = (
  */
 const createTestGameState = (
   board: Board
-): Game | InvalidNumberOfPlayersError => {
+): Game | InvalidNumberOfPlayersError | InvalidGameStateError => {
   const samplePlayer1: Player = { name: "foo", color: PenguinColor.Black };
   const samplePlayer2: Player = { name: "bar", color: PenguinColor.Brown };
   const samplePlayers: Array<Player> = [samplePlayer1, samplePlayer2];
-  const game: Game | InvalidNumberOfPlayersError = createGameState(
-    samplePlayers,
-    board
-  );
+  const game:
+    | Game
+    | InvalidNumberOfPlayersError
+    | InvalidGameStateError = createGameState(samplePlayers, board);
   return game;
 };
 

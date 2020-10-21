@@ -2,7 +2,6 @@ import {
   BoardPosition,
   VerticalDirection,
   HorizontalDirection,
-  PenguinColor,
 } from "../../board";
 import { Game, Player } from "../../state";
 import { positionIsPlayable } from "./validation";
@@ -245,14 +244,9 @@ const playerCanMove = (player: Player, game: Game): boolean => {
  * @returns True if at least one player has at least one remaining move, returns false if
  * no players can move their penguins
  */
-const anyPlayersCanMove = (game: Game): boolean =>
-  Array.from(game.penguinPositions)
-    .map(([, positions]: [PenguinColor, Array<BoardPosition>]) => positions)
-    .reduce((arr1, arr2) => [...arr1, ...arr2])
-    .some(
-      (position: BoardPosition) =>
-        getReachablePositions(game, position).length > 0
-    );
+const anyPlayersCanMove = (game: Game): boolean => {
+  return game.players.some((player: Player) => playerCanMove(player, game));
+};
 
 export {
   getReachablePositions,

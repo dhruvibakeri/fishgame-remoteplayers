@@ -25,11 +25,14 @@ import {
   anyPlayersCanMove,
 } from "../src/movementChecking";
 import { createGameState } from "../src/gameStateCreation";
-import { InvalidNumberOfPlayersError } from "../types/errors";
+import {
+  InvalidGameStateError,
+  InvalidNumberOfPlayersError,
+} from "../types/errors";
 import { isError } from "../src/validation";
 import { placePenguin } from "../src/penguinPlacement";
 
-describe("movement", () => {
+describe("movementChecking", () => {
   const board: Board = createBlankBoard(4, 3, 1) as Board;
   const center: BoardPosition = { row: 2, col: 1 };
   const up: BoardPosition = { row: 0, col: 1 };
@@ -44,11 +47,11 @@ describe("movement", () => {
   const player2: Player = { name: "bar", color: PenguinColor.Brown };
   const player3: Player = { name: "baz", color: PenguinColor.Red };
   const players: Array<Player> = [player3, player2, player1];
-  const gameOrError: Game | InvalidNumberOfPlayersError = createGameState(
-    players,
-    board
-  );
-  const game: Game = !isError(gameOrError) && gameOrError;
+  const game: Game = createGameState(players, board) as Game;
+  const player1TurnGame: Game = {
+    ...game,
+    curPlayerIndex: 2,
+  };
 
   describe("getNextPosDownLeft", () => {
     it("increments in the down left direction", () => {
@@ -175,7 +178,8 @@ describe("movement", () => {
       }) as Board;
       const gameWithHoleOrError:
         | Game
-        | InvalidNumberOfPlayersError = createGameState(players, boardWithHole);
+        | InvalidNumberOfPlayersError
+        | InvalidGameStateError = createGameState(players, boardWithHole);
       const gameWithHole: Game =
         !isError(gameWithHoleOrError) && gameWithHoleOrError;
       const expectedReachablePositions: Array<BoardPosition> = [center];
@@ -214,7 +218,11 @@ describe("movement", () => {
     });
 
     it("returns false if player has not placed any penguins", () => {
-      const gameWithPenguinPlaced = placePenguin(player1, game, center) as Game;
+      const gameWithPenguinPlaced = placePenguin(
+        player1,
+        player1TurnGame,
+        center
+      ) as Game;
       expect(playerCanMove(player2, gameWithPenguinPlaced)).toEqual(false);
     });
 
@@ -226,6 +234,7 @@ describe("movement", () => {
       ]) as Board;
       const holeGame: Game = {
         ...game,
+        curPlayerIndex: 2,
         board: holeBoard,
       };
       const holeGameWithPenguinPlaced = placePenguin(player1, holeGame, {
@@ -243,12 +252,16 @@ describe("movement", () => {
       ]) as Board;
       const holeGame: Game = {
         ...game,
+        curPlayerIndex: 2,
         board: holeBoard,
       };
-      const holeGameWithPenguinPlaced = placePenguin(player1, holeGame, {
-        col: 2,
-        row: 1,
-      }) as Game;
+      const holeGameWithPenguinPlaced = {
+        ...(placePenguin(player1, holeGame, {
+          col: 2,
+          row: 1,
+        }) as Game),
+        curPlayerIndex: 1,
+      };
       const holeGameWithPenguinsPlaced = placePenguin(
         player2,
         holeGameWithPenguinPlaced,
@@ -258,7 +271,11 @@ describe("movement", () => {
     });
 
     it("returns true if player has penguin placed and penguin has at least one possible move", () => {
-      const gameWithPenguinPlaced = placePenguin(player1, game, center) as Game;
+      const gameWithPenguinPlaced = placePenguin(
+        player1,
+        player1TurnGame,
+        center
+      ) as Game;
       expect(playerCanMove(player1, gameWithPenguinPlaced)).toEqual(true);
     });
   });
@@ -276,12 +293,16 @@ describe("movement", () => {
       ]) as Board;
       const holeGame: Game = {
         ...game,
+        curPlayerIndex: 1,
         board: holeBoard,
       };
-      const holeGameWithPenguinPlaced = placePenguin(player1, holeGame, {
-        col: 2,
-        row: 1,
-      }) as Game;
+      const holeGameWithPenguinPlaced = {
+        ...(placePenguin(player2, holeGame, {
+          col: 2,
+          row: 1,
+        }) as Game),
+        curPlayerIndex: 1,
+      };
       expect(anyPlayersCanMove(holeGameWithPenguinPlaced)).toEqual(false);
     });
 
@@ -293,12 +314,16 @@ describe("movement", () => {
       ]) as Board;
       const holeGame: Game = {
         ...game,
+        curPlayerIndex: 2,
         board: holeBoard,
       };
-      const holeGameWithPenguinPlaced = placePenguin(player1, holeGame, {
-        col: 2,
-        row: 1,
-      }) as Game;
+      const holeGameWithPenguinPlaced = {
+        ...(placePenguin(player1, holeGame, {
+          col: 2,
+          row: 1,
+        }) as Game),
+        curPlayerIndex: 1,
+      };
       const holeGameWithPenguinsPlaced = placePenguin(
         player2,
         holeGameWithPenguinPlaced,
@@ -308,7 +333,11 @@ describe("movement", () => {
     });
 
     it("returns true if at least one player has penguin placed and penguin has at least one possible move", () => {
-      const gameWithPenguinPlaced = placePenguin(player1, game, center) as Game;
+      const gameWithPenguinPlaced = placePenguin(
+        player1,
+        player1TurnGame,
+        center
+      ) as Game;
       expect(anyPlayersCanMove(gameWithPenguinPlaced)).toEqual(true);
     });
   });

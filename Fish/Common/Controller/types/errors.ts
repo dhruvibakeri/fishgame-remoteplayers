@@ -131,12 +131,14 @@ class UnreachablePositionError extends IllegalPenguinPositionError {
  * Error used to represent an invalid existing game state.
  */
 class InvalidGameStateError extends Error {
-  game: Game;
+  game?: Game;
   message: string;
 
-  constructor(game: Game, message?: string) {
+  constructor(game?: Game, message?: string) {
     super();
-    this.game = game;
+    if (game) {
+      this.game = game;
+    }
     if (message) {
       this.message = message;
     } else {

@@ -113,9 +113,7 @@ describe("stateModification", () => {
     const samplePlayer1: Player = { name: "foo", color: PenguinColor.Black };
     const samplePlayer2: Player = { name: "bar", color: PenguinColor.Brown };
     const samplePlayers: Array<Player> = [samplePlayer1, samplePlayer2];
-    const expectedGameState:
-      | Game
-      | InvalidNumberOfPlayersError = createGameState(samplePlayers, board);
+    const expectedGameState = createGameState(samplePlayers, board);
 
     it("creates test game state", () => {
       expect(createTestGameState(board)).toEqual(expectedGameState);

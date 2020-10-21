@@ -8,6 +8,7 @@ import {
   InvalidNumberOfPlayersError,
   InvalidBoardConstraintsError,
   InvalidPositionError,
+  InvalidGameStateError,
 } from "../types/errors";
 import { InputBoardPosn, readStdin } from "./testHarnessInput";
 
@@ -29,7 +30,10 @@ const getNumReachableFromBoard = (
 
   // Ensure board is not error when creating game from board
   if (!isError(board)) {
-    const game: Game | InvalidNumberOfPlayersError = createTestGameState(board);
+    const game:
+      | Game
+      | InvalidNumberOfPlayersError
+      | InvalidGameStateError = createTestGameState(board);
     // Ensure game is not error when finding reachable positions
     if (!isError(game)) {
       const startPosition: BoardPosition = {
