@@ -3,7 +3,7 @@
         {
             "color": "red",
             "score": 9,
-            "places": [[0, 0], [1, 1]]
+            "places": [[0, 0], [1, 1], [0, 2]]
         },
         {
             "color": "brown",

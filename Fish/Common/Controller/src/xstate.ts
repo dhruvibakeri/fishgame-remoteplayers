@@ -97,23 +97,27 @@ const makeSillyMove = (game: Game): Game | false => {
   return false;
 };
 
-readStdin().then((parsed: InputState) => {
-  // Convert the InputState into a Game state.
-  const gameStateOrError = inputStateToGameState(parsed);
-  let result: Game | false = false;
+readStdin()
+  .then((parsed: InputState) => {
+    // Convert the InputState into a Game state.
+    const gameStateOrError = inputStateToGameState(parsed);
+    let result: Game | false = false;
 
-  // If no error occurred in the above conversion, try to make
-  // a move as part of the silly strategy and store the result.
-  if (!isError(gameStateOrError)) {
-    result = makeSillyMove(gameStateOrError);
-  }
+    // If no error occurred in the above conversion, try to make
+    // a move as part of the silly strategy and store the result.
+    if (!isError(gameStateOrError)) {
+      result = makeSillyMove(gameStateOrError);
+    }
 
-  if (result) {
-    // If the final result is a Game, convert it to an input
-    // state and output the result.
-    console.log(JSON.stringify(gameToInputState(result)));
-  } else {
-    // If the final result is false, output this.
-    console.log(JSON.stringify(result));
-  }
-});
+    if (result) {
+      // If the final result is a Game, convert it to an input
+      // state and output the result.
+      console.log(JSON.stringify(gameToInputState(result)));
+    } else {
+      // If the final result is false, output this.
+      console.log(JSON.stringify(result));
+    }
+  })
+  .catch(() => {
+    console.log(JSON.stringify(false));
+  });

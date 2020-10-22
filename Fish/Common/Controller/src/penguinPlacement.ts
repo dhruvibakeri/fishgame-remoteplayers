@@ -31,7 +31,6 @@ const updatePlayerScore = (
   game: Game,
   landingPosition: BoardPosition
 ): Map<PenguinColor, number> => {
-  console.log(game);
   const newPlayerScore =
     getCurrentPlayerScore(game) +
     getFishNumberFromPosition(game.board, landingPosition);

@@ -132,10 +132,32 @@ const boardPositionToInputPosition = (
  *
  * @param game the Game to derive from
  * @param player the player to get the places for
+ * @param index the index of this player in the ordering of players, used
+ * to fix reorderings
  * @return the array of InputPositions representing the given player's Penguins
  */
-const getPlayerPlaces = (game: Game, player: Player): Array<InputPosition> => {
+const getPlayerPlaces = (
+  game: Game,
+  player: Player,
+  index: number
+): Array<InputPosition> => {
   const playerPenguinPositions = game.penguinPositions.get(player.color);
+  if (index === 0 && playerPenguinPositions.length > 1) {
+    // If the player is the first player in the ordering and their number of
+    // placed penguins is greater than 1, this means that the ordering of
+    // their penguins positions within its corresponding Game state penguin
+    // position array has been changed. More specifically, Game movements
+    // remove the original penguin position and appends them to the end of
+    // the position array. This compensates for that to prevent issues with
+    // recognizing JSON equality (order matters) by placing the last
+    // penguin position back at the start, since it's also guaranteed by the
+    // test harness that the first penguin will always been the one that moves.
+    const reOrderedPenguinPositions = [
+      playerPenguinPositions[playerPenguinPositions.length - 1],
+      ...playerPenguinPositions.slice(0, playerPenguinPositions.length - 1),
+    ];
+    return reOrderedPenguinPositions.map(boardPositionToInputPosition);
+  }
   return playerPenguinPositions.map(boardPositionToInputPosition);
 };
 
@@ -146,11 +168,11 @@ const getPlayerPlaces = (game: Game, player: Player): Array<InputPosition> => {
  * @return the Array of InputPlayers derived from the given Game
  */
 const gameStateToInputPlayers = (game: Game): Array<InputPlayer> =>
-  game.players.map((player: Player) => {
+  game.players.map((player: Player, index: number) => {
     return {
       color: player.color,
       score: game.scores.get(player.color),
-      places: getPlayerPlaces(game, player),
+      places: getPlayerPlaces(game, player, index),
     };
   });
 

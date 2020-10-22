@@ -49,7 +49,6 @@ describe("state.ts", () => {
     });
 
     it("retrieves a non first player", () => {
-      console.log(gameSecondTurn);
       expect(getCurrentPlayer(gameSecondTurn)).toEqual(samplePlayer2);
     });
   });

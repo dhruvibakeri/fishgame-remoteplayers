@@ -20,7 +20,6 @@ import { createGameState } from "../src/gameStateCreation";
 import {
   IllegalPenguinPositionError,
   UnreachablePositionError,
-  InvalidGameStateError,
   InvalidNumberOfPlayersError,
 } from "../types/errors";
 
@@ -34,7 +33,6 @@ describe("validation", () => {
   const validStartPosition: BoardPosition = { col: 0, row: 0 };
   const validEndPosition: BoardPosition = { col: 0, row: 1 };
   const board: Board = createHoledOneFishBoard(2, 2, holePositions, 1) as Board;
-  const player1Penguin: Penguin = { color: PenguinColor.Black };
   const penguinPositions: Map<PenguinColor, Array<BoardPosition>> = new Map([
     [player1.color, [validStartPosition]],
   ]);
