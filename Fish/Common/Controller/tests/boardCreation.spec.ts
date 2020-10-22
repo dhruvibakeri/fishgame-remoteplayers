@@ -64,6 +64,16 @@ describe("boardCreation", () => {
       [tile, hole0Fish, tile],
     ],
   };
+  const jaggedTileArray: number[][] = [
+    [3, 0],
+    [1, 1, 1, 1],
+    [1, 5, 0]
+  ];
+  const paddedBoard: Board = { tiles: [
+    [tile3Fish, hole, hole, hole],
+    [tile, tile, tile, tile],
+    [tile, tile5Fish, hole, hole]
+  ]};
 
   describe("createTile", () => {
     it("creates a tile without a hole", () => {
@@ -213,5 +223,9 @@ describe("boardCreation", () => {
         numberedBoardWithHoles
       );
     });
+
+    it("pads shorter rows with 0's to the maximum row length", () => {
+      expect(createNumberedBoard(jaggedTileArray)).toEqual(paddedBoard);
+    })
   });
 });

@@ -182,7 +182,7 @@ const gameStateToInputPlayers = (game: Game): Array<InputPlayer> =>
  * @param board the Board to transform
  * @return the transformed InputBoard
  */
-const boardToInputBoard = (board: Board): InputBoard =>
+const boardToInputBoard = (board: Board): InputBoard => 
   board.tiles.map((row: Array<Tile>) =>
     row.map((tile: Tile) => tile.numOfFish)
   );

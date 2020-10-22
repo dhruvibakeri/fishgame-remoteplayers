@@ -36,6 +36,41 @@ const buildUnplacedPenguinMap = (
 };
 
 /**
+ * Create an empty penguin position mapping from player colors to arrays of
+ * positions for the given array of players, setting each of their arrays of
+ * positions to empty.
+ *
+ * @param players the array of players to create a penguin position mapping for
+ * @return the empty penguin position mapping.
+ */
+const createEmptyPenguinPositions = (
+  players: Array<Player>
+): Map<PenguinColor, Array<BoardPosition>> => {
+  const playerColorToEmpty: Array<[
+    PenguinColor,
+    Array<BoardPosition>
+  ]> = players.map((player: Player) => [player.color, []]);
+  return new Map(playerColorToEmpty);
+};
+
+/**
+ * Create an empty scoresheet mapping from player colors to scores for the
+ * given array of players, setting each of their scores to 0.
+ *
+ * @param players the array of players to create a scoresheet for
+ * @return the scoresheet mapping
+ */
+const createEmptyScoreSheet = (
+  players: Array<Player>
+): Map<PenguinColor, number> => {
+  const playerColorToZero: Array<[
+    PenguinColor,
+    number
+  ]> = players.map((player: Player) => [player.color, 0]);
+  return new Map(playerColorToZero);
+};
+
+/**
  * Create a new Game state given an array of Players and a created board.
  *
  * @param players the array of Players playing this game
@@ -70,41 +105,6 @@ const createGameState = (
 };
 
 /**
- * Create an empty scoresheet mapping from player colors to scores for the
- * given array of players, setting each of their scores to 0.
- *
- * @param players the array of players to create a scoresheet for
- * @return the scoresheet mapping
- */
-const createEmptyScoreSheet = (
-  players: Array<Player>
-): Map<PenguinColor, number> => {
-  const playerColorToZero: Array<[
-    PenguinColor,
-    number
-  ]> = players.map((player: Player) => [player.color, 0]);
-  return new Map(playerColorToZero);
-};
-
-/**
- * Create an empty penguin position mapping from player colors to arrays of
- * positions for the given array of players, setting each of their arrays of
- * positions to empty.
- *
- * @param players the array of players to create a penguin position mapping for
- * @return the empty penguin position mapping.
- */
-const createEmptyPenguinPositions = (
-  players: Array<Player>
-): Map<PenguinColor, Array<BoardPosition>> => {
-  const playerColorToEmpty: Array<[
-    PenguinColor,
-    Array<BoardPosition>
-  ]> = players.map((player: Player) => [player.color, []]);
-  return new Map(playerColorToEmpty);
-};
-
-/**
  * Creates a sample game state with the given board FOR TESTING PURPOSES
  *
  * @param board board to use for game state creation
@@ -124,6 +124,7 @@ const createTestGameState = (
 
 export {
   MAX_NUMBER_OF_PLAYERS,
+  MIN_NUMBER_OF_PLAYERS,
   getNextPlayerIndex,
   createGameState,
   createTestGameState,
