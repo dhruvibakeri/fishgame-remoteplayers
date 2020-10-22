@@ -55,7 +55,7 @@ interface Game {
  * @return the current player's score
  */
 const getCurrentPlayerScore = (game: Game): number =>
-  game.scores.get(getCurrentPlayerColor(game));
+  game.scores.get(getCurrentPlayerColor(game)) || 0;
 
 /**
  * Get the current player's color from the given Game state.

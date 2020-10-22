@@ -184,13 +184,13 @@ const validatePenguinMove = (
   }
 
   // Verify that the player has a penguin exists at starting position
-  if (
-    !game.penguinPositions
-      .get(player.color)
-      .some((position: BoardPosition) =>
-        positionsAreEqual(position, startPosition)
-      )
-  ) {
+  const playerHasPenguinAtStartPosition = (
+    game.penguinPositions.get(player.color) || []
+  ).some((position: BoardPosition) =>
+    positionsAreEqual(position, startPosition)
+  );
+
+  if (!playerHasPenguinAtStartPosition) {
     return new IllegalPenguinPositionError(
       game,
       player,

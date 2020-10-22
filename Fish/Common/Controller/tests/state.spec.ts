@@ -11,9 +11,13 @@ import { Board, PenguinColor } from "../../board";
 
 describe("state.ts", () => {
   const board: Board = createBlankBoard(3, 3, 1) as Board;
+  const scores: Map<PenguinColor, number> = new Map([
+    [PenguinColor.Black, 1],
+    [PenguinColor.Brown, 0],
+  ]);
   const game: Game = {
     ...(createTestGameState(board) as Game),
-    scores: new Map([[PenguinColor.Black, 1]]),
+    scores,
   };
   const gameSecondTurn = { ...game, curPlayerIndex: 1 };
   const samplePlayer1: Player = { name: "foo", color: PenguinColor.Black };
@@ -45,6 +49,7 @@ describe("state.ts", () => {
     });
 
     it("retrieves a non first player", () => {
+      console.log(gameSecondTurn);
       expect(getCurrentPlayer(gameSecondTurn)).toEqual(samplePlayer2);
     });
   });

@@ -73,20 +73,17 @@ const movePenguinInPenguinPositions = (
 
   // Remove the Penguin at the start position.
   if (startPosition) {
-    newPenguinPositions.set(
-      color,
-      newPenguinPositions
-        .get(color)
-        .filter(
-          (position: BoardPosition) =>
-            !positionsAreEqual(position, startPosition)
-        )
+    const removedPenguinPositions = (
+      newPenguinPositions.get(color) || []
+    ).filter(
+      (position: BoardPosition) => !positionsAreEqual(position, startPosition)
     );
+    newPenguinPositions.set(color, removedPenguinPositions);
   }
 
   // Add the Penguin to its end position.
   newPenguinPositions.set(color, [
-    ...newPenguinPositions.get(color),
+    ...(newPenguinPositions.get(color) || []),
     endPosition,
   ]);
 
@@ -136,9 +133,10 @@ const placePenguin = (
   const newUnplacedPenguins: Map<PenguinColor, number> = new Map(
     game.remainingUnplacedPenguins
   );
+  const penguinsRemaining = game.remainingUnplacedPenguins.get(player.color);
   newUnplacedPenguins.set(
     player.color,
-    game.remainingUnplacedPenguins.get(player.color) - 1
+    penguinsRemaining ? penguinsRemaining - 1 : 0
   );
 
   // Place penguin.

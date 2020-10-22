@@ -1,5 +1,5 @@
 import { mount } from "@vue/test-utils";
-import { Game as GameState, getPositionKey, Player } from "../../../../state";
+import { Game as GameState, Player } from "../../../../state";
 import Roster from "../../src/components/Roster.vue";
 import { createGameState } from "../../../../Controller/src/gameStateCreation";
 import { createHoledOneFishBoard } from "../../../../Controller/src/boardCreation";
@@ -43,9 +43,9 @@ describe("Router.vue", () => {
 
     // Renders the roster in order with the first being the current player.
     test("the first player is the current player", () => {
-      expect(playerComponents.at(0).props().player.color).toBe(player2.color);
+      expect(playerComponents.at(0).props().player.color).toBe(player1.color);
       expect(playerComponents.at(0).props().isCurPlayer).toBe(true);
-      expect(playerComponents.at(1).props().player.color).toBe(player1.color);
+      expect(playerComponents.at(1).props().player.color).toBe(player2.color);
       expect(playerComponents.at(1).props().isCurPlayer).toBe(false);
       expect(playerComponents.at(2).props().player.color).toBe(player3.color);
       expect(playerComponents.at(2).props().isCurPlayer).toBe(false);

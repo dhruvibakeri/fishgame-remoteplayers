@@ -229,12 +229,10 @@ const getReachablePositions = (
  * @returns True if given player can make at least one move with at least one of their penguins
  */
 const playerCanMove = (player: Player, game: Game): boolean => {
-  return game.penguinPositions
-    .get(player.color)
-    .some(
-      (position: BoardPosition) =>
-        getReachablePositions(game, position).length > 0
-    );
+  return (game.penguinPositions.get(player.color) || []).some(
+    (position: BoardPosition) =>
+      getReachablePositions(game, position).length > 0
+  );
 };
 
 /**

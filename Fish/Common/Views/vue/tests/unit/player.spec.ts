@@ -31,7 +31,7 @@ describe("Player.vue", () => {
     });
 
     test("the player has the correct color", () => {
-      expect(playerComponent.props().color).toBe(color);
+      expect(playerComponent.props().player.color).toBe(color);
     });
 
     test("the player has the correct unplacedPenguins", () => {
