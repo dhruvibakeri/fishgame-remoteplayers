@@ -265,7 +265,6 @@ const createNumberedBoard = (
   }
 };
 
-// TODO test
 /**
  * Get the number of fish on the tile at the given position on the given board.
  *

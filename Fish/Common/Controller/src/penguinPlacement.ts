@@ -39,7 +39,6 @@ const updatePlayerScore = (
   return updatedScores;
 };
 
-// TODO test
 /**
  * Determine whether the two given positions have the same row and col values.
  *

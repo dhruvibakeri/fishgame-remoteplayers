@@ -139,7 +139,6 @@ const pathIsPlayable = (
   );
 };
 
-//TODO test
 /**
  * Takes in a player and a game state, and checks if the player has at least one remaining
  * unplaced penguin in the given game state

@@ -8,7 +8,6 @@ import {
 const MAX_NUMBER_OF_PLAYERS = 4;
 const MIN_NUMBER_OF_PLAYERS = 2;
 
-// TODO test
 /**
  * Get the next player's index for the given game.
  *
@@ -55,7 +54,6 @@ const createGameState = (
     return new InvalidNumberOfPlayersError(players.length);
   }
 
-  // TODO test
   // Error check that all player colors are unique
   if (new Set(players.map((player) => player.color)).size !== players.length) {
     return new InvalidGameStateError();
@@ -71,7 +69,13 @@ const createGameState = (
   };
 };
 
-// TODO test
+/**
+ * Create an empty scoresheet mapping from player colors to scores for the
+ * given array of players, setting each of their scores to 0.
+ *
+ * @param players the array of players to create a scoresheet for
+ * @return the scoresheet mapping
+ */
 const createEmptyScoreSheet = (
   players: Array<Player>
 ): Map<PenguinColor, number> => {
@@ -82,7 +86,14 @@ const createEmptyScoreSheet = (
   return new Map(playerColorToZero);
 };
 
-// TODO
+/**
+ * Create an empty penguin position mapping from player colors to arrays of
+ * positions for the given array of players, setting each of their arrays of
+ * positions to empty.
+ *
+ * @param players the array of players to create a penguin position mapping for
+ * @return the empty penguin position mapping.
+ */
 const createEmptyPenguinPositions = (
   players: Array<Player>
 ): Map<PenguinColor, Array<BoardPosition>> => {

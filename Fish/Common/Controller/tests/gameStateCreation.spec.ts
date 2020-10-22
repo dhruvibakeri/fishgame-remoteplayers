@@ -1,12 +1,16 @@
-import { Board, PenguinColor } from "../../board";
+import { Board, BoardPosition, PenguinColor } from "../../board";
 import { Player, Game } from "../../state";
-import { InvalidNumberOfPlayersError } from "../types/errors";
+import {
+  InvalidGameStateError,
+  InvalidNumberOfPlayersError,
+} from "../types/errors";
 import {
   buildUnplacedPenguinMap,
   createEmptyPenguinPositions,
   createEmptyScoreSheet,
   createGameState,
   createTestGameState,
+  getNextPlayerIndex,
 } from "../src/gameStateCreation";
 
 import { createBlankBoard } from "../src/boardCreation";
@@ -16,7 +20,26 @@ describe("stateModification", () => {
   const player2: Player = { name: "bar", color: PenguinColor.Brown };
   const player3: Player = { name: "baz", color: PenguinColor.Red };
   const player4: Player = { name: "bat", color: PenguinColor.White };
+  const players: Array<Player> = [player1, player2, player3, player4];
+
   const board: Board = createBlankBoard(2, 2, 1) as Board;
+
+  describe("getNextPlayerIndex", () => {
+    const board: Board = createBlankBoard(3, 3, 1) as Board;
+    const game: Game = createTestGameState(board) as Game;
+
+    it("gets the next player index", () => {
+      expect(getNextPlayerIndex(game)).toEqual(1);
+    });
+
+    it("wraps to the start after the last player", () => {
+      const lastPlayerTurnGame: Game = {
+        ...game,
+        curPlayerIndex: game.players.length - 1,
+      };
+      expect(getNextPlayerIndex(lastPlayerTurnGame)).toEqual(0);
+    });
+  });
 
   describe("buildUnplacedPenguinMap", () => {
     it("builds map of player to number, with each player assigned 4 penguins", () => {
@@ -80,6 +103,13 @@ describe("stateModification", () => {
       );
     });
 
+    it("rejects an array of players with non-unique colors", () => {
+      const players: Array<Player> = [player1, player2, player4, player2];
+      expect(createGameState(players, board)).toEqual(
+        new InvalidGameStateError()
+      );
+    });
+
     it("successfully creates a Game state with a number of players equal to the maximum", () => {
       const players: Array<Player> = [player1, player2, player3, player4];
       const expectedGameState: Game = {
@@ -106,6 +136,45 @@ describe("stateModification", () => {
       };
 
       expect(createGameState(players, board)).toEqual(expectedGameState);
+    });
+  });
+
+  describe("createEmptyScoreSheet", () => {
+    it("creates a score sheet for a given list of players", () => {
+      const expectedScoreSheet: Map<PenguinColor, number> = new Map([
+        [player1.color, 0],
+        [player2.color, 0],
+        [player3.color, 0],
+        [player4.color, 0],
+      ]);
+
+      expect(createEmptyScoreSheet(players)).toEqual(expectedScoreSheet);
+    });
+
+    it("creates an empty map for an empty array of players", () => {
+      expect(createEmptyScoreSheet([])).toEqual(new Map());
+    });
+  });
+
+  describe("createEmptyPenguinPositions", () => {
+    it("creates an empty penguin position mapping for each player", () => {
+      const expectedPenguinPositions: Map<
+        PenguinColor,
+        Array<BoardPosition>
+      > = new Map([
+        [player1.color, []],
+        [player2.color, []],
+        [player3.color, []],
+        [player4.color, []],
+      ]);
+
+      expect(createEmptyPenguinPositions(players)).toEqual(
+        expectedPenguinPositions
+      );
+    });
+
+    it("creates an empty map for an empty array of players", () => {
+      expect(createEmptyPenguinPositions([])).toEqual(new Map());
     });
   });
 

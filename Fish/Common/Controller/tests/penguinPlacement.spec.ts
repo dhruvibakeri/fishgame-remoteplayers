@@ -1,5 +1,5 @@
-import { Board, BoardPosition, Penguin, PenguinColor } from "../../board";
-import { Player, Game, getCurrentPlayer } from "../../state";
+import { Board, BoardPosition, PenguinColor } from "../../board";
+import { Player, Game } from "../../state";
 import {
   IllegalPenguinPositionError,
   InvalidGameStateError,
@@ -10,6 +10,7 @@ import {
   placePenguin,
   getFishNumberFromPosition,
   updatePlayerScore,
+  positionsAreEqual,
 } from "../src/penguinPlacement";
 
 import { createHoledOneFishBoard, setTileToHole } from "../src/boardCreation";
@@ -305,6 +306,28 @@ describe("penguinMovement", () => {
       expect(
         movePenguin(game, player1, validStartPosition, validEndPosition)
       ).toEqual(expectedGameState);
+    });
+  });
+
+  describe("positionsAreEqual", () => {
+    const position1: BoardPosition = { col: 1, row: 1 };
+    const position2: BoardPosition = { col: 1, row: 1 };
+    const position3: BoardPosition = { col: 0, row: 1 };
+    const position4: BoardPosition = { col: 1, row: 0 };
+    it("recognizes the same position", () => {
+      expect(positionsAreEqual(position1, position1)).toEqual(true);
+    });
+
+    it("recognizes logically equivalent positions with different references", () => {
+      expect(positionsAreEqual(position1, position2)).toEqual(true);
+    });
+
+    it("recognizes the difference in two position's rows", () => {
+      expect(positionsAreEqual(position1, position4)).toEqual(false);
+    });
+
+    it("recognizes the difference in two position's columns", () => {
+      expect(positionsAreEqual(position3, position1)).toEqual(false);
     });
   });
 });
