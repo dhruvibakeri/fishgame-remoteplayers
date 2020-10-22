@@ -252,7 +252,7 @@ const createNumberedBoard = (
     // For each given tile fish amount, set the corresponding Tile on the
     // created blank board to that fish amount.
     for (let row = 0; row < tileFish.length; row++) {
-      for (let col = 0; col < tileFish[0].length; col++) {
+      for (let col = 0; col < tileFish[row].length; col++) {
         const setTileBoard = setTileOnBoard(
           curBoard,
           { row, col },
