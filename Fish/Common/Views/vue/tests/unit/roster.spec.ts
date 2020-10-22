@@ -6,26 +6,19 @@ import { createHoledOneFishBoard } from "../../../../Controller/src/boardCreatio
 import { PenguinColor, BoardPosition, Board, Penguin } from "../../../../board";
 
 describe("Router.vue", () => {
-  const player1: Player = { name: "foo", age: 30 };
-  const player2: Player = { name: "bar", age: 20 };
-  const player3: Player = { name: "baz", age: 40 };
+  const player1: Player = { name: "foo", color: PenguinColor.Black };
+  const player2: Player = { name: "bar", color: PenguinColor.Brown };
+  const player3: Player = { name: "baz", color: PenguinColor.Red };
   const players: Array<Player> = [player1, player2, player3];
-  const playerToColorMapping: Map<string, PenguinColor> = new Map([
-    [player1.name, PenguinColor.Black],
-    [player2.name, PenguinColor.Brown],
-    [player3.name, PenguinColor.Red],
-  ]);
   const holePosition: BoardPosition = { col: 1, row: 0 };
   const holePositions: Array<BoardPosition> = [holePosition];
   const board: Board = createHoledOneFishBoard(2, 2, holePositions, 1) as Board;
-  const player1Penguin: Penguin = { color: PenguinColor.Black };
-  const player2Penguin: Penguin = { color: PenguinColor.Brown };
-  const penguinPositions: Map<string, Penguin> = new Map([
-    [getPositionKey({ col: 0, row: 0 }), player1Penguin],
-    [getPositionKey({ col: 1, row: 1 }), player2Penguin],
+  const penguinPositions: Map<PenguinColor, Array<BoardPosition>> = new Map([
+    [player1.color, [{ col: 0, row: 0 }]],
+    [player2.color, [{ col: 1, row: 1 }]],
   ]);
   const game: GameState = {
-    ...(createGameState(players, playerToColorMapping, board) as GameState),
+    ...(createGameState(players, board) as GameState),
     penguinPositions,
   };
 
@@ -49,12 +42,12 @@ describe("Router.vue", () => {
     });
 
     // Renders the roster in order with the first being the current player.
-    test("the players are ordered by age and the first is the current player", () => {
-      expect(playerComponents.at(0).props().player.age).toBe(player2.age);
+    test("the first player is the current player", () => {
+      expect(playerComponents.at(0).props().player.color).toBe(player2.color);
       expect(playerComponents.at(0).props().isCurPlayer).toBe(true);
-      expect(playerComponents.at(1).props().player.age).toBe(player1.age);
+      expect(playerComponents.at(1).props().player.color).toBe(player1.color);
       expect(playerComponents.at(1).props().isCurPlayer).toBe(false);
-      expect(playerComponents.at(2).props().player.age).toBe(player3.age);
+      expect(playerComponents.at(2).props().player.color).toBe(player3.color);
       expect(playerComponents.at(2).props().isCurPlayer).toBe(false);
     });
   });

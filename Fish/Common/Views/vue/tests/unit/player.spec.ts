@@ -1,15 +1,15 @@
 import { mount } from "@vue/test-utils";
 import { PenguinColor } from "../../../../board";
+import { Player as PlayerModel } from "../../../../state";
 import Player from "../../src/components/Player.vue";
 
 describe("Player.vue", () => {
-  const player = { name: "foo", age: 42 };
+  const player: PlayerModel = { name: "foo", color: PenguinColor.Black };
   const unplacedPenguins = 2;
   const color = PenguinColor.Black;
   const propsData = {
     player,
     unplacedPenguins,
-    color,
     isCurPlayer: false,
   };
 

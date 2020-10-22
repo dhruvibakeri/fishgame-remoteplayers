@@ -1,29 +1,23 @@
 import { mount } from "@vue/test-utils";
-import { Game as GameState, getPositionKey, Player } from "../../../../state";
+import { Game as GameState, Player } from "../../../../state";
 import Game from "../../src/components/Game.vue";
 import { createGameState } from "../../../../Controller/src/gameStateCreation";
 import { createHoledOneFishBoard } from "../../../../Controller/src/boardCreation";
 import { PenguinColor, BoardPosition, Board, Penguin } from "../../../../board";
 
 describe("Game.vue", () => {
-  const player1: Player = { name: "foo", age: 20 };
-  const player2: Player = { name: "bar", age: 30 };
+  const player1: Player = { name: "foo", color: PenguinColor.Black };
+  const player2: Player = { name: "bar", color: PenguinColor.Brown };
   const players: Array<Player> = [player1, player2];
-  const playerToColorMapping: Map<string, PenguinColor> = new Map([
-    [player1.name, PenguinColor.Black],
-    [player2.name, PenguinColor.Brown],
-  ]);
   const holePosition: BoardPosition = { col: 1, row: 0 };
   const holePositions: Array<BoardPosition> = [holePosition];
   const board: Board = createHoledOneFishBoard(2, 2, holePositions, 1) as Board;
-  const player1Penguin: Penguin = { color: PenguinColor.Black };
-  const player2Penguin: Penguin = { color: PenguinColor.Brown };
-  const penguinPositions: Map<string, Penguin> = new Map([
-    [getPositionKey({ col: 0, row: 0 }), player1Penguin],
-    [getPositionKey({ col: 1, row: 1 }), player2Penguin],
+  const penguinPositions: Map<PenguinColor, Array<BoardPosition>> = new Map([
+    [player1.color, [{ col: 0, row: 0 }]],
+    [player2.color, [{ col: 1, row: 1 }]],
   ]);
   const game: GameState = {
-    ...(createGameState(players, playerToColorMapping, board) as GameState),
+    ...(createGameState(players, board) as GameState),
     penguinPositions,
   };
 
