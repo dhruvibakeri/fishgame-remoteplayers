@@ -19,7 +19,7 @@ const sillyStrategyDirections: Array<MovementDirection> = [
   DIRECTIONS.SOUTHEAST,
   DIRECTIONS.SOUTH,
   DIRECTIONS.SOUTHWEST,
-  DIRECTIONS.NORTHEAST,
+  DIRECTIONS.NORTHWEST,
 ];
 
 /**

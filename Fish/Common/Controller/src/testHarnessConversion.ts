@@ -72,6 +72,23 @@ const inputPlayersToPenguinPositions = (
   );
 
 /**
+ * Transform the given array of InputPlayers into a scoresheet mapping from
+ * each player's color to their specified score.
+ *
+ * @param players the array of InputPlayers to transform
+ * @return the transformed scoresheet mapping
+ */
+const inputPlayersToScores = (
+  players: Array<InputPlayer>
+): Map<PenguinColor, number> =>
+  new Map(
+    players.map((inputPlayer: InputPlayer) => [
+      inputPlayer.color,
+      inputPlayer.score,
+    ])
+  );
+
+/**
  * Attempt to transform the given InputState into a Game state, returning
  * the Game state if successful and an Error if one occurred while doing
  * so.
@@ -84,6 +101,7 @@ const inputStateToGameState = (inputState: InputState): Game | Error => {
   const board = createNumberedBoard(inputState.board);
   const players = inputState.players.map(inputPlayerToPlayer);
   const penguinPositions = inputPlayersToPenguinPositions(inputState.players);
+  const scores = inputPlayersToScores(inputState.players);
 
   // If an error occurred, short circuit and return the error.
   if (isError(board)) {
@@ -94,6 +112,7 @@ const inputStateToGameState = (inputState: InputState): Game | Error => {
   return {
     ...createGameState(players, board),
     penguinPositions,
+    scores,
   };
 };
 
