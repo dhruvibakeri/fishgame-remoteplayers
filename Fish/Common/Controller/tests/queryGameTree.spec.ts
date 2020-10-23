@@ -5,6 +5,7 @@ import { Game, Player } from "../../state";
 import { isMovementLegal, mapOverReachableStates } from "../src/queryGameTree";
 import { Movement } from "../../game-tree";
 import { IllegalMovementError } from "../types/errors";
+import { createGameTree } from "../src/gameTreeCreation";
 
 describe("queryGameTree", () => {
   const player1: Player = { name: "foo", color: PenguinColor.Black };
@@ -46,6 +47,8 @@ describe("queryGameTree", () => {
     scores: scoresAfterMovement,
     penguinPositions: penguinPositionsAfterMovement,
   };
+  const gameTree = createGameTree(game);
+  const gameTreeWithTwoPenguins = createGameTree(gameWithTwoPenguins);
 
   describe("isMovementLegal", () => {
     it("rejects a start position outside of the board", () => {
@@ -54,8 +57,8 @@ describe("queryGameTree", () => {
         startPosition: invalidStartPosition,
         endPosition: validEndPosition,
       };
-      expect(isMovementLegal(game, movement)).toEqual(
-        new IllegalMovementError(game, movement)
+      expect(isMovementLegal(gameTree, movement)).toEqual(
+        new IllegalMovementError(gameTree, movement)
       );
     });
 
@@ -65,8 +68,8 @@ describe("queryGameTree", () => {
         startPosition: validStartPosition,
         endPosition: invalidEndPosition,
       };
-      expect(isMovementLegal(game, movement)).toEqual(
-        new IllegalMovementError(game, movement)
+      expect(isMovementLegal(gameTree, movement)).toEqual(
+        new IllegalMovementError(gameTree, movement)
       );
     });
 
@@ -76,8 +79,8 @@ describe("queryGameTree", () => {
         startPosition: invalidStartPosition,
         endPosition: validEndPosition,
       };
-      expect(isMovementLegal(game, movement)).toEqual(
-        new IllegalMovementError(game, movement)
+      expect(isMovementLegal(gameTree, movement)).toEqual(
+        new IllegalMovementError(gameTree, movement)
       );
     });
 
@@ -87,8 +90,8 @@ describe("queryGameTree", () => {
         startPosition: validStartPosition,
         endPosition: invalidEndPosition,
       };
-      expect(isMovementLegal(game, movement)).toEqual(
-        new IllegalMovementError(game, movement)
+      expect(isMovementLegal(gameTree, movement)).toEqual(
+        new IllegalMovementError(gameTree, movement)
       );
     });
 
@@ -97,8 +100,8 @@ describe("queryGameTree", () => {
         startPosition: validEndPosition,
         endPosition: holePosition,
       };
-      expect(isMovementLegal(game, movement)).toEqual(
-        new IllegalMovementError(game, movement)
+      expect(isMovementLegal(gameTree, movement)).toEqual(
+        new IllegalMovementError(gameTree, movement)
       );
     });
 
@@ -107,13 +110,13 @@ describe("queryGameTree", () => {
         startPosition: validStartPosition,
         endPosition: validEndPosition,
       };
-      expect(isMovementLegal(gameWithTwoPenguins, movement)).toEqual(
-        new IllegalMovementError(game, movement)
+      expect(isMovementLegal(gameTreeWithTwoPenguins, movement)).toEqual(
+        new IllegalMovementError(gameTree, movement)
       );
     });
 
     it("accepts a valid move", () => {
-      expect(isMovementLegal(game, movement)).toEqual(gameAfterMovement);
+      expect(isMovementLegal(gameTree, movement)).toEqual(gameAfterMovement);
     });
   });
 
@@ -161,6 +164,7 @@ describe("queryGameTree", () => {
       scores: scoresAfterMovement,
       board: boardAfterMovement,
     };
+    const gameTree = createGameTree(game);
 
     it("maps a function over reachable game states", () => {
       const jsonStringifyGame = (game: Game): string =>
@@ -172,7 +176,7 @@ describe("queryGameTree", () => {
         jsonStringifyGame(gameAfterMovement1),
         jsonStringifyGame(gameAfterMovement2),
       ];
-      expect(mapOverReachableStates(game, jsonStringifyGame)).toEqual(expected);
+      expect(mapOverReachableStates(gameTree, jsonStringifyGame)).toEqual(expected);
     });
   });
 });

@@ -5,18 +5,18 @@ import { IllegalMovementError } from "../types/errors";
 import { createGameTree } from "./gameTreeCreation";
 
 /**
- * Checks if given movement can be made with the given game state. If it can, returns the resulting
- * game state of the move on the current game state, otherwise returns IllegalMovementError
+ * Checks if given movement can be made with the given GameTree node. If it can,
+ * returns theresulting game state of the move on the given game tree's current
+ * game state, otherwise returns IllegalMovementError
  *
- * @param game Starting state
+ * @param gameTree Starting GameTree node
  * @param movement Movement to check if legal or not
  * @returns Game state if movement is legal, returns IllegalMovementError if not legal
  */
 const isMovementLegal = (
-  game: Game,
+  gameTree: GameTree,
   movement: Movement
 ): Game | IllegalMovementError => {
-  const gameTree: GameTree = createGameTree(game);
   // Determine if the movement is legal by comparing it to the possible
   // movements within the GameTree's potential moves and seeing if it
   // exists there.
@@ -33,12 +33,12 @@ const isMovementLegal = (
   );
 
   if (!isLegalMove) {
-    return new IllegalMovementError(game, movement);
+    return new IllegalMovementError(gameTree, movement);
   }
 
   const newGameState = movePenguin(
-    game,
-    getCurrentPlayer(game),
+    gameTree.gameState,
+    getCurrentPlayer(gameTree.gameState),
     movement.startPosition,
     movement.endPosition
   ) as Game;
@@ -47,18 +47,17 @@ const isMovementLegal = (
 };
 
 /**
- * Applies a function to all reachable states from given game state
+ * Applies a function to all reachable states from given tree node
  *
- * @param game Game to find all reachable game states to apply function
+ * @param gameTree GameTree node to get all reachable game states to apply function
  * @param fn function to apply to all reachable game states from given game
- * @returns Array of fn return type representing all reachable game states from given game with given
- * function applied to them
+ * @returns Array of fn return type representing all reachable game states from given
+ * game tree node with given function applied to them
  */
 const mapOverReachableStates = <T = unknown>(
-  game: Game,
+  gameTree: GameTree,
   fn: (game: Game) => T
 ): Array<T> => {
-  const gameTree: GameTree = createGameTree(game);
   const getGameTreeFromPotentialMove = (potentialMove: PotentialMovement) =>
     potentialMove.resultingGameTree();
 

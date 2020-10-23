@@ -1,6 +1,6 @@
 import { Board, BoardPosition } from "../../board";
 import { Game, Player } from "../../state";
-import { Movement } from "../../game-tree";
+import { Movement, GameTree } from "../../game-tree";
 
 /**
  * Error used to represent the use of out-of-bounds positions for a given board.
@@ -152,13 +152,13 @@ class InvalidGameStateError extends Error {
  * Error used to represent an invalid existing game state.
  */
 class IllegalMovementError extends Error {
-  game: Game;
+  gameTree: GameTree;
   movement: Movement;
   message: string;
 
-  constructor(game: Game, movement: Movement, message?: string) {
+  constructor(gameTree: GameTree, movement: Movement, message?: string) {
     super();
-    this.game = game;
+    this.gameTree = gameTree;
     this.movement = movement;
     if (message) {
       this.message = message;
