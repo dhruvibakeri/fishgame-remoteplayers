@@ -45,7 +45,8 @@ const hasPenguinOnPosition = (game: Game, position: BoardPosition): boolean => {
 };
 
 /**
- * Given a board and a position, check if the position is on the board and not a hole
+ * Given a board and a position, check if the position is on the board, is not a hole,
+ * and doesn't have another penguin on it.
  *
  * @param board the board to be checking against
  * @param position the position to be checked

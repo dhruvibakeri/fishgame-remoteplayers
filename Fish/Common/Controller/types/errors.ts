@@ -1,5 +1,5 @@
 import { Board, BoardPosition } from "../../board";
-import { Game, Player } from "../../state";
+import { Game, getCurrentPlayer, Player } from "../../state";
 import { Movement } from "../../game-tree";
 
 /**
@@ -169,22 +169,18 @@ class IllegalMovementError extends Error {
   }
 }
 
-/**
- * Error used to represent an invalid existing game state.
- */
-class InvalidKeyError extends Error {
-  key: string;
-  value: string;
+class NoMorePlacementsError extends Error {
+  game: Game;
   message: string;
 
-  constructor(key: string, value: string, message?: string) {
+  constructor(game: Game, message?: string) {
     super();
-    this.key = key;
-    this.value = value;
     if (message) {
       this.message = message;
     } else {
-      this.message = `Invalid key string "${key}" for type ${value}`;
+      this.message = `Player ${
+        getCurrentPlayer(game).name
+      } has no more placements available.`;
     }
     this.stack = new Error().stack;
   }
@@ -198,5 +194,5 @@ export {
   UnreachablePositionError,
   InvalidGameStateError,
   IllegalMovementError,
-  InvalidKeyError,
+  NoMorePlacementsError,
 };
