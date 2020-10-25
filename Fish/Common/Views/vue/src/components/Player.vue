@@ -16,6 +16,10 @@ around the Player's rendering.
 import Vue from "vue";
 import { Player } from "../../../../state";
 
+interface ColorStyle {
+  ['background-color']: string; 
+}
+
 export default Vue.extend({
   name: "Player",
   props: {
@@ -28,7 +32,7 @@ export default Vue.extend({
      * Used to dynamically change the color of the player's color indicator 
      * based upon the player's supplied color.
      */ 
-    colorStyle() {
+    colorStyle(): ColorStyle {
       return {
         ['background-color']: `${this.player.color}`,
       };

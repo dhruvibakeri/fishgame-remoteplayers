@@ -8,6 +8,7 @@ import {
   playerHasUnplacedPenguin,
   isError,
   hasPenguinOnPosition,
+  isValidInputState,
 } from "../src/validation";
 import {
   createBlankBoard,
@@ -22,6 +23,7 @@ import {
   UnreachablePositionError,
   InvalidNumberOfPlayersError,
 } from "../types/errors";
+import { InputPlayer, InputState, InputBoard } from "../src/testHarnessInput";
 
 describe("validation", () => {
   const player1: Player = { name: "foo", color: PenguinColor.Black };
@@ -369,6 +371,35 @@ describe("validation", () => {
       expect(
         validatePenguinMove(game, player1, validStartPosition, validEndPosition)
       ).toEqual(true);
+    });
+  });
+
+  describe("isValidInputState", () => {
+    const inputPlayer1: InputPlayer = { color: PenguinColor.Brown, score: 0, places: [] };
+    const inputPlayer2: InputPlayer = { color: PenguinColor.White, score: 0, places: [] };
+    const inputPlayer3: InputPlayer = { color: PenguinColor.Black, score: 0, places: [] };
+    const inputPlayer4: InputPlayer = { color: PenguinColor.Red, score: 0, places: [] };
+    const inputPlayer5: InputPlayer = { color: PenguinColor.Brown, score: 0, places: [] };
+    const inputBoard1: InputBoard = [[1,2],[2,1]];
+    const inputBoard2: InputBoard = [[1,2,3,4,5,6],[1,2,3,4,5,6],[1,2,3,4,5,6],[1,2,3,4,5,6],[1,2,3,4,5,6]];
+    const inputBoard3: InputBoard = [[1,2,3,4],[1,2,3],[1,2,3]];
+    const invalidInputGame1: InputState = { board: inputBoard1, players: [inputPlayer1] };
+    const invalidInputGame2: InputState = { board: inputBoard1, players: [inputPlayer1, inputPlayer2, inputPlayer3, inputPlayer4, inputPlayer5] };
+    const invalidInputGame3: InputState = { board: inputBoard1, players: [inputPlayer1, inputPlayer2, inputPlayer5] };
+    const invalidInputGame4: InputState = { board: inputBoard2, players: [inputPlayer1, inputPlayer2] };
+    const validInputGame1: InputState = { board: inputBoard3, players: [inputPlayer1, inputPlayer2, inputPlayer3, inputPlayer4] }
+    const validInputGame2: InputState = { board: inputBoard3, players: [inputPlayer1, inputPlayer2] }
+
+    it("returns false when given an invalid input game", () => {
+      expect(isValidInputState(invalidInputGame1)).toEqual(false);
+      expect(isValidInputState(invalidInputGame2)).toEqual(false);
+      expect(isValidInputState(invalidInputGame3)).toEqual(false);
+      expect(isValidInputState(invalidInputGame4)).toEqual(false);
+    });
+
+    it("returns true when given a valid input game", () => {
+      expect(isValidInputState(validInputGame1)).toEqual(true);
+      expect(isValidInputState(validInputGame2)).toEqual(true);
     });
   });
 });

@@ -1,7 +1,7 @@
 import { DIRECTIONS, MovementDirection } from "../../board";
 import { Game, getCurrentPlayer, getCurrentPlayerColor } from "../../state";
 import { InputState, readStdin } from "./testHarnessInput";
-import { isError } from "./validation";
+import { isError, isValidInputState } from "./validation";
 import { movePenguin } from "./penguinPlacement";
 import { getNextPosition } from "./movementChecking";
 import {
@@ -105,8 +105,8 @@ readStdin()
 
     // If no error occurred in the above conversion, try to make
     // a move as part of the silly strategy and store the result.
-    if (!isError(gameStateOrError)) {
-      result = makeSillyMove(gameStateOrError);
+    if (isValidInputState(parsed) && !isError(gameStateOrError)) {
+      result = makeSillyMove(gameStateOrError) as Game;
     }
 
     if (result) {

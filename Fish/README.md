@@ -1,5 +1,51 @@
 # Fish - Andrew Leung and Fiona Gridley
 
+## 4 &mdash; The Game Tree
+
+These additions are for the assignment, [4 - The Game Tree](https://felleisen.org/matthias/4500-f20/4.html). The purpose of this assignment is to design and implement data representations for full games otherwise known as game trees, along with implementing functionality for creating, validating actions against, and mapping over these trees. In addition, we were tasked with creating a new testing harness that would serve as an integration test for our previously implemented game state.
+
+<details>
+  <summary>Click to see the new elements:</summary>
+  
+- `Fish` : Directory containing the entire Fish project
+  - `Common`
+    - `Controller`
+      - `src`
+        - `gameTreeCreation.ts` : Typescript file with functions for creating a GameTree
+        - `queryGameTree.ts` : Typescript file with functions related to querying a game tree (validating move, applying function to child nodes)
+        - `testHarnessConversion.ts` : Typescript file with functions relating to converting json test harness input to our data representations
+        - `testHarnessInput.ts` : Typescript file with type definintions for expected input for test harness data
+        - `xstate.ts` : TypeScript file with implementation for the assignment test harness
+      - `tests` : Directory containing test files for implementations
+        - `gameTreeCreation.spec.ts` : `gameTreeCreation.ts` test file
+        - `queryGameTree.spec.ts` : `queryGameTree.ts` test file
+        - `xstate.spec.ts` : test file
+    - `game-tree.ts` : TypeScript file containing definitions for game tree data representations
+    - `player-interface.ts` Typescript file containing API for player component
+  - `Planning` : Directory containing all planning documents for the Fish project
+    - `player-protocol.md` : Design document for planning the API for the player-referee protocol
+
+</details>
+
+### How To Test
+
+#### Our test suite
+
+Running the test suite for milestone 4 is the same as for milestone 3, see below.
+
+#### The test harness
+
+As requested within the assignment, we have created a test harness available in `libertyhill/4`. It consumes test data like those within `4/Test` (any file marked as input such like `<n>-in.json`) via STDIN and outputs via STDOUT.
+
+To run the harness from the `4` directory, run the following:
+
+```
+make
+./xstate < Tests/<n>-in.json
+```
+
+---
+
 ## 3 &mdash; The Game State
 
 These additions are for the assignment, [3 - The Game State](https://felleisen.org/matthias/4500-f20/3.html). The purpose of this assignment is to design and implement data representations for a Fish game's game state, be able to bridge between data representations via a test harness, and lastly design a representation of a full Fish game.

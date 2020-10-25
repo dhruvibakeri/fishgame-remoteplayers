@@ -6,6 +6,7 @@ import {
   getNextPenguinPlacementPosition,
   placeAllPenguinsZigZag,
   placeNextPenguin,
+  chooseNextAction,
 } from "../../../Player/strategy";
 import { NoMorePlacementsError } from "../types/errors";
 
@@ -239,5 +240,9 @@ describe("strategy", () => {
     it("places all penguins in the zig zag pattern", () => {
       expect(placeAllPenguinsZigZag(game)).toEqual(gameAfterAllPlacement);
     });
+  });
+
+  describe("chooseNextAction", () => {
+    it("", () => {});
   });
 });

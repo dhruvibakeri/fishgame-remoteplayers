@@ -9,6 +9,10 @@ import { Player, Game, getCurrentPlayerColor } from "../../state";
 import { Board, BoardPosition, PenguinColor } from "../../board";
 import { getReachablePositions } from "./movementChecking";
 import { positionsAreEqual } from "./penguinPlacement";
+import { InputState, InputPlayer } from "./testHarnessInput";
+import { MIN_NUMBER_OF_PLAYERS, MAX_NUMBER_OF_PLAYERS } from "./gameStateCreation";
+
+const MAX_TEST_HARNESS_BOARD_TILES = 25;
 
 /**
  * Given a board and a position, determine whether that position is within the
@@ -208,6 +212,32 @@ const validatePenguinMove = (
   return true;
 };
 
+/**
+ * Determine whether the given InputState is valid, meaning that:
+ * - it has a valid number of players
+ * - the player colors are unique
+ * - the number of tiles is under 25 and both dimensions are greater than 0
+ * 
+ * @param inputState the InputState to verify
+ * @return whether the inputState is valid
+ */
+const isValidInputState = (inputState: InputState): boolean => {
+  // Validate the number of players.
+  const validNumberOfPlayers = MIN_NUMBER_OF_PLAYERS <= inputState.players.length && inputState.players.length <= MAX_NUMBER_OF_PLAYERS;
+
+  // Validate the player colors are unique.
+  const distinctColors: Set<PenguinColor> = new Set(inputState.players.map((inputPlayer: InputPlayer) => inputPlayer.color));
+  const colorsAreUnique = distinctColors.size== inputState.players.length;
+
+  // Validate number of board tiles.
+  const longestRowLength = Math.max(...inputState.board.map((row: Array<number>) => row.length));
+  const numberOfTiles = longestRowLength * inputState.board.length;
+  const validNumberOfTiles = numberOfTiles <= MAX_TEST_HARNESS_BOARD_TILES;
+  const validBoardSize = isValidBoardSize(longestRowLength, inputState.board.length) && validNumberOfTiles;
+
+  return validNumberOfPlayers && colorsAreUnique && validBoardSize;
+}
+
 export {
   positionIsOnBoard,
   hasPenguinOnPosition,
@@ -218,4 +248,5 @@ export {
   validatePenguinMove,
   playerHasUnplacedPenguin,
   isError,
+  isValidInputState,
 };

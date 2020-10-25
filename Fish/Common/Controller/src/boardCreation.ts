@@ -237,8 +237,12 @@ const createNumberedBoard = (
     return new InvalidBoardConstraintsError(0, 0);
   }
 
+  // Find length of longest array of tiles, in case extra 0 tiles need to be added
+  let maxLength = tileFish[0].length;
+  tileFish.map((row: number[]) => maxLength = maxLength > row.length ? maxLength : row.length);
+
   // Begin with a blank board the same size as the given 2D array.
-  const blankBoard = createBlankBoard(tileFish.length, tileFish[0].length, 0);
+  const blankBoard = createBlankBoard(tileFish.length, maxLength, 0);
 
   if (isError(blankBoard)) {
     return blankBoard;
@@ -248,7 +252,7 @@ const createNumberedBoard = (
     // For each given tile fish amount, set the corresponding Tile on the
     // created blank board to that fish amount.
     for (let row = 0; row < tileFish.length; row++) {
-      for (let col = 0; col < tileFish[0].length; col++) {
+      for (let col = 0; col < tileFish[row].length; col++) {
         const setTileBoard = setTileOnBoard(
           curBoard,
           { row, col },
