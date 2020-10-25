@@ -9,6 +9,7 @@ import {
   InvalidPositionError,
   InvalidGameStateError,
   IllegalPenguinPositionError,
+  NoMorePlacementsError,
 } from "../types/errors";
 import {
   isError,
@@ -105,7 +106,7 @@ const placePenguin = (
   position: BoardPosition
 ):
   | Game
-  | InvalidPositionError
+  | NoMorePlacementsError
   | InvalidGameStateError
   | IllegalPenguinPositionError => {
   // Validate position where penguin will be placed
@@ -115,10 +116,7 @@ const placePenguin = (
 
   // Validate that player has unplaced penguin(s) remaining
   if (!playerHasUnplacedPenguin(player, game)) {
-    return new InvalidGameStateError(
-      game,
-      "Player does not have any remaining unplaced penguins"
-    );
+    return new NoMorePlacementsError(game);
   }
 
   // Validate that player is the current player (it's currently the given player's turn)

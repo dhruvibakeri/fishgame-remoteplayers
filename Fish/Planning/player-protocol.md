@@ -4,13 +4,13 @@
 
 The following are the various calling conventions within the player-referee API which each participating player must implement. It is meant to surface the lines of communication between the referee and player components so that each player may expose to the referee how to make its placements and movements, notify the player of diqualification, and provide to the player information on the outcome of the game.
 
-___
+---
 
 ### MakePlacement: `(Game) => BoardPosition`
 
 The MakePlacement call is meant to expose to the referee that calls it a means to get that player's next placement within the placement rounds of the Game. This means that making this call should only be done within a the placement stage of the game, at that player's turn. As part of making this call, the referee must supply the current Game state of the game from which the player will be making their placement, which should correctly denote the receiving player as the current player. The return of this call is subsequently the position on the Board of the current Game state where the player wishes to place their penguin.
 
-___
+---
 
 ### MakeMovement: `(Game) => Movement`
 
