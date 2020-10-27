@@ -182,7 +182,7 @@ describe("penguinMovement", () => {
       ).toEqual(
         new InvalidGameStateError(
           noUnplacedPenguinsGame,
-          "Player does not have any remaining unplaced penguins"
+          "Player foo has no more placements available."
         )
       );
     });

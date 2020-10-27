@@ -169,6 +169,10 @@ class IllegalMovementError extends Error {
   }
 }
 
+/**
+ * Error used to represent a player attempting to place a penguin when they 
+ * have no more placements available.
+ */
 class NoMorePlacementsError extends Error {
   game: Game;
   message: string;
@@ -186,6 +190,47 @@ class NoMorePlacementsError extends Error {
   }
 }
 
+/**
+ * Error used to represent a player trying to find an action to make when they 
+ * have no more possible movements they can make.
+ */
+class NoMoreMovementsError extends Error {
+  game: Game;
+  message: string;
+
+  constructor(game: Game, message?: string) {
+    super();
+    if (message) {
+      this.message = message;
+    } else {
+      this.message = `Player ${
+        getCurrentPlayer(game).name
+      } has no more movements available.`;
+    }
+    this.stack = new Error().stack;
+  }
+}
+
+/**
+ * Error used when trying to create a game tree from an invalid game state,
+ * meaning a game state in which not all penguins have been placed.
+ */
+class InvalidGameForTreeError extends Error {
+  game: Game;
+  message: string;
+
+  constructor(game: Game, message?: string) {
+    super();
+    if (message) {
+      this.message = message;
+    } else {
+      this.message = 'Invalid game for tree generation. Not all penguins have been placed';
+    }
+    this.stack = new Error().stack;
+  }
+}
+
+
 export {
   InvalidPositionError,
   InvalidBoardConstraintsError,
@@ -195,4 +240,6 @@ export {
   InvalidGameStateError,
   IllegalMovementError,
   NoMorePlacementsError,
+  NoMoreMovementsError,
+  InvalidGameForTreeError,
 };

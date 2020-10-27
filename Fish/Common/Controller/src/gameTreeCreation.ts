@@ -8,6 +8,16 @@ import {
 import { BoardPosition } from "../../board";
 import { getReachablePositions } from "./movementChecking";
 import { movePenguin } from "./penguinPlacement";
+import { InvalidGameForTreeError } from "../types/errors";
+
+/**
+ * Checks if tree can be generated for given game, meaning all penguins have been placed
+ * @param game game to check for number of placed penguins
+ * @returns true if all penguins have been placed, false if not
+ */
+const isGameTreeable = (game: Game): boolean => {
+  return game.penguinPositions.size === (6 - game.players.length) * game.players.length;
+}
 
 /**
  * Given a Game state, return its corresponding GameTree.
@@ -15,7 +25,10 @@ import { movePenguin } from "./penguinPlacement";
  * @param game the Game state
  * @return the state's corresponding GameTree
  */
-const createGameTree = (game: Game): GameTree => {
+const createGameTree = (game: Game): GameTree | InvalidGameForTreeError => {
+  if (!isGameTreeable) {
+    return new InvalidGameForTreeError(game);
+  }
   return {
     gameState: game,
     potentialMoves: generatePotentialMoveMapping(game),

@@ -8,9 +8,11 @@ import {
 import {
   IllegalPenguinPositionError,
   InvalidGameStateError,
+  NoMoreMovementsError,
   NoMorePlacementsError,
 } from "../Common/Controller/types/errors";
-import { Movement } from "../Common/game-tree";
+import { Movement, GameTree, PotentialMovement } from "../Common/game-tree";
+import { createGameTree } from "../Common/Controller/src/gameTreeCreation";
 
 /**
  * Using the zig-zag strategy as outlined in Milestone 5, finds the next
@@ -53,6 +55,8 @@ const placeNextPenguin = (
   );
 
   // Attempt to place the penguin and return the result.
+  const result = placePenguin(getCurrentPlayer(game), game, placementPosition) as Game;
+  console.log(result.board.tiles);
   return placePenguin(getCurrentPlayer(game), game, placementPosition);
 };
 
@@ -77,10 +81,10 @@ const placeAllPenguinsZigZag = (
     | InvalidGameStateError
     | IllegalPenguinPositionError = game;
   while (
-    game.remainingUnplacedPenguins.get(curPlayer.color) > 0 &&
-    !isError(placedPenguinGame)
+    !isError(placedPenguinGame) &&
+    placedPenguinGame.remainingUnplacedPenguins.get(curPlayer.color) > 0
   ) {
-    placedPenguinGame = placeNextPenguin(game);
+    placedPenguinGame = placeNextPenguin(placedPenguinGame);
     if (!isError(placedPenguinGame)) {
       curPlayer = getCurrentPlayer(placedPenguinGame);
     }
@@ -89,12 +93,136 @@ const placeAllPenguinsZigZag = (
   return placedPenguinGame;
 };
 
-const chooseNextAction = (game: Game, lookAheadDepth: number): Movement => {
+/**
+ * Minimax recursive search function to find the maximum possible score for the searchingPlayerIndex,
+ * assuming all other players will make a move to minimize the searchingPlayerIndex's score.
+ * This computation will be done up to a given remaining depth in the searching player's turns.
+ * 
+ * @param gameTree GameTree representing the current node in tree traversal
+ * @param searchingPlayerIndex Index in gameTree.gameState.players for the player the function is maximizing for
+ * @param lookAheadTurnsDepth Depth remaining in tree traversal
+ */
+const getMinMaxScore = (gameTree: GameTree, searchingPlayerIndex: number, lookAheadTurnsDepth: number): number => {
+  
+  // If current node is root node or if we've reached the desired depth, return current player score
+  if (lookAheadTurnsDepth === 0 || gameTree.potentialMoves.length === 0) {
+    return gameTree.gameState.scores.get(gameTree.gameState.players[searchingPlayerIndex].color);
+  };
+
+  const isMaximizing: boolean = searchingPlayerIndex === gameTree.gameState.curPlayerIndex;
+  const curLookAheadTurnsDepth: number = isMaximizing ? lookAheadTurnsDepth - 1 : lookAheadTurnsDepth;
+
+  // Get scores for all child nodes of current gameTree
+  const scores: number[] = [];
+  for (const potentialMovement of gameTree.potentialMoves) {
+    const potentialMovementTree: GameTree = potentialMovement.resultingGameTree()
+    const potentialMovementScore: number = getMinMaxScore(potentialMovementTree, searchingPlayerIndex, curLookAheadTurnsDepth);
+    scores.push(potentialMovementScore);
+  }
+
+  if (isMaximizing) {
+    // If the current player in the Game state is the player searching for their
+    // move, then find the maximum move.
+    return Math.max(...scores);  
+  }
+  return Math.min(...scores);
+}
+
+/**
+ * Given an array of T and a function to get the numeric value of T, return 
+ * an array containing the mininimum values of T.
+ * 
+ * @param arr the array to find the minimum values of
+ * @param getValue a function which gets the numeric value of a T
+ * @return the array containing the elements of arr which have the miinimum 
+ * numeric value.
+ */
+const minArray = <T>(arr: Array<T>, getValue: (el: T) => number): Array<T> => {
+  const values: Array<number> = arr.map((el: T) => getValue(el));
+  const minValue = Math.min(...values);
+  return arr.filter((el: T) => getValue(el) === minValue);
+}
+
+/**
+ * Given an array of T and a function to get the numeric value of T, return 
+ * an array containing the maximum values of T.
+ * 
+ * @param arr the array to find the maximum values of
+ * @param getValue a function which gets the numeric value of a T
+ * @return the array containing the elements of arr which have the maximum 
+ * numeric value.
+ */
+const maxArray = <T>(arr: Array<T>, getValue: (el: T) => number): Array<T> => {
+  const values: Array<number> = arr.map((el: T) => getValue(el));
+  const maxValue = Math.max(...values);
+  return arr.filter((el: T) => getValue(el) === maxValue);
+}
+
+/**
+ * Given a non empty array of movements, narrow them down into a single 
+ * movement by filtering in the order of the following criteria:
+ * - lowest starting row position
+ * - lowest starting column positionl
+ * - lowest ending row position
+ * - lowest ending column position
+ * 
+ * @param movements the movements to break ties for
+ * @return a single movement chosen from the given array of movements
+ */
+const tieBreakMovements = (movements: Array<Movement>): Movement => {
+  // Get the movements with the lowest starting row value.
+  const filteredByLowestStartingRow = minArray<Movement>(movements, (movement: Movement) => movement.startPosition.row);
+  if (filteredByLowestStartingRow.length === 1) {
+    return filteredByLowestStartingRow[0];
+  }
+
+  // Get the movements with the lowest starting column value.
+  const filteredByLowestStartCol = minArray<Movement>(filteredByLowestStartingRow, (movement: Movement) => movement.startPosition.col);
+  if (filteredByLowestStartCol.length === 1) {
+    return filteredByLowestStartCol[0];
+  }
+
+  // Get the movements with the lowest ending row value.
+  const filteredByLowestEndRow = minArray<Movement>(filteredByLowestStartCol, (movement: Movement) => movement.endPosition.row);
+  if (filteredByLowestEndRow.length === 1) {
+    return filteredByLowestEndRow[0];
+  }
+
+  // Get the movements with the lowest ending column value.
+  const filteredByLowestEndPosition = minArray<Movement>(filteredByLowestEndRow, (movement: Movement) => movement.endPosition.col);
+  return filteredByLowestEndPosition[0];
+}
+
+/**
+ * Choose the next action for the current player of the given Game state using
+ * a minimax optimization with the given maximum depth corresponding to the 
+ * number of that player's turns to search when optimizing.
+ * 
+ * @param game the Game state to find the next action from
+ * @param lookAheadTurnsDepth the maximum number of turns for the current 
+ * player to search through when optimimizing using the minimax optimization
+ * strategy. 
+ */
+const chooseNextAction = (game: Game, lookAheadTurnsDepth: number): Movement | NoMoreMovementsError => {
   // Create the GameTree for the given state.
-  // Examine depth-first to find the movement(s) that leads to the minimal
-  // maximum gain for the Game's current player.
-  // Tie break the found movements.
+  const gameTree: GameTree = createGameTree(game);
+
+  // Return false if there are no next actions for the player to make.
+  if (gameTree.potentialMoves.length < 1) {
+    return new NoMoreMovementsError(game);
+  }
+
+  // For each of the movements, find their min max.
+  const movementsToMinMax: Array<[Movement, number]> = gameTree.potentialMoves.map((potentialMove: PotentialMovement) => [potentialMove.movement, getMinMaxScore(potentialMove.resultingGameTree(), game.curPlayerIndex, lookAheadTurnsDepth)]);
+ 
+  // Get the movements with the greatest scores.
+  const maxMovements: Array<Movement> = maxArray<[Movement, number]>(movementsToMinMax, ([, score]: [Movement, number]) => score).map(([movement, score]: [Movement, number]) => movement);
+  
+  // Tie break into a single movement
+  const nextMovement: Movement | false = tieBreakMovements(maxMovements);
+
   // Return the next movement.
+  return nextMovement;
 };
 
 export {
@@ -102,4 +230,8 @@ export {
   placeNextPenguin,
   placeAllPenguinsZigZag,
   chooseNextAction,
+  getMinMaxScore,
+  minArray,
+  maxArray,
+  tieBreakMovements,
 };
