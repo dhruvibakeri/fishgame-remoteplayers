@@ -7,6 +7,7 @@ import {
 } from "../Common/Controller/src/validation";
 import {
   IllegalPenguinPositionError,
+  InvalidGameForTreeError,
   InvalidGameStateError,
   NoMoreMovementsError,
   NoMorePlacementsError,
@@ -23,7 +24,7 @@ import { createGameTree } from "../Common/Controller/src/gameTreeCreation";
  * @returns BoardPosition representing the next available position to place
  * a penguin.
  */
-const getNextPenguinPlacementPosition = (game: Game): BoardPosition => {
+const getNextPenguinPlacementPosition = (game: Game): BoardPosition | NoMorePlacementsError => {
   for (let row = 0; row < game.board.tiles.length; row++) {
     for (let col = 0; col < game.board.tiles[0].length; col++) {
       if (positionIsPlayable(game, { row, col })) {
@@ -31,6 +32,7 @@ const getNextPenguinPlacementPosition = (game: Game): BoardPosition => {
       }
     }
   }
+  return new NoMorePlacementsError(game);
 };
 
 /**
@@ -50,17 +52,15 @@ const placeNextPenguin = (
   | InvalidGameStateError
   | IllegalPenguinPositionError => {
   // Get next available space in zig zag pattern.
-  const placementPosition: BoardPosition = getNextPenguinPlacementPosition(
+  const placementPosition: BoardPosition | NoMorePlacementsError = getNextPenguinPlacementPosition(
     game
   );
 
+  if (isError(placementPosition)) {
+    return new NoMorePlacementsError(game);
+  }
+
   // Attempt to place the penguin and return the result.
-  const result = placePenguin(
-    getCurrentPlayer(game),
-    game,
-    placementPosition
-  ) as Game;
-  console.log(result.board.tiles);
   return placePenguin(getCurrentPlayer(game), game, placementPosition);
 };
 
@@ -232,14 +232,21 @@ const tieBreakMovements = (movements: Array<Movement>): Movement => {
 const chooseNextAction = (
   game: Game,
   lookAheadTurnsDepth: number
-): Movement | NoMoreMovementsError => {
+): Movement | NoMoreMovementsError | InvalidGameForTreeError => {
   // Create the GameTree for the given state.
-  const gameTree: GameTree = createGameTree(game);
+  const gameTree: GameTree | InvalidGameForTreeError = createGameTree(game);
+
+  // Return gameTree error if given game state is not valid game state for tree creation
+  if (isError(gameTree)) {
+    return gameTree;
+  }
 
   // Return false if there are no next actions for the player to make.
   if (gameTree.potentialMoves.length < 1) {
     return new NoMoreMovementsError(game);
   }
+
+  gameTree.potentialMoves.forEach((value: PotentialMovement) => console.log(value.movement));
 
   // For each of the movements, find their min max.
   const movementsToMinMax: Array<[

@@ -134,36 +134,36 @@ describe("gameTreeCreation", () => {
     { movement: movement3, length: 1 },
   ];
 
-  describe("createGameTree", () => {
-    const actual = createGameTree(game);
-    const actualPotentialStates = actual.potentialMoves.map(
-      (potentialMove: PotentialMovement) => {
-        return {
-          movement: potentialMove.movement,
-          game: potentialMove.resultingGameTree().gameState,
-        };
-      }
-    );
-    const actualPotentialLengths = actual.potentialMoves.map(
-      (potentialMove: PotentialMovement) => {
-        return {
-          movement: potentialMove.movement,
-          length: potentialMove.resultingGameTree().potentialMoves.length,
-        };
-      }
-    );
-    it("creates a game tree for a given game with the correct state", () => {
-      expect(actual.gameState).toEqual(game);
-    });
+  // describe("createGameTree", () => {
+  //   const actual = createGameTree(game);
+  //   const actualPotentialStates = actual.potentialMoves.map(
+  //     (potentialMove: PotentialMovement) => {
+  //       return {
+  //         movement: potentialMove.movement,
+  //         game: potentialMove.resultingGameTree().gameState,
+  //       };
+  //     }
+  //   );
+  //   const actualPotentialLengths = actual.potentialMoves.map(
+  //     (potentialMove: PotentialMovement) => {
+  //       return {
+  //         movement: potentialMove.movement,
+  //         length: potentialMove.resultingGameTree().potentialMoves.length,
+  //       };
+  //     }
+  //   );
+  //   it("creates a game tree for a given game with the correct state", () => {
+  //     expect(actual.gameState).toEqual(game);
+  //   });
 
-    it("creates a game tree for a given game with the correct potential states", () => {
-      expect(actualPotentialStates).toEqual(expectedGameStates);
-    });
+  //   it("creates a game tree for a given game with the correct potential states", () => {
+  //     expect(actualPotentialStates).toEqual(expectedGameStates);
+  //   });
 
-    it("creates a game tree for a given game with the correct potential move lengths for its potential moves", () => {
-      expect(actualPotentialLengths).toEqual(expectedPotentialMoveLengths);
-    });
-  });
+  //   it("creates a game tree for a given game with the correct potential move lengths for its potential moves", () => {
+  //     expect(actualPotentialLengths).toEqual(expectedPotentialMoveLengths);
+  //   });
+  // });
 
   describe("generatePotentialMoveMapping", () => {
     const actual = generatePotentialMoveMapping(game);

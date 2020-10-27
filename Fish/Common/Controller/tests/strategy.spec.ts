@@ -16,11 +16,12 @@ import {
   maxArray,
   tieBreakMovements,
 } from "../../../Player/strategy";
-import { NoMorePlacementsError } from "../types/errors";
+import { InvalidGameForTreeError, NoMorePlacementsError } from "../types/errors";
 import { inputStateToGameState } from "../src/testHarnessConversion";
 import { InputPlayer } from "../src/testHarnessInput";
 import { createGameTree } from "../src/gameTreeCreation";
 import { GameTree, Movement } from "../../game-tree";
+import { movePenguin } from "../src/penguinPlacement";
 
 describe("strategy", () => {
   const player1: Player = {
@@ -124,7 +125,7 @@ describe("strategy", () => {
     Array<BoardPosition>
   > = new Map([
     [player1.color, [placement1Position, placement3PositionWithHole]],
-    [player2.color, [placement2Position]],
+    [player2.color, [placement2PositionWithHole]],
   ]);
   const remainingUnplacedPenguinsAfterPlacement3WithHole: Map<
     PenguinColor,
@@ -138,7 +139,7 @@ describe("strategy", () => {
     [player2.color, 1],
   ]);
   const gameAfterPlacement3WithHole: Game = {
-    ...gameAfterPlacement1,
+    ...gameAfterPlacement2WithHole,
     curPlayerIndex: 1,
     penguinPositions: penguinPositionsAfterPlacement3WithHole,
     remainingUnplacedPenguins: remainingUnplacedPenguinsAfterPlacement3WithHole,
@@ -185,39 +186,32 @@ describe("strategy", () => {
     remainingUnplacedPenguins: remainingUnplacedPenguinsAfterAllPlacement,
     scores: scoresAfterAllPlacement,
   };
+  const gameNoMoves: Game = movePenguin(gameAfterAllPlacement, player1, {row: 1, col: 1}, {row: 2, col: 2}) as Game;
+  const gameTreeNoMoves: GameTree = createGameTree(gameNoMoves) as GameTree;
 
-  const gameWithTwoPiecesPositions: Map<
-    PenguinColor,
-    Array<BoardPosition>
-  > = new Map([
-    [player1.color, [{ col: 0, row: 0 }]],
-    [player2.color, [{ col: 2, row: 2 }]],
-  ]);
-  const gameWithTwoPiecesBoard: Board = {
-    tiles: [
-      [{ numOfFish: 1 }, { numOfFish: 2 }],
-      [{ numOfFish: 3 }, { numOfFish: 2 }],
-      [{ numOfFish: 1 }, { numOfFish: 2 }],
-    ],
-  };
-  const gameWithTwoPieces: Game = {
-    ...game,
-    board: gameWithTwoPiecesBoard,
-    penguinPositions: gameWithTwoPiecesPositions,
-    scores: scoresAfterPlacement2,
-    remainingUnplacedPenguins: remainingUnplacedPenguinsAfterAllPlacement,
-  };
-  const noMovesGame: Game = {
-    ...gameWithTwoPieces,
-    penguinPositions: new Map([
-      [player1.color, []],
-      [player2.color, []],
-    ]),
-  };
-  const gameTree: GameTree = createGameTree(gameWithTwoPieces);
-  console.log("no moves");
-  const gameTreeNoMoves: GameTree = createGameTree(noMovesGame);
-
+  // const gameWithTwoPiecesPositions: Map<
+  //   PenguinColor,
+  //   Array<BoardPosition>
+  // > = new Map([
+  //   [player1.color, [{ col: 0, row: 0 }]],
+  //   [player2.color, [{ col: 2, row: 2 }]],
+  // ]);
+  // const gameWithTwoPiecesBoard: Board = {
+  //   tiles: [
+  //     [{ numOfFish: 1 }, { numOfFish: 2 }],
+  //     [{ numOfFish: 3 }, { numOfFish: 2 }],
+  //     [{ numOfFish: 1 }, { numOfFish: 2 }],
+  //   ],
+  // };
+  // const gameWithTwoPieces: Game = {
+  //   ...game,
+  //   board: gameWithTwoPiecesBoard,
+  //   penguinPositions: gameWithTwoPiecesPositions,
+  //   scores: scoresAfterPlacement2,
+  //   remainingUnplacedPenguins: remainingUnplacedPenguinsAfterAllPlacement,
+  // };
+  const gameTree: GameTree = createGameTree(gameAfterAllPlacement) as GameTree;
+  
   describe("getNextPenguinPlacementPosition", () => {
     it("returns next open position in the zig zag ordering", () => {
       expect(getNextPenguinPlacementPosition(game)).toEqual(placement1Position);
@@ -254,8 +248,6 @@ describe("strategy", () => {
     });
 
     it("zig zags back to the first position of the next row", () => {
-      console.log(gameAfterPlacement3WithHole.board.tiles);
-      console.log(gameAfterPlacement2WithHole.board.tiles);
       expect(placeNextPenguin(gameAfterPlacement2WithHole)).toEqual(
         gameAfterPlacement3WithHole
       );
@@ -288,56 +280,62 @@ describe("strategy", () => {
     });
   });
 
-  // describe("chooseNextAction", () => {
-  //   const inputBoard = [[1,1,2],[2,1,2],[1,1,1],[1,2,3]];
-  //   const inputPlayers: InputPlayer[] = [
-  //     {
-  //       color: PenguinColor.Black,
-  //       score: 8,
-  //       places: [[0,0],[1,0],[3,1],[3,2]]
-  //     },
-  //     {
-  //       color: PenguinColor.Brown,
-  //       score: 6,
-  //       places: [[3,0],[2,1],[0,2],[1,2]]
-  //     }
-  //   ];
-  //   const startingGame = inputStateToGameState({board: inputBoard, players: inputPlayers}) as Game;
-  //   const numberedBoard = createNumberedBoard([[1,3,5,4],[3,2,4,1],[2,3,5,1],[4,1,1,2]]) as Board;
-  //   const numberedGame = createGameState(players, numberedBoard) as Game;
-  //   const gameAfterPlacement = placeAllPenguinsZigZag(numberedGame) as Game;
-  //   const numberedBoardWithHoles = createNumberedBoard([[1,0,5],[3,0,4,1],[2,3,5],[0,1,0,2]]) as Board;
-  //   const numberedGameWithHoles = createGameState(players, numberedBoardWithHoles) as Game;
-  //   const gameAfterPlacementWithHoles = placeAllPenguinsZigZag(numberedGameWithHoles) as Game;
+  describe("chooseNextAction", () => {
+    const inputBoard = [[1,1,2],[2,1,2],[1,1,1],[1,2,3]];
+    const inputPlayers: InputPlayer[] = [
+      {
+        color: PenguinColor.Black,
+        score: 8,
+        places: [[0,0],[1,0],[3,1],[3,2]]
+      },
+      {
+        color: PenguinColor.Brown,
+        score: 6,
+        places: [[3,0],[2,1],[0,2],[1,2]]
+      }
+    ];
+    const startingGame = inputStateToGameState({board: inputBoard, players: inputPlayers}) as Game;
+    const numberedBoard = createNumberedBoard([[1,3,5,4],[3,2,4,1],[2,3,5,1],[4,1,1,2]]) as Board;
+    const numberedGame = createGameState(players, numberedBoard) as Game;
+    const gameAfterPlacement = placeAllPenguinsZigZag(numberedGame) as Game;
+    // console.log(gameAfterPlacement.board.tiles);
+    // console.log(gameAfterPlacement.penguinPositions);
+    const numberedBoardWithHoles = createNumberedBoard([[1,0,5],[3,0,4,1],[2,3,5],[0,1,0,2]]) as Board;
+    const numberedGameWithHoles = createGameState(players, numberedBoardWithHoles) as Game;
+    const gameAfterPlacementWithHoles = placeAllPenguinsZigZag(numberedGameWithHoles) as Game;
 
-  //   it("Returns best movement for game state", () => {
-  //     expect(chooseNextAction(startingGame, 2)).toBe(false);
-  //     expect(chooseNextAction(gameAfterPlacement, 2)).toBe(false);
-  //     expect(chooseNextAction(gameAfterPlacementWithHoles, 2)).toBe(false);
-  //   });
-  // });
+    it("Returns best movement for game state", () => {
+      console.log(startingGame.board.tiles);
+      console.log(startingGame.penguinPositions);
+      expect(chooseNextAction(startingGame, 2)).toBe(false);
+      expect(chooseNextAction(gameAfterPlacement, 1)).toBe(false);
+      expect(chooseNextAction(gameAfterPlacementWithHoles, 2)).toBe(false);
+    });
+  });
 
   describe("getMinMaxScore", () => {
     it("returns the searching player's score if the depth is 0", () => {
-      expect(getMinMaxScore(gameTree, 0, 0)).toEqual(1);
+      expect(getMinMaxScore(gameTree, 0, 0)).toEqual(4);
     });
 
     it("returns the searching player's score if there are no more potential moves", () => {
-      expect(getMinMaxScore(gameTreeNoMoves, 0, 1)).toEqual(1);
+      expect(getMinMaxScore(gameTreeNoMoves, 0, 1)).toEqual(5);
     });
 
     it("returns a maximum of the found scores if it's the searching player's turn", () => {
-      expect(getMinMaxScore(gameTree, 0, 1)).toEqual(3);
-      expect(getMinMaxScore(gameTree, 0, 2)).toEqual(4);
+      expect(getMinMaxScore(gameTree, 0, 1)).toEqual(5);
+      expect(getMinMaxScore(gameTree, 0, 2)).toEqual(5);
     });
 
     it("returns a minimum of the found scores if it's not the searching player's turns", () => {
       const opponentTurnGame: Game = {
-        ...game,
+        ...gameAfterAllPlacement,
         curPlayerIndex: 1,
       };
-      const opponentTurnGameTree = createGameTree(opponentTurnGame);
-      expect(getMinMaxScore(opponentTurnGameTree, 0, 2)).toEqual(1);
+      const opponentTurnGameTree = createGameTree(opponentTurnGame) as GameTree;
+      expect(getMinMaxScore(opponentTurnGameTree, 0, 0)).toEqual(4);
+      expect(getMinMaxScore(opponentTurnGameTree, 0, 1)).toEqual(4);
+      expect(getMinMaxScore(opponentTurnGameTree, 0, 2)).toEqual(4);
     });
   });
 

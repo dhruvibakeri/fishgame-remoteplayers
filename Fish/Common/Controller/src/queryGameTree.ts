@@ -2,7 +2,6 @@ import { Game, getCurrentPlayer } from "../../state";
 import { GameTree, Movement, PotentialMovement } from "../../game-tree";
 import { movePenguin, positionsAreEqual } from "./penguinPlacement";
 import { IllegalMovementError } from "../types/errors";
-import { createGameTree } from "./gameTreeCreation";
 
 /**
  * Checks if given movement can be made with the given GameTree node. If it can,

@@ -1,11 +1,11 @@
-import { Game, getCurrentPlayerColor, MovementGame } from "../../state";
+import { Game, getCurrentPlayerColor } from "../../state";
 import {
   GameTree,
   Movement,
   LazyGameTree,
   PotentialMovement,
 } from "../../game-tree";
-import { BoardPosition } from "../../board";
+import { BoardPosition, PenguinColor } from "../../board";
 import { getReachablePositions } from "./movementChecking";
 import { movePenguin } from "./penguinPlacement";
 import { InvalidGameForTreeError } from "../types/errors";
@@ -16,8 +16,12 @@ import { InvalidGameForTreeError } from "../types/errors";
  * @returns true if all penguins have been placed, false if not
  */
 const isGameTreeable = (game: Game): boolean => {
+  let placedPenguins: number = 0;
+  game.penguinPositions.forEach((value: BoardPosition[]) => {
+    placedPenguins += value.length;
+  });
   return (
-    game.penguinPositions.size ===
+    placedPenguins ===
     (6 - game.players.length) * game.players.length
   );
 };
@@ -29,7 +33,7 @@ const isGameTreeable = (game: Game): boolean => {
  * @return the state's corresponding GameTree
  */
 const createGameTree = (
-  game: MovementGame
+  game: Game,
 ): GameTree | InvalidGameForTreeError => {
   if (!isGameTreeable(game)) {
     return new InvalidGameForTreeError(game);
@@ -75,7 +79,7 @@ const generatePotentialMoveMapping = (game: Game): Array<PotentialMovement> => {
 /**
  * Given a Game state and a Movement, create the resulting LazyGameTree
  * corresponding to the current player of the given state making that
- * Movement.
+ * Movement. This function is only used by createGameTree.
  *
  * @param game the Game state
  * @param movement the Movement to apply
@@ -91,7 +95,13 @@ const createLazyGameTree = (game: Game, movement: Movement): LazyGameTree => {
     movement.startPosition,
     movement.endPosition
   ) as Game;
-  return () => createGameTree(newGameState);
+
+  // Cast newGameTree as GameTree. This can be done because this function is only called
+  // by createGameTree, which validates that the original game state is valid for tree
+  // generation. All children of valid game tree nodes are also valid game trees.
+  const newGameTree: GameTree = createGameTree(newGameState) as GameTree;
+
+  return () => newGameTree;
 };
 
 export { createGameTree, generatePotentialMoveMapping, createLazyGameTree };
