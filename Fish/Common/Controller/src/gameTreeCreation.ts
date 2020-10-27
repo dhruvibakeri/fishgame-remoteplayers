@@ -1,4 +1,4 @@
-import { Game, getCurrentPlayerColor } from "../../state";
+import { Game, getCurrentPlayerColor, MovementGame } from "../../state";
 import {
   GameTree,
   Movement,
@@ -16,8 +16,11 @@ import { InvalidGameForTreeError } from "../types/errors";
  * @returns true if all penguins have been placed, false if not
  */
 const isGameTreeable = (game: Game): boolean => {
-  return game.penguinPositions.size === (6 - game.players.length) * game.players.length;
-}
+  return (
+    game.penguinPositions.size ===
+    (6 - game.players.length) * game.players.length
+  );
+};
 
 /**
  * Given a Game state, return its corresponding GameTree.
@@ -25,8 +28,10 @@ const isGameTreeable = (game: Game): boolean => {
  * @param game the Game state
  * @return the state's corresponding GameTree
  */
-const createGameTree = (game: Game): GameTree | InvalidGameForTreeError => {
-  if (!isGameTreeable) {
+const createGameTree = (
+  game: MovementGame
+): GameTree | InvalidGameForTreeError => {
+  if (!isGameTreeable(game)) {
     return new InvalidGameForTreeError(game);
   }
   return {

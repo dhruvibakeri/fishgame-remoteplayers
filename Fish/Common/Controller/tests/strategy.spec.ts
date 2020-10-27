@@ -1,7 +1,11 @@
 import { createGameState } from "../src/gameStateCreation";
 import { Game, Player } from "../../state";
 import { Board, BoardPosition, PenguinColor } from "../../board";
-import { createBlankBoard, createNumberedBoard, setTileToHole } from "../src/boardCreation";
+import {
+  createBlankBoard,
+  createNumberedBoard,
+  setTileToHole,
+} from "../src/boardCreation";
 import {
   getNextPenguinPlacementPosition,
   placeAllPenguinsZigZag,
@@ -10,12 +14,13 @@ import {
   getMinMaxScore,
   minArray,
   maxArray,
+  tieBreakMovements,
 } from "../../../Player/strategy";
 import { NoMorePlacementsError } from "../types/errors";
 import { inputStateToGameState } from "../src/testHarnessConversion";
 import { InputPlayer } from "../src/testHarnessInput";
 import { createGameTree } from "../src/gameTreeCreation";
-import { GameTree } from "../../game-tree";
+import { GameTree, Movement } from "../../game-tree";
 
 describe("strategy", () => {
   const player1: Player = {
@@ -181,15 +186,20 @@ describe("strategy", () => {
     scores: scoresAfterAllPlacement,
   };
 
-  const gameWithTwoPiecesPositions: Map<PenguinColor, Array<BoardPosition>> = new Map([
-    [player1.color, [{col: 0, row: 0}]],
-    [player2.color, [{col: 2, row: 2}]]
+  const gameWithTwoPiecesPositions: Map<
+    PenguinColor,
+    Array<BoardPosition>
+  > = new Map([
+    [player1.color, [{ col: 0, row: 0 }]],
+    [player2.color, [{ col: 2, row: 2 }]],
   ]);
-  const gameWithTwoPiecesBoard: Board = { tiles: [
-    [{ numOfFish: 1 }, { numOfFish: 2 }],
-    [{ numOfFish: 3 }, { numOfFish: 2 }],
-    [{ numOfFish: 1 }, { numOfFish: 2 }],
-  ]};
+  const gameWithTwoPiecesBoard: Board = {
+    tiles: [
+      [{ numOfFish: 1 }, { numOfFish: 2 }],
+      [{ numOfFish: 3 }, { numOfFish: 2 }],
+      [{ numOfFish: 1 }, { numOfFish: 2 }],
+    ],
+  };
   const gameWithTwoPieces: Game = {
     ...game,
     board: gameWithTwoPiecesBoard,
@@ -202,7 +212,7 @@ describe("strategy", () => {
     penguinPositions: new Map([
       [player1.color, []],
       [player2.color, []],
-    ])
+    ]),
   };
   const gameTree: GameTree = createGameTree(gameWithTwoPieces);
   console.log("no moves");
@@ -299,14 +309,14 @@ describe("strategy", () => {
   //   const numberedBoardWithHoles = createNumberedBoard([[1,0,5],[3,0,4,1],[2,3,5],[0,1,0,2]]) as Board;
   //   const numberedGameWithHoles = createGameState(players, numberedBoardWithHoles) as Game;
   //   const gameAfterPlacementWithHoles = placeAllPenguinsZigZag(numberedGameWithHoles) as Game;
-    
+
   //   it("Returns best movement for game state", () => {
   //     expect(chooseNextAction(startingGame, 2)).toBe(false);
   //     expect(chooseNextAction(gameAfterPlacement, 2)).toBe(false);
   //     expect(chooseNextAction(gameAfterPlacementWithHoles, 2)).toBe(false);
   //   });
   // });
-  
+
   describe("getMinMaxScore", () => {
     it("returns the searching player's score if the depth is 0", () => {
       expect(getMinMaxScore(gameTree, 0, 0)).toEqual(1);
@@ -325,7 +335,7 @@ describe("strategy", () => {
       const opponentTurnGame: Game = {
         ...game,
         curPlayerIndex: 1,
-      }
+      };
       const opponentTurnGameTree = createGameTree(opponentTurnGame);
       expect(getMinMaxScore(opponentTurnGameTree, 0, 2)).toEqual(1);
     });
@@ -333,9 +343,9 @@ describe("strategy", () => {
 
   describe("minArray", () => {
     it("finds the minimum elements of an array", () => {
-      const arr = [{foo: 1}, {foo: 2}, {foo: 1}, {foo: 3}];
+      const arr = [{ foo: 1 }, { foo: 2 }, { foo: 1 }, { foo: 3 }];
       const fn = (foo: any) => foo.foo;
-      expect(minArray(arr, fn)).toEqual([{foo: 1}, {foo: 1}])
+      expect(minArray(arr, fn)).toEqual([{ foo: 1 }, { foo: 1 }]);
     });
 
     it("returns an empty array when given an empty array", () => {
@@ -345,9 +355,9 @@ describe("strategy", () => {
 
   describe("maxArray", () => {
     it("finds the maximum elements of an array", () => {
-      const arr = [{foo: 3}, {foo: 2}, {foo: 1}, {foo: 3}];
+      const arr = [{ foo: 3 }, { foo: 2 }, { foo: 1 }, { foo: 3 }];
       const fn = (foo: any) => foo.foo;
-      expect(maxArray(arr, fn)).toEqual([{foo: 3}, {foo: 3}])
+      expect(maxArray(arr, fn)).toEqual([{ foo: 3 }, { foo: 3 }]);
     });
 
     it("returns an empty array when given an empty array", () => {
@@ -356,12 +366,81 @@ describe("strategy", () => {
   });
 
   describe("tieBreakMovements", () => {
-    it("chooses the movement with the lowest starting row", () => {});
+    const startPosition1: BoardPosition = { col: 0, row: 0 };
+    const endPosition1: BoardPosition = { col: 0, row: 1 };
+    const movement1: Movement = {
+      startPosition: startPosition1,
+      endPosition: endPosition1,
+    };
 
-    it("chooses the movement with the lowest starting row then column", () => {});
+    const startPosition2: BoardPosition = { col: 1, row: 1 };
+    const endPosition2: BoardPosition = { col: 1, row: 2 };
+    const movement2: Movement = {
+      startPosition: startPosition2,
+      endPosition: endPosition2,
+    };
 
-    it("chooses the movement with the lowest starting position then ending row", () => {});
+    const startPosition3: BoardPosition = { col: 2, row: 1 };
+    const endPosition3: BoardPosition = { col: 2, row: 2 };
+    const movement3: Movement = {
+      startPosition: startPosition3,
+      endPosition: endPosition3,
+    };
 
-    it("chooses the movement with the lowest starting position then ending position", () => {});
-  })
+    const startPosition4: BoardPosition = { col: 2, row: 0 };
+    const endPosition4: BoardPosition = { col: 2, row: 1 };
+    const movement4: Movement = {
+      startPosition: startPosition4,
+      endPosition: endPosition4,
+    };
+
+    const endPosition5: BoardPosition = { col: 2, row: 2 };
+    const movement5: Movement = {
+      startPosition: startPosition1,
+      endPosition: endPosition5,
+    };
+
+    const endPosition6: BoardPosition = { col: 2, row: 1 };
+    const movement6: Movement = {
+      startPosition: startPosition1,
+      endPosition: endPosition6,
+    };
+
+    it("chooses the movement with the lowest starting row", () => {
+      expect(tieBreakMovements([movement2, movement1, movement3])).toEqual(
+        movement1
+      );
+    });
+
+    it("chooses the movement with the lowest starting row then column", () => {
+      expect(
+        tieBreakMovements([movement4, movement2, movement1, movement3])
+      ).toEqual(movement1);
+    });
+
+    it("chooses the movement with the lowest starting position then ending row", () => {
+      expect(
+        tieBreakMovements([
+          movement3,
+          movement5,
+          movement2,
+          movement1,
+          movement4,
+        ])
+      ).toEqual(movement1);
+    });
+
+    it("chooses the movement with the lowest starting position then ending position", () => {
+      expect(
+        tieBreakMovements([
+          movement2,
+          movement1,
+          movement4,
+          movement6,
+          movement5,
+          movement3,
+        ])
+      ).toEqual(movement1);
+    });
+  });
 });
