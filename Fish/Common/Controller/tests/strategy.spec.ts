@@ -16,7 +16,10 @@ import {
   maxArray,
   tieBreakMovements,
 } from "../../../Player/strategy";
-import { InvalidGameForTreeError, NoMorePlacementsError } from "../types/errors";
+import {
+  InvalidGameForTreeError,
+  NoMorePlacementsError,
+} from "../types/errors";
 import { inputStateToGameState } from "../src/testHarnessConversion";
 import { InputPlayer } from "../src/testHarnessInput";
 import { createGameTree } from "../src/gameTreeCreation";
@@ -186,7 +189,12 @@ describe("strategy", () => {
     remainingUnplacedPenguins: remainingUnplacedPenguinsAfterAllPlacement,
     scores: scoresAfterAllPlacement,
   };
-  const gameNoMoves: Game = movePenguin(gameAfterAllPlacement, player1, {row: 1, col: 1}, {row: 2, col: 2}) as Game;
+  const gameNoMoves: Game = movePenguin(
+    gameAfterAllPlacement,
+    player1,
+    { row: 1, col: 1 },
+    { row: 2, col: 2 }
+  ) as Game;
   const gameTreeNoMoves: GameTree = createGameTree(gameNoMoves) as GameTree;
 
   // const gameWithTwoPiecesPositions: Map<
@@ -211,7 +219,7 @@ describe("strategy", () => {
   //   remainingUnplacedPenguins: remainingUnplacedPenguinsAfterAllPlacement,
   // };
   const gameTree: GameTree = createGameTree(gameAfterAllPlacement) as GameTree;
-  
+
   describe("getNextPenguinPlacementPosition", () => {
     it("returns next open position in the zig zag ordering", () => {
       expect(getNextPenguinPlacementPosition(game)).toEqual(placement1Position);
@@ -281,32 +289,63 @@ describe("strategy", () => {
   });
 
   describe("chooseNextAction", () => {
-    const inputBoard = [[1,1,2],[2,1,2],[1,1,1],[1,2,3]];
+    const inputBoard = [
+      [1, 1, 2],
+      [2, 1, 2],
+      [1, 1, 1],
+      [1, 2, 3],
+    ];
     const inputPlayers: InputPlayer[] = [
       {
         color: PenguinColor.Black,
         score: 8,
-        places: [[0,0],[1,0],[3,1],[3,2]]
+        places: [
+          [0, 0],
+          [0, 1],
+          [0, 3],
+          [2, 3],
+        ],
       },
       {
         color: PenguinColor.Brown,
         score: 6,
-        places: [[3,0],[2,1],[0,2],[1,2]]
-      }
+        places: [
+          [0, 3],
+          [1, 2],
+          [2, 0],
+          [2, 1],
+        ],
+      },
     ];
-    const startingGame = inputStateToGameState({board: inputBoard, players: inputPlayers}) as Game;
-    const numberedBoard = createNumberedBoard([[1,3,5,4],[3,2,4,1],[2,3,5,1],[4,1,1,2]]) as Board;
+    const startingGame = inputStateToGameState({
+      board: inputBoard,
+      players: inputPlayers,
+    }) as Game;
+    const numberedBoard = createNumberedBoard([
+      [1, 3, 5, 4],
+      [3, 2, 4, 1],
+      [2, 3, 5, 1],
+      [4, 1, 1, 2],
+    ]) as Board;
     const numberedGame = createGameState(players, numberedBoard) as Game;
     const gameAfterPlacement = placeAllPenguinsZigZag(numberedGame) as Game;
     // console.log(gameAfterPlacement.board.tiles);
     // console.log(gameAfterPlacement.penguinPositions);
-    const numberedBoardWithHoles = createNumberedBoard([[1,0,5],[3,0,4,1],[2,3,5],[0,1,0,2]]) as Board;
-    const numberedGameWithHoles = createGameState(players, numberedBoardWithHoles) as Game;
-    const gameAfterPlacementWithHoles = placeAllPenguinsZigZag(numberedGameWithHoles) as Game;
+    const numberedBoardWithHoles = createNumberedBoard([
+      [1, 0, 5],
+      [3, 0, 4, 1],
+      [2, 3, 5],
+      [0, 1, 0, 2],
+    ]) as Board;
+    const numberedGameWithHoles = createGameState(
+      players,
+      numberedBoardWithHoles
+    ) as Game;
+    const gameAfterPlacementWithHoles = placeAllPenguinsZigZag(
+      numberedGameWithHoles
+    ) as Game;
 
     it("Returns best movement for game state", () => {
-      console.log(startingGame.board.tiles);
-      console.log(startingGame.penguinPositions);
       expect(chooseNextAction(startingGame, 2)).toBe(false);
       expect(chooseNextAction(gameAfterPlacement, 1)).toBe(false);
       expect(chooseNextAction(gameAfterPlacementWithHoles, 2)).toBe(false);

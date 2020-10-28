@@ -1,4 +1,4 @@
-import { DIRECTIONS, MovementDirection } from "../../board";
+import { MovementDirection } from "../../board";
 import { Game, getCurrentPlayer, getCurrentPlayerColor } from "../../state";
 import { InputState, readStdin } from "./testHarnessInput";
 import { isError, isValidInputState } from "./validation";
@@ -8,19 +8,7 @@ import {
   gameToInputState,
   inputStateToGameState,
 } from "./testHarnessConversion";
-
-/**
- * The order of directions to try and move in as part of the silly player
- * movement strategy defined within the assignment.
- */
-const sillyStrategyDirections: Array<MovementDirection> = [
-  DIRECTIONS.NORTH,
-  DIRECTIONS.NORTHEAST,
-  DIRECTIONS.SOUTHEAST,
-  DIRECTIONS.SOUTH,
-  DIRECTIONS.SOUTHWEST,
-  DIRECTIONS.NORTHWEST,
-];
+import { SillyStrategyDirections } from "./testHarnessStrategy";
 
 /**
  * Try to make a single tile move in the given direction within
@@ -84,7 +72,7 @@ const makeSillyMove = (game: Game): Game | false => {
   // Going through the order of directions within the silly strategy,
   // try to make a move in each of those directions, trying the next
   // if one fails.
-  for (const direction of sillyStrategyDirections) {
+  for (const direction of SillyStrategyDirections) {
     const resultOfMove: Game | false = tryToMakeMove(direction, game);
 
     // Return the result of the first move that is successful.

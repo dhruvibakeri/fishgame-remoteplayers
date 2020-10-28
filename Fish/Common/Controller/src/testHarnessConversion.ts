@@ -1,12 +1,16 @@
 import { PenguinColor, BoardPosition, Board, Tile } from "../../board";
-import { Player, Game } from "../../state";
+import { Movement } from "../../game-tree";
+import { Player, Game, getCurrentPlayer } from "../../state";
 import { createNumberedBoard } from "./boardCreation";
 import { createGameState } from "./gameStateCreation";
+import { movePenguin } from "./penguinPlacement";
 import {
   InputPlayer,
   InputPosition,
   InputState,
   InputBoard,
+  Action,
+  MoveResponseQuery,
 } from "./testHarnessInput";
 import { isError } from "./validation";
 
@@ -52,6 +56,24 @@ const inputPositionToBoardPosition = (
   inputPosition: InputPosition
 ): BoardPosition => {
   return { row: inputPosition[0], col: inputPosition[1] };
+};
+
+/**
+ * Given two InputPositions representing the starting and ending positions of
+ * a Movement, create a Movement from them.
+ *
+ * @param fromPosition the starting InputPosition of the movement
+ * @param toPosition the ending InputPosition of the movement
+ * @return the converted Movement
+ */
+const inputPositionsToMovement = (
+  fromPosition: InputPosition,
+  toPosition: InputPosition
+): Movement => {
+  return {
+    startPosition: inputPositionToBoardPosition(fromPosition),
+    endPosition: inputPositionToBoardPosition(toPosition),
+  };
 };
 
 /**
@@ -182,7 +204,7 @@ const gameStateToInputPlayers = (game: Game): Array<InputPlayer> =>
  * @param board the Board to transform
  * @return the transformed InputBoard
  */
-const boardToInputBoard = (board: Board): InputBoard => 
+const boardToInputBoard = (board: Board): InputBoard =>
   board.tiles.map((row: Array<Tile>) =>
     row.map((tile: Tile) => tile.numOfFish)
   );
@@ -200,4 +222,64 @@ const gameToInputState = (game: Game): InputState => {
   };
 };
 
-export { inputStateToGameState, gameToInputState };
+/**
+ * Given a MoveResponseQuery, return the Game state that results from applying
+ * the specified movement to the game state.
+ *
+ * Since the xtree harness assumes that the given MoveResponseQuery is valid
+ * and a portion of this validity means that the move outlined in the query
+ * is valid for the given state, these same assumptions may also be held here when
+ * applying the movement to the Game state. This assumption also ensures that
+ * the given InputState is also a valid state for movement i.e. all penguins
+ * are placed, since no movement would be valid otherwise.
+ *
+ * @param moveResponseQuery the MoveResponseQuery to process
+ * @return the Game state resulting from the query or false if for some reason
+ * this fails.
+ */
+const performMoveResponseQuery = (
+  moveResponseQuery: MoveResponseQuery
+): Game | false => {
+  // Convert the state within the query into a Game state, assuming the
+  // Game is valid as specified in the xtree harness assumptions.
+  const gameState: Game | Error = inputStateToGameState(
+    moveResponseQuery.state
+  );
+
+  // Create a Movement from the from and to positions within the query.
+  const movement: Movement = inputPositionsToMovement(
+    moveResponseQuery.from,
+    moveResponseQuery.to
+  );
+
+  // The movement is assumed to be valid.
+  if (isError(gameState)) {
+    return false;
+  } else {
+    return movePenguin(
+      gameState,
+      getCurrentPlayer(gameState),
+      movement.startPosition,
+      movement.endPosition
+    ) as Game;
+  }
+};
+
+/**
+ * Convert the given Movement into an Action.
+ *
+ * @param movement the Movement to convert
+ * @return the converted Action
+ */
+const movementToAction = (movement: Movement): Action => [
+  boardPositionToInputPosition(movement.startPosition),
+  boardPositionToInputPosition(movement.endPosition),
+];
+
+export {
+  inputStateToGameState,
+  gameToInputState,
+  performMoveResponseQuery,
+  inputPositionToBoardPosition,
+  movementToAction,
+};

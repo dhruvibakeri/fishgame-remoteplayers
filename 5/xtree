@@ -1,0 +1,2 @@
+#!/bin/bash
+node ../Fish/Common/Controller/build/Common/Controller/src/xtree.js <&0

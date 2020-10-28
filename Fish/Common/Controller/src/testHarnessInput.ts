@@ -28,8 +28,8 @@ type InputBoard = Array<Array<number>>;
  * @param board the InputBoard to be used in the testing harness
  */
 interface InputBoardPosn {
-  position: InputPosition;
-  board: InputBoard;
+  readonly position: InputPosition;
+  readonly board: InputBoard;
 }
 
 /**
@@ -62,11 +62,45 @@ interface InputPlayer {
 }
 
 /**
- * Read and parse JSON input from STDIN
+ * A MoveResponseQuery represents an input into the xtree testing harness.
+ * It describes the current state and the move that the currently active player
+ * has picked.
+ *
+ * The object is then invalid if the specified move is illegal in the given
+ * state.
+ *
+ * @param state the game state from which this move is being made
+ * @param from the position from which the current player of the given state
+ * wishes to move/where their avatar is located
+ * @param to the position where the current player of the given state wishes
+ * to move their avatar to.
+ */
+interface MoveResponseQuery {
+  readonly state: InputState;
+  readonly from: InputPosition;
+  readonly to: InputPosition;
+}
+
+/**
+ * An Action is constructed in response to a MoveResponseQuery, and represents
+ * either what action the next player can take to move one of their penguins to
+ * a place that neighbors the destination of the previous player's move as
+ * outlined in the MoveResponseQuery.
+ *
+ * If Action = false, then the desired move from the query is not possible.
+ * If Action = [InputPosition, InputPosition], then such a move is possible and
+ * the array describes the opponent's move from the first position to the second.
+ */
+type Action = false | [InputPosition, InputPosition];
+
+/**
+ * Read and parse JSON input from STDIN.
+ *
+ * @return a Promise containing the parsed JSON
  */
 const readStdin = async <T>(): Promise<T> => {
   const input: string = await getStdin();
-  const parsed = JSON.parse(input);
+  const parsed: T = JSON.parse(input);
   return parsed;
 };
 
@@ -76,5 +110,7 @@ export {
   InputBoardPosn,
   InputState,
   InputPlayer,
+  MoveResponseQuery,
+  Action,
   readStdin,
 };
