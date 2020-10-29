@@ -1,5 +1,5 @@
 import { BoardPosition } from "./board";
-import { Game, MovementGame } from "./state";
+import { MovementGame } from "./state";
 
 /**
  * A Movement represents a move by a Player of one of their Penguins from a

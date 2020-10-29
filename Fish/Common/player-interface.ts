@@ -1,6 +1,6 @@
 import { BoardPosition } from "./board";
 import { Movement } from "./game-tree";
-import { Player, Game } from "./state";
+import { Game } from "./state";
 
 /**
  * A GameDebrief represents information about the outcome of a completed Fish
@@ -8,16 +8,58 @@ import { Player, Game } from "./state";
  * how the game played out.
  *
  * @param activePlayers represents the roster of players who remained active
- * until the end of the game. Since players also contain their respective
- * scores, it also acts as an end-of-game scoresheet.
+ * until the end of the game, with their scores. This will be ordered by 
+ * descending score.
  *
  * @param kickedPlayers represents the roster of players who either failed
- * or were kicked out of the game due to making invalid or illegal moves.
+ * or were kicked out of the game due to failing to make a move within a
+ * specified timeout when requested, or making invalid or illegal moves.
+ * Note that in the final debrief, we do not distinguish between failed and
+ * cheating players, instead lumping them together into a single array of
+ * InactivePlayers which only notes their identifying information.
  */
 interface GameDebrief {
-  readonly activePlayers: Array<Player>;
-  readonly kickedPlayers: Array<Player>;
+  readonly activePlayers: Array<ActivePlayer>;
+  readonly kickedPlayers: Array<InactivePlayer>;
 }
+
+/**
+ * An ActivePlayer is a player who stayed in the game until the end of the game.
+ * Even if a player's penguins got stuck before the end of the game, they are still
+ * an active player. An active player is one who did not get disqualified for any reason.
+ *
+ * @param name The name of the player given to the referee by the Tournament manager
+ * before the game began. Note that this name must uniquely define this player.
+ * @param score The player's final score at the conclusion of the game
+ */
+interface ActivePlayer {
+  readonly name: string,
+  readonly score: number
+}
+
+/**
+ * An InactivePlayer is a player who either failed to make a move within the
+ * specified timeout duration of their turn when requested, or who delivered 
+ * a move that was found to be illegal based upon the GameTree of the current
+ * Game's state. In either cases, the player was subsequently kicked upon 
+ * making either violation during the course of the game.
+ * 
+ * @param name the name of the player given to the referee by the Tornament manager
+ * before the game began. Note that this name must uniquely define this player.
+ */
+interface InactivePlayer {
+  readonly name: string;
+}
+
+/**
+ * A GameIsStarting call is meant to allow the referee to signal to the player
+ * that the game is starting. The referee passes the initial game state to the
+ * player, but does not need or expect a response from the player. This call is
+ * used by the referee exactly once at the start of the game.
+ * 
+ * @param game the initial starting game state
+ */
+type GameIsStarting = (game: Game) => void;
 
 /**
  * A MakePlacement call is meant to expose to the referee how to place its
@@ -50,8 +92,8 @@ type MakePlacement = (game: Game) => BoardPosition;
 type MakeMovement = (game: Game) => Movement;
 
 /**
- * The SendGameDebrief call allows the referee to send the player a debrief
- * of the game results following the conclusion of the game. The referee sends the
+ * The GameHasEnded call allows the referee to send the player a debrief
+ * of the game results, signalling the conclusion of the game. The referee sends the
  * GameDebrief which contains a list of players who got kicked/disqualified during
  * the game and a list of those who did not. The players can then, if they so choose,
  * determine the winner of the game or their placement based on the `score` attribute
@@ -61,7 +103,7 @@ type MakeMovement = (game: Game) => Movement;
  * @param gameDebrief the GameDebrief being given to the player containing information
  * regarding the game's outcome.
  */
-type SendGameDebrief = (gameDebrief: GameDebrief) => void;
+type GameHasEnded = (gameDebrief: GameDebrief) => void;
 
 /**
  * A DisqualifyMe call gives the referee a way to signal to the player that they've

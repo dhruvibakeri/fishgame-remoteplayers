@@ -1,5 +1,46 @@
 # Fish - Andrew Leung and Fiona Gridley
 
+## 5 &mdash; The Strategy
+
+These additions are for the assignment, [5 - The Strategy](https://felleisen.org/matthias/4500-f20/5.html). The purpose of this assignment is to design and implement a strategy component that decides where to place penguins (zig-zag pattern), and where to move penguins for the player who's turn it is by using the minimax algorithm to evaluate scores.
+
+<details>
+  <summary>Click to see the new elements:</summary>
+  
+- `Fish`
+  - `Common`
+    - `Controller`
+      - `src`
+        - `testHarnessStrategy.ts` : TypeScript file with constants used for specified test harness strategies
+        - `xtree.ts` : TypeScript file with implementation for the assignment test harness
+      - `tests` : Directory containing test files for implementations
+        - `strategy.spec.ts` : `strategy.ts` test file
+  - `Planning` : Directory containing all planning documents for the Fish project
+    - `referee.md` : Design document for planning the referee component and API
+  - `Player` : Directory containing elements of a Player component
+    - `strategy.ts` : Typescript file containing strategy elements for a player component
+
+</details>
+
+### How To Test
+
+#### Our test suite
+
+Running the test suite for milestone 5 is the same as for milestone 4, see below.
+
+#### The test harness
+
+As requested within the assignment, we have created a test harness available in `libertyhill/5`. It consumes test data like those within `5/Test` (any file marked as input such like `<n>-in.json`) via STDIN and outputs via STDOUT.
+
+To run the harness from the `5` directory, run the following:
+
+```
+make
+./xtree < Tests/<n>-in.json
+```
+
+---
+
 ## 4 &mdash; The Game Tree
 
 These additions are for the assignment, [4 - The Game Tree](https://felleisen.org/matthias/4500-f20/4.html). The purpose of this assignment is to design and implement data representations for full games otherwise known as game trees, along with implementing functionality for creating, validating actions against, and mapping over these trees. In addition, we were tasked with creating a new testing harness that would serve as an integration test for our previously implemented game state.

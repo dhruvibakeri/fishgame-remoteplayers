@@ -7,14 +7,12 @@ import {
 } from "../Common/Controller/src/validation";
 import {
   IllegalPenguinPositionError,
-  InvalidGameForTreeError,
   InvalidGameStateError,
   NoMoreMovementsError,
   NoMorePlacementsError,
 } from "../Common/Controller/types/errors";
 import { Movement, GameTree, PotentialMovement } from "../Common/game-tree";
 import {
-  createGameTree,
   createGameTreeFromMovementGame,
   gameIsMovementGame,
 } from "../Common/Controller/src/gameTreeCreation";
