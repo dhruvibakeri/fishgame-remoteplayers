@@ -10,10 +10,8 @@ import { getReachablePositions } from "./movementChecking";
 import { movePenguin } from "./penguinPlacement";
 import { InvalidGameForTreeError } from "../types/errors";
 import { isError } from "./validation";
-import { updateGameCurPlayerIndex } from "./gameStateCreation";
+import { skipToNextActivePlayer } from "./gameStateCreation";
 
-// TODO test
-// TODO move to validation maybe
 /**
  * Given a Game state, determine if the Game is a MovementGame i.e. all players
  * within the Game have placed all of their penguins.
@@ -26,54 +24,32 @@ const gameIsMovementGame = (game: Game): game is MovementGame =>
     ([, unplacedPenguins]: [PenguinColor, number]) => unplacedPenguins === 0
   );
 
-// TODO test
-/**
- * Validate whether a game tree can be made from the given Game state or in
- * other words, whether the given Game state is a MovementGame with all of its
- * penguins placed. Return the coerced MovementGame if so and an error otherwise.
- *
- * @param game game to check for number of placed penguins
- * @returns a MovementGame if the Game is treeable or an Error if not
- */
-const validateIsGameTreeable = (
-  game: Game
-): MovementGame | InvalidGameForTreeError => {
-  if (gameIsMovementGame(game)) {
-    return game;
-  } else {
-    return new InvalidGameForTreeError(game);
-  }
-};
-
-// TODO test
 /**
  * Given a Game state, return its corresponding GameTree, making sure that the
  * state is within the movement stage i.e. all penguins have been placed.
  *
  * @param game the Game state
- * @return the state's corresponding GameTree
+ * @return the state's corresponding GameTree or an Error if it cannot be
+ * created.
  */
 const createGameTree = (game: Game): GameTree | InvalidGameForTreeError => {
-  const movementGameOrError:
-    | MovementGame
-    | InvalidGameForTreeError = validateIsGameTreeable(game);
-  if (isError(movementGameOrError)) {
-    return movementGameOrError;
+  if (gameIsMovementGame(game)) {
+    return createGameTreeFromMovementGame(game);
   } else {
-    return createGameTreeFromMovementGame(movementGameOrError);
+    return new InvalidGameForTreeError(game);
   }
 };
 
-// TODO test
 /**
  * Given a MovementGame state, return its corresponding GameTree, skipping players
  * which are unable to make moves. If the result contains an empty list of
  * potential moves, this then signifies a final game state.
  *
  * @param game the MovementGame to be made into a GameTree.
+ * @return the MovementState's corresponding GameTree
  */
 const createGameTreeFromMovementGame = (game: MovementGame): GameTree => {
-  const gameSkippingInactivePlayers: MovementGame = updateGameCurPlayerIndex(
+  const gameSkippingInactivePlayers: MovementGame = skipToNextActivePlayer(
     game
   );
 

@@ -2,15 +2,13 @@ import { Board, BoardPosition, PenguinColor } from "../../board";
 import { Game, MovementGame, Player } from "../../state";
 import {
   createGameTree,
+  createGameTreeFromMovementGame,
   createLazyGameTree,
+  gameIsMovementGame,
   generatePotentialMoveMapping,
 } from "../src/gameTreeCreation";
-import {
-  GameTree,
-  LazyGameTree,
-  Movement,
-  PotentialMovement,
-} from "../../game-tree";
+import { GameTree, Movement, PotentialMovement } from "../../game-tree";
+import { InvalidGameForTreeError } from "../types/errors";
 
 describe("gameTreeCreation", () => {
   const player1: Player = { name: "foo", color: PenguinColor.Black };
@@ -60,6 +58,10 @@ describe("gameTreeCreation", () => {
     [player2.color, 0],
   ]);
   const scoresAfterMovement: Map<PenguinColor, number> = new Map([
+    [player1.color, 1],
+    [player2.color, 0],
+  ]);
+  const unplacedPenguins: Map<PenguinColor, number> = new Map([
     [player1.color, 1],
     [player2.color, 0],
   ]);
@@ -138,37 +140,94 @@ describe("gameTreeCreation", () => {
     { movement: movement2, length: 1, curPlayerIndex: 1 },
     { movement: movement3, length: 1, curPlayerIndex: 1 },
   ];
+  const gameWithUnlacedPenguins: Game = {
+    ...game,
+    remainingUnplacedPenguins: unplacedPenguins,
+  };
 
-  // describe("createGameTree", () => {
-  //   const actual = createGameTree(game);
-  //   const actualPotentialStates = actual.potentialMoves.map(
-  //     (potentialMove: PotentialMovement) => {
-  //       return {
-  //         movement: potentialMove.movement,
-  //         game: potentialMove.resultingGameTree().gameState,
-  //       };
-  //     }
-  //   );
-  //   const actualPotentialLengths = actual.potentialMoves.map(
-  //     (potentialMove: PotentialMovement) => {
-  //       return {
-  //         movement: potentialMove.movement,
-  //         length: potentialMove.resultingGameTree().potentialMoves.length,
-  //       };
-  //     }
-  //   );
-  //   it("creates a game tree for a given game with the correct state", () => {
-  //     expect(actual.gameState).toEqual(game);
-  //   });
+  describe("createGameTree", () => {
+    const actual = createGameTree(game) as GameTree;
+    const actualPotentialStates = actual.potentialMoves.map(
+      (potentialMove: PotentialMovement) => {
+        return {
+          movement: potentialMove.movement,
+          game: potentialMove.resultingGameTree().gameState,
+        };
+      }
+    );
+    const actualPotentialLengths = actual.potentialMoves.map(
+      (potentialMove: PotentialMovement) => {
+        return {
+          movement: potentialMove.movement,
+          length: potentialMove.resultingGameTree().potentialMoves.length,
+          curPlayerIndex: potentialMove.resultingGameTree().gameState
+            .curPlayerIndex,
+        };
+      }
+    );
 
-  //   it("creates a game tree for a given game with the correct potential states", () => {
-  //     expect(actualPotentialStates).toEqual(expectedGameStates);
-  //   });
+    it("creates a game tree for a given game with the correct state", () => {
+      expect(actual.gameState).toEqual(game);
+    });
 
-  //   it("creates a game tree for a given game with the correct potential move lengths for its potential moves", () => {
-  //     expect(actualPotentialLengths).toEqual(expectedPotentialMoveLengths);
-  //   });
-  // });
+    it("creates a game tree for a given game with the correct potential states", () => {
+      expect(actualPotentialStates).toEqual(expectedGameStates);
+    });
+
+    it("creates a game tree for a given game with the correct potential move lengths for its potential moves", () => {
+      expect(actualPotentialLengths).toEqual(expectedPotentialMoveLengths);
+    });
+
+    it("rejects a non MovementGame", () => {
+      expect(createGameTree(gameWithUnlacedPenguins)).toEqual(
+        new InvalidGameForTreeError(gameWithUnlacedPenguins)
+      );
+    });
+  });
+
+  describe("createGameTreeFromMovementGame", () => {
+    const actual = createGameTreeFromMovementGame(game) as GameTree;
+    const actualPotentialStates = actual.potentialMoves.map(
+      (potentialMove: PotentialMovement) => {
+        return {
+          movement: potentialMove.movement,
+          game: potentialMove.resultingGameTree().gameState,
+        };
+      }
+    );
+    const actualPotentialLengths = actual.potentialMoves.map(
+      (potentialMove: PotentialMovement) => {
+        return {
+          movement: potentialMove.movement,
+          length: potentialMove.resultingGameTree().potentialMoves.length,
+          curPlayerIndex: potentialMove.resultingGameTree().gameState
+            .curPlayerIndex,
+        };
+      }
+    );
+
+    it("creates a game tree for a given game with the correct state", () => {
+      expect(actual.gameState).toEqual(game);
+    });
+
+    it("creates a game tree for a given game with the correct potential states", () => {
+      expect(actualPotentialStates).toEqual(expectedGameStates);
+    });
+
+    it("creates a game tree for a given game with the correct potential move lengths for its potential moves", () => {
+      expect(actualPotentialLengths).toEqual(expectedPotentialMoveLengths);
+    });
+  });
+
+  describe("gameIsMovementGame", () => {
+    it("rejects a Game with unplaced penguins", () => {
+      expect(gameIsMovementGame(gameWithUnlacedPenguins)).toEqual(false);
+    });
+
+    it("accepts a Game with no unplaced penguins", () => {
+      expect(gameIsMovementGame(game)).toEqual(true);
+    });
+  });
 
   describe("generatePotentialMoveMapping", () => {
     const actual = generatePotentialMoveMapping(game);

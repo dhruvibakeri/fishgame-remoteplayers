@@ -9,6 +9,7 @@ import {
   isError,
   hasPenguinOnPosition,
   isValidInputState,
+  currentPlayerHasMoves,
 } from "../src/validation";
 import {
   createBlankBoard,
@@ -24,6 +25,7 @@ import {
   InvalidNumberOfPlayersError,
 } from "../types/errors";
 import { InputPlayer, InputState, InputBoard } from "../src/testHarnessInput";
+import { placeAllPenguinsZigZag } from "../../../Player/strategy";
 
 describe("validation", () => {
   const player1: Player = { name: "foo", color: PenguinColor.Black };
@@ -475,6 +477,40 @@ describe("validation", () => {
     it("returns true when given a valid input game", () => {
       expect(isValidInputState(validInputGame1)).toEqual(true);
       expect(isValidInputState(validInputGame2)).toEqual(true);
+    });
+  });
+
+  describe("currentPlayerHasMoves", () => {
+    const board: Board = createBlankBoard(4, 4, 1) as Board;
+    const boardNoMoves: Board = createHoledOneFishBoard(
+      4,
+      4,
+      [
+        { col: 0, row: 2 },
+        { col: 1, row: 2 },
+        { col: 2, row: 2 },
+        { col: 3, row: 2 },
+        { col: 0, row: 3 },
+        { col: 1, row: 3 },
+        { col: 2, row: 3 },
+        { col: 3, row: 3 },
+      ],
+      1
+    ) as Board;
+    const game: Game = createGameState(players, board) as Game;
+    const movementGame: MovementGame = placeAllPenguinsZigZag(
+      game
+    ) as MovementGame;
+    const movementGameNoMoves: MovementGame = {
+      ...movementGame,
+      board: boardNoMoves,
+    };
+    it("accepts a game where the current player has moves", () => {
+      expect(currentPlayerHasMoves(movementGame)).toEqual(true);
+    });
+
+    it("rejects a game where the current player has no moves", () => {
+      expect(currentPlayerHasMoves(movementGameNoMoves)).toEqual(false);
     });
   });
 });

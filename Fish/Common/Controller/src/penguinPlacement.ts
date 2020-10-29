@@ -21,7 +21,7 @@ import {
 import { getFishNumberFromPosition, setTileToHole } from "./boardCreation";
 import {
   getNextPlayerIndex,
-  updateGameCurPlayerIndex,
+  skipToNextActivePlayer,
 } from "./gameStateCreation";
 
 /**
@@ -213,7 +213,7 @@ const movePenguin = (
     };
     // Get the game with its current player index updated to that of the next
     // player who can move.
-    const gameWithNextActivePlayer: MovementGame = updateGameCurPlayerIndex(
+    const gameWithNextActivePlayer: MovementGame = skipToNextActivePlayer(
       gameWithNextPlayerIndex
     );
 

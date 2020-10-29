@@ -170,8 +170,9 @@ class IllegalMovementError extends Error {
 }
 
 /**
- * Error used to represent a player attempting to place a penguin when they 
- * have no more placements available.
+ * Error used to represent a player attempting to place a penguin when they
+ * have no more placements available or there are no more available placements
+ * on the game's board.
  */
 class NoMorePlacementsError extends Error {
   game: Game;
@@ -182,16 +183,16 @@ class NoMorePlacementsError extends Error {
     if (message) {
       this.message = message;
     } else {
-      this.message = `Player ${
+      this.message = `There are no available placements for Player ${
         getCurrentPlayer(game).name
-      } has no more placements available.`;
+      }`;
     }
     this.stack = new Error().stack;
   }
 }
 
 /**
- * Error used to represent a player trying to find an action to make when they 
+ * Error used to represent a player trying to find an action to make when they
  * have no more possible movements they can make.
  */
 class NoMoreMovementsError extends Error {
@@ -224,12 +225,12 @@ class InvalidGameForTreeError extends Error {
     if (message) {
       this.message = message;
     } else {
-      this.message = 'Invalid game for tree generation. Not all penguins have been placed';
+      this.message =
+        "Invalid game for tree generation. Not all penguins have been placed";
     }
     this.stack = new Error().stack;
   }
 }
-
 
 export {
   InvalidPositionError,

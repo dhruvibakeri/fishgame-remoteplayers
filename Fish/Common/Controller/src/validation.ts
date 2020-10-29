@@ -250,7 +250,6 @@ const isValidInputState = (inputState: InputState): boolean => {
   return validNumberOfPlayers && colorsAreUnique && validBoardSize;
 };
 
-// TODO  test
 /**
  * Determine if the current Player of the given MovementGame has any potential
  * moves.

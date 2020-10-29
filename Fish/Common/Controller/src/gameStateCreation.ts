@@ -1,13 +1,10 @@
-import { Player, Game, MovementGame, getCurrentPlayerColor } from "../../state";
+import { Player, Game, MovementGame } from "../../state";
 import { Board, BoardPosition, PenguinColor } from "../../board";
 import {
   InvalidGameStateError,
   InvalidNumberOfPlayersError,
 } from "../types/errors";
-import { createGameTree, gameIsMovementGame } from "./gameTreeCreation";
-import { GameTree } from "../../game-tree";
-import { currentPlayerHasMoves, isError } from "./validation";
-import { getReachablePositions } from "./movementChecking";
+import { currentPlayerHasMoves } from "./validation";
 
 const MAX_NUMBER_OF_PLAYERS = 4;
 const MIN_NUMBER_OF_PLAYERS = 2;
@@ -22,7 +19,6 @@ const PENGUIN_AMOUNT_N = 6;
 const getNextPlayerIndex = (game: Game): number =>
   (game.curPlayerIndex + 1) % game.players.length;
 
-// TODO test
 /**
  * Update the current player index of the given MovementGame to the that of the
  * next player who can make a movement, including the current player. In the
@@ -35,11 +31,11 @@ const getNextPlayerIndex = (game: Game): number =>
  * of the next player who can move, or the final state of the game of no
  * players can.
  */
-const updateGameCurPlayerIndex = (game: MovementGame): MovementGame => {
+const skipToNextActivePlayer = (game: MovementGame): MovementGame => {
   // For the given MovementGame, update the the current player index to that of
   // the next Player which has a potential move, using a playersSeen counter to
   // prevent infinite recursion.
-  const updateGameCurPlayerIndexRecursive = (
+  const skipToNextActivePlayerRecursive = (
     movementGame: MovementGame,
     playersSeen: number
   ): MovementGame => {
@@ -60,11 +56,11 @@ const updateGameCurPlayerIndex = (game: MovementGame): MovementGame => {
         ...movementGame,
         curPlayerIndex: getNextPlayerIndex(movementGame),
       };
-      return updateGameCurPlayerIndexRecursive(nextPlayerGame, playersSeen + 1);
+      return skipToNextActivePlayerRecursive(nextPlayerGame, playersSeen + 1);
     }
   };
 
-  return updateGameCurPlayerIndexRecursive(game, 0);
+  return skipToNextActivePlayerRecursive(game, 0);
 };
 
 /**
@@ -182,5 +178,5 @@ export {
   createEmptyScoreSheet,
   createEmptyPenguinPositions,
   buildUnplacedPenguinMap,
-  updateGameCurPlayerIndex,
+  skipToNextActivePlayer,
 };

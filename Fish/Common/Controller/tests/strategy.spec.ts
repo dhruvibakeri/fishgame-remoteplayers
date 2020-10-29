@@ -16,7 +16,7 @@ import {
   maxArray,
   tieBreakMovements,
 } from "../../../Player/strategy";
-import { NoMorePlacementsError } from "../types/errors";
+import { NoMoreMovementsError, NoMorePlacementsError } from "../types/errors";
 import { inputStateToGameState } from "../src/testHarnessConversion";
 import { InputPlayer } from "../src/testHarnessInput";
 import { createGameTree } from "../src/gameTreeCreation";
@@ -186,12 +186,12 @@ describe("strategy", () => {
     remainingUnplacedPenguins: remainingUnplacedPenguinsAfterAllPlacement,
     scores: scoresAfterAllPlacement,
   };
-  const gameNoMoves: Game = movePenguin(
+  const gameNoMoves: MovementGame = movePenguin(
     gameAfterAllPlacement,
     player1,
     { row: 1, col: 1 },
     { row: 2, col: 2 }
-  ) as Game;
+  ) as MovementGame;
   const gameTreeNoMoves: GameTree = createGameTree(gameNoMoves) as GameTree;
 
   // const gameWithTwoPiecesPositions: Map<
@@ -358,11 +358,9 @@ describe("strategy", () => {
     });
 
     it("rejects a placement for a player with no more available moves", () => {
-      // TODO
-    });
-
-    it("rejects a game that isn't a MovementGame", () => {
-      // TODO
+      expect(chooseNextAction(gameNoMoves, 1)).toEqual(
+        new NoMoreMovementsError(gameNoMoves)
+      );
     });
   });
 

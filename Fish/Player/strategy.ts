@@ -16,6 +16,7 @@ import { Movement, GameTree, PotentialMovement } from "../Common/game-tree";
 import {
   createGameTree,
   createGameTreeFromMovementGame,
+  gameIsMovementGame,
 } from "../Common/Controller/src/gameTreeCreation";
 
 /**
@@ -31,7 +32,7 @@ const getNextPenguinPlacementPosition = (
   game: Game
 ): BoardPosition | NoMorePlacementsError => {
   for (let row = 0; row < game.board.tiles.length; row++) {
-    for (let col = 0; col < game.board.tiles[0].length; col++) {
+    for (let col = 0; col < game.board.tiles[row].length; col++) {
       if (positionIsPlayable(game, { row, col })) {
         return { row, col };
       }
@@ -79,7 +80,7 @@ const placeNextPenguin = (
 const placeAllPenguinsZigZag = (
   game: Game
 ):
-  | Game
+  | MovementGame
   | NoMorePlacementsError
   | InvalidGameStateError
   | IllegalPenguinPositionError => {
@@ -99,7 +100,13 @@ const placeAllPenguinsZigZag = (
     }
   }
 
-  return placedPenguinGame;
+  if (isError(placedPenguinGame)) {
+    return placedPenguinGame;
+  } else if (gameIsMovementGame(placedPenguinGame)) {
+    return placedPenguinGame;
+  } else {
+    return new InvalidGameStateError(game, "Unable to make all placements.");
+  }
 };
 
 /**

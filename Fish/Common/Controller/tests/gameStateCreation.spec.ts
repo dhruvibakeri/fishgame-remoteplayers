@@ -1,5 +1,5 @@
 import { Board, BoardPosition, PenguinColor } from "../../board";
-import { Player, Game } from "../../state";
+import { Player, Game, MovementGame } from "../../state";
 import {
   InvalidGameStateError,
   InvalidNumberOfPlayersError,
@@ -11,11 +11,16 @@ import {
   createGameState,
   createTestGameState,
   getNextPlayerIndex,
+  skipToNextActivePlayer,
 } from "../src/gameStateCreation";
 
-import { createBlankBoard } from "../src/boardCreation";
+import {
+  createBlankBoard,
+  createHoledOneFishBoard,
+} from "../src/boardCreation";
+import { placeAllPenguinsZigZag } from "../../../Player/strategy";
 
-describe("stateModification", () => {
+describe("gameStateCreation", () => {
   const player1: Player = { name: "foo", color: PenguinColor.Black };
   const player2: Player = { name: "bar", color: PenguinColor.Brown };
   const player3: Player = { name: "baz", color: PenguinColor.Red };
@@ -38,6 +43,79 @@ describe("stateModification", () => {
         curPlayerIndex: game.players.length - 1,
       };
       expect(getNextPlayerIndex(lastPlayerTurnGame)).toEqual(0);
+    });
+  });
+
+  describe("skipToNextActivePlayer", () => {
+    const board: Board = createBlankBoard(4, 4, 1) as Board;
+    const boardNoMoves: Board = createHoledOneFishBoard(
+      4,
+      4,
+      [
+        { col: 0, row: 2 },
+        { col: 1, row: 2 },
+        { col: 2, row: 2 },
+        { col: 3, row: 2 },
+        { col: 0, row: 3 },
+        { col: 1, row: 3 },
+        { col: 2, row: 3 },
+        { col: 3, row: 3 },
+      ],
+      1
+    ) as Board;
+    const game: Game = createGameState([player1, player2], board) as Game;
+    const movementGame: MovementGame = placeAllPenguinsZigZag(
+      game
+    ) as MovementGame;
+    const penguinPositionsSkipPlayer: Map<
+      PenguinColor,
+      Array<BoardPosition>
+    > = new Map([
+      [
+        player1.color,
+        [
+          { col: 0, row: 0 },
+          { col: 0, row: 1 },
+          { col: 0, row: 2 },
+          { col: 1, row: 0 },
+        ],
+      ],
+      [
+        player2.color,
+        [
+          { col: 2, row: 0 },
+          { col: 1, row: 1 },
+          { col: 1, row: 2 },
+          { col: 0, row: 3 },
+        ],
+      ],
+    ]);
+    const movementGameSkipPlayer: MovementGame = {
+      ...movementGame,
+      penguinPositions: penguinPositionsSkipPlayer,
+    };
+    const movementGameNoMoves: MovementGame = {
+      ...movementGame,
+      board: boardNoMoves,
+    };
+    it("keeps the current player if they can move", () => {
+      expect(skipToNextActivePlayer(movementGame)).toEqual(movementGame);
+    });
+
+    it("skips to the next player that can move", () => {
+      const expectedGame: MovementGame = {
+        ...movementGameSkipPlayer,
+        curPlayerIndex: 1,
+      };
+      expect(skipToNextActivePlayer(movementGameSkipPlayer)).toEqual(
+        expectedGame
+      );
+    });
+
+    it("returns the original state if no players can move", () => {
+      expect(skipToNextActivePlayer(movementGameNoMoves)).toEqual(
+        movementGameNoMoves
+      );
     });
   });
 
