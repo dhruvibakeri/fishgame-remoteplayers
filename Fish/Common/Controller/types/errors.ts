@@ -180,6 +180,7 @@ class NoMorePlacementsError extends Error {
 
   constructor(game: Game, message?: string) {
     super();
+    this.game = game;
     if (message) {
       this.message = message;
     } else {
@@ -201,6 +202,7 @@ class NoMoreMovementsError extends Error {
 
   constructor(game: Game, message?: string) {
     super();
+    this.game = game;
     if (message) {
       this.message = message;
     } else {
@@ -222,6 +224,7 @@ class InvalidGameForTreeError extends Error {
 
   constructor(game: Game, message?: string) {
     super();
+    this.game = game;
     if (message) {
       this.message = message;
     } else {

@@ -14,7 +14,6 @@ import {
   MIN_NUMBER_OF_PLAYERS,
   MAX_NUMBER_OF_PLAYERS,
 } from "./gameStateCreation";
-import { gameIsMovementGame } from "./gameTreeCreation";
 
 const MAX_TEST_HARNESS_BOARD_TILES = 25;
 
@@ -257,16 +256,12 @@ const isValidInputState = (inputState: InputState): boolean => {
  * @param movementGame the MovementGame to check.
  * @return whether the MovementGame's current player has any remaining moves
  */
-const currentPlayerHasMoves = (movementGame: MovementGame): boolean =>
-  movementGame.penguinPositions
-    .get(getCurrentPlayerColor(movementGame))
-    .map((penguinPosition: BoardPosition) =>
-      getReachablePositions(movementGame, penguinPosition)
-    )
-    .some(
-      (reachablePositionsFromMove: Array<BoardPosition>) =>
-        reachablePositionsFromMove.length > 0
-    );
+const currentPlayerHasMoves = (movementGame: MovementGame): boolean => {
+  const curPlayerPenguins = movementGame.penguinPositions.get(getCurrentPlayerColor(movementGame)) as BoardPosition[];
+  const reachablePositions = curPlayerPenguins.map((penguinPosition: BoardPosition) => getReachablePositions(movementGame, penguinPosition));
+  const hasMoves = reachablePositions.some((reachablePositionsFromMove: Array<BoardPosition>) => reachablePositionsFromMove.length > 0);
+  return hasMoves;
+}
 
 export {
   positionIsOnBoard,
