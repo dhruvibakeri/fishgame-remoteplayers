@@ -21,6 +21,7 @@ These additions are for the assignment, [5 - The Strategy](https://felleisen.org
     - `strategy.ts` : Typescript file containing strategy elements for a player component
 
 </details>
+<br/>
 
 ### How To Test
 
@@ -67,6 +68,7 @@ These additions are for the assignment, [4 - The Game Tree](https://felleisen.or
     - `player-protocol.md` : Design document for planning the API for the player-referee protocol
 
 </details>
+<br/>
 
 ### How To Test
 

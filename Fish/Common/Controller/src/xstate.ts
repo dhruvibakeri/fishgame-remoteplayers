@@ -1,5 +1,10 @@
 import { MovementDirection } from "../../board";
-import { Game, getCurrentPlayer, getCurrentPlayerColor } from "../../state";
+import {
+  Game,
+  getCurrentPlayer,
+  getCurrentPlayerColor,
+  MovementGame,
+} from "../../state";
 import { InputState, readStdin } from "./testHarnessInput";
 import { isError, isValidInputState } from "./validation";
 import { movePenguin } from "./penguinPlacement";
@@ -9,6 +14,7 @@ import {
   inputStateToGameState,
 } from "./testHarnessConversion";
 import { SillyStrategyDirections } from "./testHarnessStrategy";
+import { gameIsMovementGame } from "./gameTreeCreation";
 
 /**
  * Try to make a single tile move in the given direction within
@@ -21,7 +27,7 @@ import { SillyStrategyDirections } from "./testHarnessStrategy";
  */
 const tryToMakeMove = (
   direction: MovementDirection,
-  game: Game
+  game: MovementGame
 ): Game | false => {
   const currentPlayerPenguinPositions = game.penguinPositions.get(
     getCurrentPlayerColor(game)
@@ -68,7 +74,7 @@ const tryToMakeMove = (
  * @return either the resulting Game state from the move if successful or false
  * if no move could be made from the strategy
  */
-const makeSillyMove = (game: Game): Game | false => {
+const makeSillyMove = (game: MovementGame): Game | false => {
   // Going through the order of directions within the silly strategy,
   // try to make a move in each of those directions, trying the next
   // if one fails.
@@ -93,7 +99,11 @@ readStdin()
 
     // If no error occurred in the above conversion, try to make
     // a move as part of the silly strategy and store the result.
-    if (isValidInputState(parsed) && !isError(gameStateOrError)) {
+    if (
+      isValidInputState(parsed) &&
+      !isError(gameStateOrError) &&
+      gameIsMovementGame(gameStateOrError)
+    ) {
       result = makeSillyMove(gameStateOrError) as Game;
     }
 
