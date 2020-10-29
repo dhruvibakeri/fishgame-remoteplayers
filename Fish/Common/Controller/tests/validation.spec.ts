@@ -16,7 +16,7 @@ import {
   setTileToHole,
 } from "../src/boardCreation";
 import { Board, BoardPosition, Penguin, PenguinColor } from "../../board";
-import { Game, Player } from "../../state";
+import { Game, MovementGame, Player } from "../../state";
 import { createGameState } from "../src/gameStateCreation";
 import {
   IllegalPenguinPositionError,
@@ -38,15 +38,29 @@ describe("validation", () => {
   const penguinPositions: Map<PenguinColor, Array<BoardPosition>> = new Map([
     [player1.color, [validStartPosition]],
   ]);
-  const game: Game = {
+  const noRemainingUnplacedPenguins: Map<PenguinColor, 0> = new Map([
+    [player1.color, 0],
+    [player2.color, 0],
+  ]);
+  const game: MovementGame = {
     ...(createGameState(players, board) as Game),
     penguinPositions,
+    remainingUnplacedPenguins: noRemainingUnplacedPenguins,
+  };
+
+  const remainingUnplacedPenguins: Map<PenguinColor, number> = new Map([
+    [player1.color, 1],
+    [player2.color, 2],
+  ]);
+  const gameWithUnplacedPenguins = {
+    ...game,
+    remainingUnplacedPenguins,
   };
   const twoPenguinPositions: Map<PenguinColor, Array<BoardPosition>> = new Map(
     penguinPositions
   );
   twoPenguinPositions.set(PenguinColor.White, [validEndPosition]);
-  const gameWithTwoPenguins: Game = {
+  const gameWithTwoPenguins: MovementGame = {
     ...game,
     penguinPositions: twoPenguinPositions,
   };
@@ -260,8 +274,12 @@ describe("validation", () => {
     });
 
     it("returns true when player has unplaced penguins", () => {
-      expect(playerHasUnplacedPenguin(player1, game)).toEqual(true);
-      expect(playerHasUnplacedPenguin(player2, game)).toEqual(true);
+      expect(
+        playerHasUnplacedPenguin(player1, gameWithUnplacedPenguins)
+      ).toEqual(true);
+      expect(
+        playerHasUnplacedPenguin(player2, gameWithUnplacedPenguins)
+      ).toEqual(true);
     });
   });
 
@@ -370,25 +388,82 @@ describe("validation", () => {
     it("accepts a valid move", () => {
       expect(
         validatePenguinMove(game, player1, validStartPosition, validEndPosition)
-      ).toEqual(true);
+      ).toEqual(game);
     });
   });
 
   describe("isValidInputState", () => {
-    const inputPlayer1: InputPlayer = { color: PenguinColor.Brown, score: 0, places: [] };
-    const inputPlayer2: InputPlayer = { color: PenguinColor.White, score: 0, places: [] };
-    const inputPlayer3: InputPlayer = { color: PenguinColor.Black, score: 0, places: [] };
-    const inputPlayer4: InputPlayer = { color: PenguinColor.Red, score: 0, places: [] };
-    const inputPlayer5: InputPlayer = { color: PenguinColor.Brown, score: 0, places: [] };
-    const inputBoard1: InputBoard = [[1,2],[2,1]];
-    const inputBoard2: InputBoard = [[1,2,3,4,5,6],[1,2,3,4,5,6],[1,2,3,4,5,6],[1,2,3,4,5,6],[1,2,3,4,5,6]];
-    const inputBoard3: InputBoard = [[1,2,3,4],[1,2,3],[1,2,3]];
-    const invalidInputGame1: InputState = { board: inputBoard1, players: [inputPlayer1] };
-    const invalidInputGame2: InputState = { board: inputBoard1, players: [inputPlayer1, inputPlayer2, inputPlayer3, inputPlayer4, inputPlayer5] };
-    const invalidInputGame3: InputState = { board: inputBoard1, players: [inputPlayer1, inputPlayer2, inputPlayer5] };
-    const invalidInputGame4: InputState = { board: inputBoard2, players: [inputPlayer1, inputPlayer2] };
-    const validInputGame1: InputState = { board: inputBoard3, players: [inputPlayer1, inputPlayer2, inputPlayer3, inputPlayer4] }
-    const validInputGame2: InputState = { board: inputBoard3, players: [inputPlayer1, inputPlayer2] }
+    const inputPlayer1: InputPlayer = {
+      color: PenguinColor.Brown,
+      score: 0,
+      places: [],
+    };
+    const inputPlayer2: InputPlayer = {
+      color: PenguinColor.White,
+      score: 0,
+      places: [],
+    };
+    const inputPlayer3: InputPlayer = {
+      color: PenguinColor.Black,
+      score: 0,
+      places: [],
+    };
+    const inputPlayer4: InputPlayer = {
+      color: PenguinColor.Red,
+      score: 0,
+      places: [],
+    };
+    const inputPlayer5: InputPlayer = {
+      color: PenguinColor.Brown,
+      score: 0,
+      places: [],
+    };
+    const inputBoard1: InputBoard = [
+      [1, 2],
+      [2, 1],
+    ];
+    const inputBoard2: InputBoard = [
+      [1, 2, 3, 4, 5, 6],
+      [1, 2, 3, 4, 5, 6],
+      [1, 2, 3, 4, 5, 6],
+      [1, 2, 3, 4, 5, 6],
+      [1, 2, 3, 4, 5, 6],
+    ];
+    const inputBoard3: InputBoard = [
+      [1, 2, 3, 4],
+      [1, 2, 3],
+      [1, 2, 3],
+    ];
+    const invalidInputGame1: InputState = {
+      board: inputBoard1,
+      players: [inputPlayer1],
+    };
+    const invalidInputGame2: InputState = {
+      board: inputBoard1,
+      players: [
+        inputPlayer1,
+        inputPlayer2,
+        inputPlayer3,
+        inputPlayer4,
+        inputPlayer5,
+      ],
+    };
+    const invalidInputGame3: InputState = {
+      board: inputBoard1,
+      players: [inputPlayer1, inputPlayer2, inputPlayer5],
+    };
+    const invalidInputGame4: InputState = {
+      board: inputBoard2,
+      players: [inputPlayer1, inputPlayer2],
+    };
+    const validInputGame1: InputState = {
+      board: inputBoard3,
+      players: [inputPlayer1, inputPlayer2, inputPlayer3, inputPlayer4],
+    };
+    const validInputGame2: InputState = {
+      board: inputBoard3,
+      players: [inputPlayer1, inputPlayer2],
+    };
 
     it("returns false when given an invalid input game", () => {
       expect(isValidInputState(invalidInputGame1)).toEqual(false);

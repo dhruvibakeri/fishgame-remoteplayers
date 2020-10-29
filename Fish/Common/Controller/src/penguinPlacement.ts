@@ -3,6 +3,7 @@ import {
   Game,
   getCurrentPlayerScore,
   getCurrentPlayerColor,
+  MovementGame,
 } from "../../state";
 import { BoardPosition, Board, PenguinColor } from "../../board";
 import {
@@ -18,7 +19,10 @@ import {
   validatePenguinMove,
 } from "./validation";
 import { getFishNumberFromPosition, setTileToHole } from "./boardCreation";
-import { getNextPlayerIndex } from "./gameStateCreation";
+import {
+  getNextPlayerIndex,
+  updateGameCurPlayerIndex,
+} from "./gameStateCreation";
 
 /**
  * Adds score to current player based on the number of fish at the given tile that
@@ -164,18 +168,18 @@ const placePenguin = (
  * @return the new Game state with the resulting move or an error
  */
 const movePenguin = (
-  game: Game,
+  game: MovementGame,
   player: Player,
   startPosition: BoardPosition,
   endPosition: BoardPosition
 ):
-  | Game
+  | MovementGame
   | InvalidPositionError
   | IllegalPenguinPositionError
   | InvalidGameStateError => {
   // Validate the move and get the Penguin being moved.
-  const isValidOrError:
-    | true
+  const movementGameOrError:
+    | MovementGame
     | IllegalPenguinPositionError
     | InvalidGameStateError
     | InvalidPositionError = validatePenguinMove(
@@ -185,9 +189,9 @@ const movePenguin = (
     endPosition
   );
 
-  if (isError(isValidOrError)) {
+  if (isError(movementGameOrError)) {
     // If the move was invalid, return the error.
-    return isValidOrError;
+    return movementGameOrError;
   } else {
     // If the move is valid, update the Game state's Penguin position
     // mapping and return the new state.
@@ -202,11 +206,20 @@ const movePenguin = (
     // setTileToHole will always return board because we've already verified that startPosition is a
     // valid board position earlier in this function
     const newBoard = setTileToHole(game.board, startPosition) as Board;
+    // Get the game with the current player index incremented by 1.
+    const gameWithNextPlayerIndex: MovementGame = {
+      ...movementGameOrError,
+      curPlayerIndex: getNextPlayerIndex(movementGameOrError),
+    };
+    // Get the game with its current player index updated to that of the next
+    // player who can move.
+    const gameWithNextActivePlayer: MovementGame = updateGameCurPlayerIndex(
+      gameWithNextPlayerIndex
+    );
 
     return {
-      ...game,
+      ...gameWithNextActivePlayer,
       board: newBoard,
-      curPlayerIndex: getNextPlayerIndex(game),
       penguinPositions: updatedPenguinPositions,
       scores: updatePlayerScore(game, endPosition),
     };

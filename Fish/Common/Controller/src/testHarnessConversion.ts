@@ -1,8 +1,10 @@
+import { InvalidGameStateError } from "../types/errors";
 import { PenguinColor, BoardPosition, Board, Tile } from "../../board";
 import { Movement } from "../../game-tree";
-import { Player, Game, getCurrentPlayer } from "../../state";
+import { Player, Game, getCurrentPlayer, MovementGame } from "../../state";
 import { createNumberedBoard } from "./boardCreation";
-import { createGameState } from "./gameStateCreation";
+import { createGameState, PENGUIN_AMOUNT_N } from "./gameStateCreation";
+import { gameIsMovementGame } from "./gameTreeCreation";
 import { movePenguin } from "./penguinPlacement";
 import {
   InputPlayer,
@@ -111,6 +113,34 @@ const inputPlayersToScores = (
   );
 
 /**
+ * Assuming all the given InputPlayers have valid amounts of placed penguins,
+ * create their respective mapping from each player's PenguinColor to their
+ * number of unplaced penguins.
+ *
+ * @param players the array of InputPlayers to transform
+ * @return the transformed remaining unplaced penguins mapping
+ */
+const inputPlayersToRemainingUnplacedPenguins = (
+  players: Array<InputPlayer>
+): Map<PenguinColor, number> | InvalidGameStateError => {
+  const penguinsToPlace = PENGUIN_AMOUNT_N - players.length;
+  const somePlayerHasTooManyPlacements = players.some(
+    (player: InputPlayer) => player.places.length > penguinsToPlace
+  );
+
+  if (somePlayerHasTooManyPlacements) {
+    return new InvalidGameStateError();
+  }
+
+  return new Map(
+    players.map((player: InputPlayer) => [
+      player.color,
+      penguinsToPlace - player.places.length,
+    ])
+  );
+};
+
+/**
  * Attempt to transform the given InputState into a Game state, returning
  * the Game state if successful and an Error if one occurred while doing
  * so.
@@ -124,10 +154,18 @@ const inputStateToGameState = (inputState: InputState): Game | Error => {
   const players = inputState.players.map(inputPlayerToPlayer);
   const penguinPositions = inputPlayersToPenguinPositions(inputState.players);
   const scores = inputPlayersToScores(inputState.players);
+  const remainingUnplacedPenguins = inputPlayersToRemainingUnplacedPenguins(
+    inputState.players
+  );
 
   // If an error occurred, short circuit and return the error.
   if (isError(board)) {
     return board;
+  }
+
+  // If an error occurred, short circuit and return the error.
+  if (isError(remainingUnplacedPenguins)) {
+    return remainingUnplacedPenguins;
   }
 
   // Create the Game.
@@ -135,7 +173,30 @@ const inputStateToGameState = (inputState: InputState): Game | Error => {
     ...createGameState(players, board),
     penguinPositions,
     scores,
+    remainingUnplacedPenguins,
   };
+};
+
+/**
+ * Attempt to transform the given InputState into a MovementGame state,
+ * returning the MovementGame state if successful and an Error if one
+ * occurred while doing so.
+ *
+ * @param inputState the InputState to transform
+ * @return the successfully transformed MovementGame state or an error
+ */
+const inputStateToMovementGame = (
+  inputState: InputState
+): MovementGame | Error => {
+  const gameOrError: Game | Error = inputStateToGameState(inputState);
+
+  if (isError(gameOrError)) {
+    // Return as an Error.
+    return gameOrError;
+  } else if (gameIsMovementGame(gameOrError)) {
+    // Return as a MovementGame.
+    return gameOrError;
+  }
 };
 
 /**
@@ -239,10 +300,10 @@ const gameToInputState = (game: Game): InputState => {
  */
 const performMoveResponseQuery = (
   moveResponseQuery: MoveResponseQuery
-): Game | false => {
+): MovementGame | false => {
   // Convert the state within the query into a Game state, assuming the
   // Game is valid as specified in the xtree harness assumptions.
-  const gameState: Game | Error = inputStateToGameState(
+  const gameState: MovementGame | Error = inputStateToMovementGame(
     moveResponseQuery.state
   );
 
@@ -261,7 +322,7 @@ const performMoveResponseQuery = (
       getCurrentPlayer(gameState),
       movement.startPosition,
       movement.endPosition
-    ) as Game;
+    ) as MovementGame;
   }
 };
 

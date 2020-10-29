@@ -5,3 +5,4 @@ package-lock.json
 !*.config.js
 !.eslintrc.js
 .DS_store
+.vscode/

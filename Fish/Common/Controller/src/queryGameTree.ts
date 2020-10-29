@@ -1,4 +1,4 @@
-import { Game, getCurrentPlayer } from "../../state";
+import { Game, getCurrentPlayer, Player } from "../../state";
 import { GameTree, Movement, PotentialMovement } from "../../game-tree";
 import { movePenguin, positionsAreEqual } from "./penguinPlacement";
 import { IllegalMovementError } from "../types/errors";

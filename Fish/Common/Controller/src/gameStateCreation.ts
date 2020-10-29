@@ -1,12 +1,17 @@
-import { Player, Game } from "../../state";
+import { Player, Game, MovementGame, getCurrentPlayerColor } from "../../state";
 import { Board, BoardPosition, PenguinColor } from "../../board";
 import {
   InvalidGameStateError,
   InvalidNumberOfPlayersError,
 } from "../types/errors";
+import { createGameTree, gameIsMovementGame } from "./gameTreeCreation";
+import { GameTree } from "../../game-tree";
+import { currentPlayerHasMoves, isError } from "./validation";
+import { getReachablePositions } from "./movementChecking";
 
 const MAX_NUMBER_OF_PLAYERS = 4;
 const MIN_NUMBER_OF_PLAYERS = 2;
+const PENGUIN_AMOUNT_N = 6;
 
 /**
  * Get the next player's index for the given game.
@@ -16,6 +21,51 @@ const MIN_NUMBER_OF_PLAYERS = 2;
  */
 const getNextPlayerIndex = (game: Game): number =>
   (game.curPlayerIndex + 1) % game.players.length;
+
+// TODO test
+/**
+ * Update the current player index of the given MovementGame to the that of the
+ * next player who can make a movement, including the current player. In the
+ * case of there being no more moves for any player, return the given state as
+ * the final state. It is up to the caller to determine if the Game is the
+ * final state.
+ *
+ * @param game the MovementGame to update
+ * @return the MovementGame which either has its current player index to that
+ * of the next player who can move, or the final state of the game of no
+ * players can.
+ */
+const updateGameCurPlayerIndex = (game: MovementGame): MovementGame => {
+  // For the given MovementGame, update the the current player index to that of
+  // the next Player which has a potential move, using a playersSeen counter to
+  // prevent infinite recursion.
+  const updateGameCurPlayerIndexRecursive = (
+    movementGame: MovementGame,
+    playersSeen: number
+  ): MovementGame => {
+    // There are no more potential moves for any players. Return the final state.
+    if (playersSeen >= game.players.length) {
+      return game;
+    }
+
+    // Determine whether the current player has any moves they can possibly make.
+    const currentPlayerCanMove = currentPlayerHasMoves(movementGame);
+
+    // If the current player can move, return the MovementGame with them as the
+    // current player. Otherwise check the next player.
+    if (currentPlayerCanMove) {
+      return movementGame;
+    } else {
+      const nextPlayerGame: MovementGame = {
+        ...movementGame,
+        curPlayerIndex: getNextPlayerIndex(movementGame),
+      };
+      return updateGameCurPlayerIndexRecursive(nextPlayerGame, playersSeen + 1);
+    }
+  };
+
+  return updateGameCurPlayerIndexRecursive(game, 0);
+};
 
 /**
  * Creates a mapping from the given array of Players to their initial amount of
@@ -27,7 +77,7 @@ const buildUnplacedPenguinMap = (
   players: Array<Player>
 ): Map<PenguinColor, number> => {
   const unplacedPenguins: Map<PenguinColor, number> = new Map();
-  const numPenguins: number = 6 - players.length;
+  const numPenguins: number = PENGUIN_AMOUNT_N - players.length;
   for (const player of players) {
     unplacedPenguins.set(player.color, numPenguins);
   }
@@ -125,10 +175,12 @@ const createTestGameState = (
 export {
   MAX_NUMBER_OF_PLAYERS,
   MIN_NUMBER_OF_PLAYERS,
+  PENGUIN_AMOUNT_N,
   getNextPlayerIndex,
   createGameState,
   createTestGameState,
   createEmptyScoreSheet,
   createEmptyPenguinPositions,
   buildUnplacedPenguinMap,
+  updateGameCurPlayerIndex,
 };

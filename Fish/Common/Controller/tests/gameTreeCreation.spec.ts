@@ -1,11 +1,16 @@
 import { Board, BoardPosition, PenguinColor } from "../../board";
-import { Game, Player } from "../../state";
+import { Game, MovementGame, Player } from "../../state";
 import {
   createGameTree,
   createLazyGameTree,
   generatePotentialMoveMapping,
 } from "../src/gameTreeCreation";
-import { Movement, PotentialMovement } from "../../game-tree";
+import {
+  GameTree,
+  LazyGameTree,
+  Movement,
+  PotentialMovement,
+} from "../../game-tree";
 
 describe("gameTreeCreation", () => {
   const player1: Player = { name: "foo", color: PenguinColor.Black };
@@ -58,7 +63,7 @@ describe("gameTreeCreation", () => {
     [player1.color, 1],
     [player2.color, 0],
   ]);
-  const remainingUnplacedPenguins: Map<PenguinColor, number> = new Map([
+  const remainingUnplacedPenguins: Map<PenguinColor, 0> = new Map([
     [player1.color, 0],
     [player2.color, 0],
   ]);
@@ -88,7 +93,7 @@ describe("gameTreeCreation", () => {
     [player2.color, [player2Position1]],
   ]);
 
-  const game: Game = {
+  const game: MovementGame = {
     players,
     board: boardBeforeMovement,
     curPlayerIndex: 0,
@@ -100,7 +105,7 @@ describe("gameTreeCreation", () => {
   const gameAfterMovement1: Game = {
     players,
     board: boardAfterMovement1Or2,
-    curPlayerIndex: 1,
+    curPlayerIndex: 0,
     penguinPositions: penguinPositionsAfterMovement1,
     remainingUnplacedPenguins,
     scores: scoresAfterMovement,
@@ -129,9 +134,9 @@ describe("gameTreeCreation", () => {
     { movement: movement3, game: gameAfterMovement3 },
   ];
   const expectedPotentialMoveLengths = [
-    { movement: movement1, length: 0 },
-    { movement: movement2, length: 1 },
-    { movement: movement3, length: 1 },
+    { movement: movement1, length: 2, curPlayerIndex: 0 },
+    { movement: movement2, length: 1, curPlayerIndex: 1 },
+    { movement: movement3, length: 1, curPlayerIndex: 1 },
   ];
 
   // describe("createGameTree", () => {
@@ -178,12 +183,16 @@ describe("gameTreeCreation", () => {
         return {
           movement: potentialMove.movement,
           length: potentialMove.resultingGameTree().potentialMoves.length,
+          curPlayerIndex: potentialMove.resultingGameTree().gameState
+            .curPlayerIndex,
         };
       }
     );
+
     it("generates the correct potential game states", () => {
       expect(actualGameStates).toEqual(expectedGameStates);
     });
+
     it("generates the correct amount of potential moves from each potential move", () => {
       expect(actualPotentialMoveLengths).toEqual(expectedPotentialMoveLengths);
     });
@@ -191,9 +200,9 @@ describe("gameTreeCreation", () => {
 
   describe("createLazyGameTree", () => {
     it("creates a LazyGameTree from a game state and movement", () => {
-      const actual = createLazyGameTree(game, movement1)();
+      const actual: GameTree = createLazyGameTree(game, movement1)();
       expect(actual.gameState).toEqual(gameAfterMovement1);
-      expect(Array.from(actual.potentialMoves).length).toEqual(0);
+      expect(Array.from(actual.potentialMoves).length).toEqual(2);
     });
   });
 });

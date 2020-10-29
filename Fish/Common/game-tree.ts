@@ -1,5 +1,5 @@
 import { BoardPosition } from "./board";
-import { Game } from "./state";
+import { Game, MovementGame } from "./state";
 
 /**
  * A Movement represents a move by a Player of one of their Penguins from a
@@ -44,14 +44,21 @@ interface PotentialMovement {
  * that point and a mapping from each of the possible movements to be made by that
  * state's current player to a LazyGameTree, which represents the next GameTree
  * node from making that movement.
- * @param gameState the the state of the game at this node of the GameTree
+ *
+ * The process of creating a GameTree automatically skips players without any
+ * further moves, where a GameTree with an empty array of PotentialMovements
+ * symbolizes a completed game, where the game state is the final state.
+ *
+ * @param gameState the state of the game at this node of the GameTree, this
+ * must be a MovementGame since GameTrees are only applicable once all penguins
+ * have been placed
  * @param potentialMoves a mapping of every possible Movement that the current
  * player of this Game state can make to the GameTree (lazily evaluated via a LazyGameTree)
  * that would result from making that move, containing the next GameState and set of
  * possible moves
  */
 interface GameTree {
-  readonly gameState: Game;
+  readonly gameState: MovementGame;
   readonly potentialMoves: Array<PotentialMovement>;
 }
 

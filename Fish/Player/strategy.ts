@@ -1,5 +1,5 @@
 import { BoardPosition } from "../Common/board";
-import { Game, getCurrentPlayer, Player } from "../Common/state";
+import { Game, getCurrentPlayer, MovementGame, Player } from "../Common/state";
 import { placePenguin } from "../Common/Controller/src/penguinPlacement";
 import {
   positionIsPlayable,
@@ -13,7 +13,10 @@ import {
   NoMorePlacementsError,
 } from "../Common/Controller/types/errors";
 import { Movement, GameTree, PotentialMovement } from "../Common/game-tree";
-import { createGameTree } from "../Common/Controller/src/gameTreeCreation";
+import {
+  createGameTree,
+  createGameTreeFromMovementGame,
+} from "../Common/Controller/src/gameTreeCreation";
 
 /**
  * Using the zig-zag strategy as outlined in Milestone 5, finds the next
@@ -232,16 +235,11 @@ const tieBreakMovements = (movements: Array<Movement>): Movement => {
  * strategy.
  */
 const chooseNextAction = (
-  game: Game,
+  game: MovementGame,
   lookAheadTurnsDepth: number
-): Movement | NoMoreMovementsError | InvalidGameForTreeError => {
+): Movement | NoMoreMovementsError => {
   // Create the GameTree for the given state.
-  const gameTree: GameTree | InvalidGameForTreeError = createGameTree(game);
-
-  // Return gameTree error if given game state is not valid game state for tree creation
-  if (isError(gameTree)) {
-    return gameTree;
-  }
+  const gameTree: GameTree = createGameTreeFromMovementGame(game);
 
   // Return false if there are no next actions for the player to make.
   if (gameTree.potentialMoves.length < 1) {

@@ -1,4 +1,4 @@
-import { Game, getCurrentPlayerColor } from "../../state";
+import { Game, getCurrentPlayerColor, MovementGame } from "../../state";
 import {
   GameTree,
   Movement,
@@ -9,38 +9,77 @@ import { BoardPosition, PenguinColor } from "../../board";
 import { getReachablePositions } from "./movementChecking";
 import { movePenguin } from "./penguinPlacement";
 import { InvalidGameForTreeError } from "../types/errors";
+import { isError } from "./validation";
+import { updateGameCurPlayerIndex } from "./gameStateCreation";
 
+// TODO test
+// TODO move to validation maybe
 /**
- * Checks if tree can be generated for given game, meaning all penguins have been placed
- * @param game game to check for number of placed penguins
- * @returns true if all penguins have been placed, false if not
+ * Given a Game state, determine if the Game is a MovementGame i.e. all players
+ * within the Game have placed all of their penguins.
+ *
+ * @param game the Game state to check
+ * @return whether the Game state is a MovementGame
  */
-const isGameTreeable = (game: Game): boolean => {
-  let placedPenguins: number = 0;
-  game.penguinPositions.forEach((value: BoardPosition[]) => {
-    placedPenguins += value.length;
-  });
-  return (
-    placedPenguins ===
-    (6 - game.players.length) * game.players.length
+const gameIsMovementGame = (game: Game): game is MovementGame =>
+  Array.from(game.remainingUnplacedPenguins).every(
+    ([, unplacedPenguins]: [PenguinColor, number]) => unplacedPenguins === 0
   );
+
+// TODO test
+/**
+ * Validate whether a game tree can be made from the given Game state or in
+ * other words, whether the given Game state is a MovementGame with all of its
+ * penguins placed. Return the coerced MovementGame if so and an error otherwise.
+ *
+ * @param game game to check for number of placed penguins
+ * @returns a MovementGame if the Game is treeable or an Error if not
+ */
+const validateIsGameTreeable = (
+  game: Game
+): MovementGame | InvalidGameForTreeError => {
+  if (gameIsMovementGame(game)) {
+    return game;
+  } else {
+    return new InvalidGameForTreeError(game);
+  }
 };
 
+// TODO test
 /**
- * Given a Game state, return its corresponding GameTree.
+ * Given a Game state, return its corresponding GameTree, making sure that the
+ * state is within the movement stage i.e. all penguins have been placed.
  *
  * @param game the Game state
  * @return the state's corresponding GameTree
  */
-const createGameTree = (
-  game: Game,
-): GameTree | InvalidGameForTreeError => {
-  if (!isGameTreeable(game)) {
-    return new InvalidGameForTreeError(game);
+const createGameTree = (game: Game): GameTree | InvalidGameForTreeError => {
+  const movementGameOrError:
+    | MovementGame
+    | InvalidGameForTreeError = validateIsGameTreeable(game);
+  if (isError(movementGameOrError)) {
+    return movementGameOrError;
+  } else {
+    return createGameTreeFromMovementGame(movementGameOrError);
   }
+};
+
+// TODO test
+/**
+ * Given a MovementGame state, return its corresponding GameTree, skipping players
+ * which are unable to make moves. If the result contains an empty list of
+ * potential moves, this then signifies a final game state.
+ *
+ * @param game the MovementGame to be made into a GameTree.
+ */
+const createGameTreeFromMovementGame = (game: MovementGame): GameTree => {
+  const gameSkippingInactivePlayers: MovementGame = updateGameCurPlayerIndex(
+    game
+  );
+
   return {
-    gameState: game,
-    potentialMoves: generatePotentialMoveMapping(game),
+    gameState: gameSkippingInactivePlayers,
+    potentialMoves: generatePotentialMoveMapping(gameSkippingInactivePlayers),
   };
 };
 
@@ -51,7 +90,9 @@ const createGameTree = (
  * @param game the Game state
  * @return a mapping from potential Movements to their resulting LazyGameTrees
  */
-const generatePotentialMoveMapping = (game: Game): Array<PotentialMovement> => {
+const generatePotentialMoveMapping = (
+  game: MovementGame
+): Array<PotentialMovement> => {
   // From the given starting position, get all the possible Movements from it.
   const startPositionToPotentialMovements = (
     startPosition: BoardPosition
@@ -77,7 +118,7 @@ const generatePotentialMoveMapping = (game: Game): Array<PotentialMovement> => {
 };
 
 /**
- * Given a Game state and a Movement, create the resulting LazyGameTree
+ * Given a MovementGame state and a Movement, create the resulting LazyGameTree
  * corresponding to the current player of the given state making that
  * Movement. This function is only used by createGameTree.
  *
@@ -85,7 +126,10 @@ const generatePotentialMoveMapping = (game: Game): Array<PotentialMovement> => {
  * @param movement the Movement to apply
  * @return the resultng LazyGameTree
  */
-const createLazyGameTree = (game: Game, movement: Movement): LazyGameTree => {
+const createLazyGameTree = (
+  game: MovementGame,
+  movement: Movement
+): LazyGameTree => {
   // This resulting game state is guaranteed to receive valid inputs as it is
   // only used for GameTree creation, which uses penguins and reachable positions
   // that have already been validated.
@@ -94,14 +138,22 @@ const createLazyGameTree = (game: Game, movement: Movement): LazyGameTree => {
     game.players[game.curPlayerIndex],
     movement.startPosition,
     movement.endPosition
-  ) as Game;
+  ) as MovementGame;
 
   // Cast newGameTree as GameTree. This can be done because this function is only called
   // by createGameTree, which validates that the original game state is valid for tree
   // generation. All children of valid game tree nodes are also valid game trees.
-  const newGameTree: GameTree = createGameTree(newGameState) as GameTree;
+  const newGameTree: GameTree = createGameTreeFromMovementGame(
+    newGameState
+  ) as GameTree;
 
   return () => newGameTree;
 };
 
-export { createGameTree, generatePotentialMoveMapping, createLazyGameTree };
+export {
+  createGameTree,
+  createGameTreeFromMovementGame,
+  generatePotentialMoveMapping,
+  createLazyGameTree,
+  gameIsMovementGame,
+};

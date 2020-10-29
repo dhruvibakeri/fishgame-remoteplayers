@@ -1,5 +1,5 @@
 import { createGameState } from "../src/gameStateCreation";
-import { Game, Player } from "../../state";
+import { Game, MovementGame, Player } from "../../state";
 import { Board, BoardPosition, PenguinColor } from "../../board";
 import {
   createBlankBoard,
@@ -16,10 +16,7 @@ import {
   maxArray,
   tieBreakMovements,
 } from "../../../Player/strategy";
-import {
-  InvalidGameForTreeError,
-  NoMorePlacementsError,
-} from "../types/errors";
+import { NoMorePlacementsError } from "../types/errors";
 import { inputStateToGameState } from "../src/testHarnessConversion";
 import { InputPlayer } from "../src/testHarnessInput";
 import { createGameTree } from "../src/gameTreeCreation";
@@ -173,7 +170,7 @@ describe("strategy", () => {
   ]);
   const remainingUnplacedPenguinsAfterAllPlacement: Map<
     PenguinColor,
-    number
+    0
   > = new Map([
     [player1.color, 0],
     [player2.color, 0],
@@ -182,7 +179,7 @@ describe("strategy", () => {
     [player1.color, 4],
     [player2.color, 4],
   ]);
-  const gameAfterAllPlacement: Game = {
+  const gameAfterAllPlacement: MovementGame = {
     ...game,
     curPlayerIndex: 0,
     penguinPositions: penguinPositionsAfterAllPlacement,
@@ -301,26 +298,26 @@ describe("strategy", () => {
         score: 8,
         places: [
           [0, 0],
-          [0, 1],
-          [0, 3],
-          [2, 3],
+          [1, 0],
+          [3, 0],
+          [3, 2],
         ],
       },
       {
         color: PenguinColor.Brown,
         score: 6,
         places: [
-          [0, 3],
-          [1, 2],
-          [2, 0],
+          [0, 1],
           [2, 1],
+          [0, 2],
+          [1, 2],
         ],
       },
     ];
     const startingGame = inputStateToGameState({
       board: inputBoard,
       players: inputPlayers,
-    }) as Game;
+    }) as MovementGame;
     const numberedBoard = createNumberedBoard([
       [1, 3, 5, 4],
       [3, 2, 4, 1],
@@ -328,7 +325,9 @@ describe("strategy", () => {
       [4, 1, 1, 2],
     ]) as Board;
     const numberedGame = createGameState(players, numberedBoard) as Game;
-    const gameAfterPlacement = placeAllPenguinsZigZag(numberedGame) as Game;
+    const gameAfterPlacement = placeAllPenguinsZigZag(
+      numberedGame
+    ) as MovementGame;
     // console.log(gameAfterPlacement.board.tiles);
     // console.log(gameAfterPlacement.penguinPositions);
     const numberedBoardWithHoles = createNumberedBoard([
@@ -346,9 +345,24 @@ describe("strategy", () => {
     ) as Game;
 
     it("Returns best movement for game state", () => {
-      expect(chooseNextAction(startingGame, 2)).toBe(false);
-      expect(chooseNextAction(gameAfterPlacement, 1)).toBe(false);
-      expect(chooseNextAction(gameAfterPlacementWithHoles, 2)).toBe(false);
+      const expectedMove1: Movement = {
+        startPosition: { col: 2, row: 3 },
+        endPosition: { col: 1, row: 1 },
+      };
+      const expectedMove2: Movement = {
+        startPosition: { col: 2, row: 0 },
+        endPosition: { col: 2, row: 2 },
+      };
+      expect(chooseNextAction(startingGame, 2)).toEqual(expectedMove1);
+      expect(chooseNextAction(gameAfterPlacement, 1)).toEqual(expectedMove2);
+    });
+
+    it("rejects a placement for a player with no more available moves", () => {
+      // TODO
+    });
+
+    it("rejects a game that isn't a MovementGame", () => {
+      // TODO
     });
   });
 

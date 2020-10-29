@@ -5,12 +5,16 @@ import {
   IllegalPenguinPositionError,
   UnreachablePositionError,
 } from "../types/errors";
-import { Player, Game, getCurrentPlayerColor } from "../../state";
+import { Player, Game, getCurrentPlayerColor, MovementGame } from "../../state";
 import { Board, BoardPosition, PenguinColor } from "../../board";
 import { getReachablePositions } from "./movementChecking";
 import { positionsAreEqual } from "./penguinPlacement";
 import { InputState, InputPlayer } from "./testHarnessInput";
-import { MIN_NUMBER_OF_PLAYERS, MAX_NUMBER_OF_PLAYERS } from "./gameStateCreation";
+import {
+  MIN_NUMBER_OF_PLAYERS,
+  MAX_NUMBER_OF_PLAYERS,
+} from "./gameStateCreation";
+import { gameIsMovementGame } from "./gameTreeCreation";
 
 const MAX_TEST_HARNESS_BOARD_TILES = 25;
 
@@ -169,12 +173,12 @@ const playerHasUnplacedPenguin = (player: Player, game: Game): boolean => {
  * @return true or an error corresponding to the invalidity of the move
  */
 const validatePenguinMove = (
-  game: Game,
+  game: MovementGame,
   player: Player,
   startPosition: BoardPosition,
   endPosition: BoardPosition
 ):
-  | true
+  | MovementGame
   | InvalidGameStateError
   | InvalidPositionError
   | IllegalPenguinPositionError => {
@@ -209,7 +213,7 @@ const validatePenguinMove = (
     return new InvalidGameStateError(game);
   }
 
-  return true;
+  return game;
 };
 
 /**
@@ -217,26 +221,53 @@ const validatePenguinMove = (
  * - it has a valid number of players
  * - the player colors are unique
  * - the number of tiles is under 25 and both dimensions are greater than 0
- * 
+ *
  * @param inputState the InputState to verify
  * @return whether the inputState is valid
  */
 const isValidInputState = (inputState: InputState): boolean => {
   // Validate the number of players.
-  const validNumberOfPlayers = MIN_NUMBER_OF_PLAYERS <= inputState.players.length && inputState.players.length <= MAX_NUMBER_OF_PLAYERS;
+  const validNumberOfPlayers =
+    MIN_NUMBER_OF_PLAYERS <= inputState.players.length &&
+    inputState.players.length <= MAX_NUMBER_OF_PLAYERS;
 
   // Validate the player colors are unique.
-  const distinctColors: Set<PenguinColor> = new Set(inputState.players.map((inputPlayer: InputPlayer) => inputPlayer.color));
-  const colorsAreUnique = distinctColors.size== inputState.players.length;
+  const distinctColors: Set<PenguinColor> = new Set(
+    inputState.players.map((inputPlayer: InputPlayer) => inputPlayer.color)
+  );
+  const colorsAreUnique = distinctColors.size == inputState.players.length;
 
   // Validate number of board tiles.
-  const longestRowLength = Math.max(...inputState.board.map((row: Array<number>) => row.length));
+  const longestRowLength = Math.max(
+    ...inputState.board.map((row: Array<number>) => row.length)
+  );
   const numberOfTiles = longestRowLength * inputState.board.length;
   const validNumberOfTiles = numberOfTiles <= MAX_TEST_HARNESS_BOARD_TILES;
-  const validBoardSize = isValidBoardSize(longestRowLength, inputState.board.length) && validNumberOfTiles;
+  const validBoardSize =
+    isValidBoardSize(longestRowLength, inputState.board.length) &&
+    validNumberOfTiles;
 
   return validNumberOfPlayers && colorsAreUnique && validBoardSize;
-}
+};
+
+// TODO  test
+/**
+ * Determine if the current Player of the given MovementGame has any potential
+ * moves.
+ *
+ * @param movementGame the MovementGame to check.
+ * @return whether the MovementGame's current player has any remaining moves
+ */
+const currentPlayerHasMoves = (movementGame: MovementGame): boolean =>
+  movementGame.penguinPositions
+    .get(getCurrentPlayerColor(movementGame))
+    .map((penguinPosition: BoardPosition) =>
+      getReachablePositions(movementGame, penguinPosition)
+    )
+    .some(
+      (reachablePositionsFromMove: Array<BoardPosition>) =>
+        reachablePositionsFromMove.length > 0
+    );
 
 export {
   positionIsOnBoard,
@@ -249,4 +280,5 @@ export {
   playerHasUnplacedPenguin,
   isError,
   isValidInputState,
+  currentPlayerHasMoves,
 };
