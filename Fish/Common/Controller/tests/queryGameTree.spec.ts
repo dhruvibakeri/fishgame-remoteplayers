@@ -2,10 +2,11 @@ import { createHoledOneFishBoard, setTileToHole } from "../src/boardCreation";
 import { createGameState } from "../src/gameStateCreation";
 import { Board, BoardPosition, PenguinColor } from "../../board";
 import { Game, Player } from "../../state";
-import { isMovementLegal, mapOverReachableStates } from "../src/queryGameTree";
-import { Movement } from "../../game-tree";
+import { isMovementLegal } from "../src/queryGameTree";
+import { GameTree, Movement } from "../../game-tree";
 import { IllegalMovementError } from "../types/errors";
 import { createGameTree } from "../src/gameTreeCreation";
+import { placeAllPenguinsZigZag } from "../../../Player/strategy";
 
 describe("queryGameTree", () => {
   const player1: Player = { name: "foo", color: PenguinColor.Black };
@@ -16,6 +17,7 @@ describe("queryGameTree", () => {
   const validStartPosition: BoardPosition = { col: 0, row: 0 };
   const validEndPosition: BoardPosition = { col: 0, row: 1 };
   const board: Board = createHoledOneFishBoard(2, 2, holePositions, 1) as Board;
+  const placeableBoard: Board = createHoledOneFishBoard(4, 4, holePositions, 1) as Board;
   const penguinPositions: Map<PenguinColor, Array<BoardPosition>> = new Map([
     [player1.color, [validStartPosition]],
   ]);
@@ -27,98 +29,113 @@ describe("queryGameTree", () => {
     penguinPositions
   );
   twoPenguinPositions.set(PenguinColor.White, [validEndPosition]);
-  const gameWithTwoPenguins: Game = {
-    ...game,
-    penguinPositions: twoPenguinPositions,
-  };
-  const movement: Movement = {
-    startPosition: validStartPosition,
-    endPosition: validEndPosition,
-  };
-  const penguinPositionsAfterMovement = new Map(penguinPositions);
-  penguinPositionsAfterMovement.set(player1.color, [validEndPosition]);
   const scoresAfterMovement = new Map(game.scores);
   scoresAfterMovement.set(player1.color, 1);
-  const boardAfterMovement = setTileToHole(board, validStartPosition) as Board;
-  const gameAfterMovement: Game = {
-    ...game,
-    curPlayerIndex: 1,
-    board: boardAfterMovement,
-    scores: scoresAfterMovement,
-    penguinPositions: penguinPositionsAfterMovement,
+  const placeableGame: Game = {
+    ...(createGameState(players, placeableBoard) as Game),
   };
-  const gameTree = createGameTree(game);
-  const gameTreeWithTwoPenguins = createGameTree(gameWithTwoPenguins);
+  const allPlacedGame = placeAllPenguinsZigZag(placeableGame) as Game;
+  const allPlacedGameTree = createGameTree(allPlacedGame) as GameTree;
 
-  // describe("isMovementLegal", () => {
-  //   it("rejects a start position outside of the board", () => {
-  //     const invalidStartPosition: BoardPosition = { col: 2, row: 2 };
-  //     const movement: Movement = {
-  //       startPosition: invalidStartPosition,
-  //       endPosition: validEndPosition,
-  //     };
-  //     expect(isMovementLegal(gameTree, movement)).toEqual(
-  //       new IllegalMovementError(gameTree, movement)
-  //     );
-  //   });
+  describe("isMovementLegal", () => {
+    it("rejects a start position outside of the board", () => {
+      const invalidStartPosition: BoardPosition = { col: 4, row: 4 };
+      const movement: Movement = {
+        startPosition: invalidStartPosition,
+        endPosition: validEndPosition,
+      };
+      expect(isMovementLegal(allPlacedGameTree, movement)).toEqual(
+        new IllegalMovementError(allPlacedGameTree, movement)
+      );
+    });
 
-  //   it("rejects an end position outside of the board", () => {
-  //     const invalidEndPosition: BoardPosition = { col: 3, row: 3 };
-  //     const movement: Movement = {
-  //       startPosition: validStartPosition,
-  //       endPosition: invalidEndPosition,
-  //     };
-  //     expect(isMovementLegal(gameTree, movement)).toEqual(
-  //       new IllegalMovementError(gameTree, movement)
-  //     );
-  //   });
+    it("rejects an end position outside of the board", () => {
+      const invalidEndPosition: BoardPosition = { col: 4, row: 4 };
+      const movement: Movement = {
+        startPosition: validStartPosition,
+        endPosition: invalidEndPosition,
+      };
+      expect(isMovementLegal(allPlacedGameTree, movement)).toEqual(
+        new IllegalMovementError(allPlacedGameTree, movement)
+      );
+    });
 
-  //   it("rejects a player trying to move from a starting position not containing one of their penguins", () => {
-  //     const invalidStartPosition: BoardPosition = { col: 1, row: 1 };
-  //     const movement: Movement = {
-  //       startPosition: invalidStartPosition,
-  //       endPosition: validEndPosition,
-  //     };
-  //     expect(isMovementLegal(gameTree, movement)).toEqual(
-  //       new IllegalMovementError(gameTree, movement)
-  //     );
-  //   });
+    it("rejects a player trying to move from a starting position not containing one of their penguins", () => {
+      const invalidStartPosition: BoardPosition = { col: 0, row: 1 };
+      const movement: Movement = {
+        startPosition: invalidStartPosition,
+        endPosition: validEndPosition,
+      };
+      expect(isMovementLegal(allPlacedGameTree, movement)).toEqual(
+        new IllegalMovementError(allPlacedGameTree, movement)
+      );
+    });
 
-  //   it("rejects a player trying to move to a position not reachable from the start", () => {
-  //     const invalidEndPosition: BoardPosition = { col: 1, row: 1 };
-  //     const movement: Movement = {
-  //       startPosition: validStartPosition,
-  //       endPosition: invalidEndPosition,
-  //     };
-  //     expect(isMovementLegal(gameTree, movement)).toEqual(
-  //       new IllegalMovementError(gameTree, movement)
-  //     );
-  //   });
+    it("rejects a player trying to move to a position not reachable from the start", () => {
+      const invalidEndPosition: BoardPosition = { col: 1, row: 1 };
+      const movement: Movement = {
+        startPosition: validStartPosition,
+        endPosition: invalidEndPosition,
+      };
+      expect(isMovementLegal(allPlacedGameTree, movement)).toEqual(
+        new IllegalMovementError(allPlacedGameTree, movement)
+      );
+    });
 
-  //   it("rejects a player trying to move to a hole", () => {
-  //     const movement: Movement = {
-  //       startPosition: validEndPosition,
-  //       endPosition: holePosition,
-  //     };
-  //     expect(isMovementLegal(gameTree, movement)).toEqual(
-  //       new IllegalMovementError(gameTree, movement)
-  //     );
-  //   });
+    it("rejects a player trying to move to a hole", () => {
+      const movement: Movement = {
+        startPosition: { row: 1, col: 1 },
+        endPosition: holePosition,
+      };
+      expect(isMovementLegal(allPlacedGameTree, movement)).toEqual(
+        new IllegalMovementError(allPlacedGameTree, movement)
+      );
+    });
 
-  //   it("rejects a player trying to move to a position with another penguin present", () => {
-  //     const movement: Movement = {
-  //       startPosition: validStartPosition,
-  //       endPosition: validEndPosition,
-  //     };
-  //     expect(isMovementLegal(gameTreeWithTwoPenguins, movement)).toEqual(
-  //       new IllegalMovementError(gameTree, movement)
-  //     );
-  //   });
+    it("rejects a player trying to move to a position with another penguin present", () => {
+      const movement: Movement = {
+        startPosition: validStartPosition,
+        endPosition: validEndPosition,
+      };
+      expect(isMovementLegal(allPlacedGameTree, movement)).toEqual(
+        new IllegalMovementError(allPlacedGameTree, movement)
+      );
+    });
 
-  //   it("accepts a valid move", () => {
-  //     expect(isMovementLegal(gameTree, movement)).toEqual(gameAfterMovement);
-  //   });
-  // });
+    it("accepts a valid move", () => {
+      const movement: Movement = {
+        startPosition: { row: 0, col: 3 },
+        endPosition: { row: 2, col: 3 },
+      };
+      const penguinsAfterMovement = new Map([
+        [player1.color, [
+            { row: 0, col: 0 },
+            { row: 1, col: 1 },
+            { row: 1, col: 3 },
+            { row: 2, col: 3 },
+        ]],
+        [player2.color, [
+            { row: 0, col: 2 },
+            { row: 1, col: 0 },
+            { row: 1, col: 2 },
+            { row: 2, col: 0 }
+          ]],
+      ]);
+      const scoresAfterMovement = new Map([
+        [player1.color, 1],
+        [player2.color, 0]
+      ]);
+      const boardAfterMovement = setTileToHole(placeableBoard, { row: 0, col: 3 }) as Board;
+      const gameAfterMovement = {
+        ...allPlacedGame,
+        penguinPositions: penguinsAfterMovement,
+        scores: scoresAfterMovement,
+        board: boardAfterMovement,
+        curPlayerIndex: 1,
+      }
+      expect(isMovementLegal(allPlacedGameTree, movement)).toEqual(gameAfterMovement);
+    });
+  });
 
   describe("mapOverReachableStates", () => {
     const player1Position1: BoardPosition = { col: 1, row: 2 };
