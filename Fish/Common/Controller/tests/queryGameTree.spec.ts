@@ -2,8 +2,8 @@ import { createHoledOneFishBoard, setTileToHole } from "../src/boardCreation";
 import { createGameState } from "../src/gameStateCreation";
 import { Board, BoardPosition, PenguinColor } from "../../board";
 import { Game, Player } from "../../state";
-import { isMovementLegal } from "../src/queryGameTree";
-import { GameTree, Movement } from "../../game-tree";
+import { isMovementLegal, mapOverReachableStates } from "../src/queryGameTree";
+import { GameTree, Movement, PotentialMovement } from "../../game-tree";
 import { IllegalMovementError } from "../types/errors";
 import { createGameTree } from "../src/gameTreeCreation";
 import { placeAllPenguinsZigZag } from "../../../Player/strategy";
@@ -188,12 +188,14 @@ describe("queryGameTree", () => {
         JSON.stringify(game) +
         JSON.stringify(Array.from(game.penguinPositions)) +
         JSON.stringify(Array.from(game.scores));
-
-      const expected: Array<string> = [
-        jsonStringifyGame(gameAfterMovement1),
-        jsonStringifyGame(gameAfterMovement2),
-      ];
-      // expect(mapOverReachableStates(gameTree, jsonStringifyGame)).toEqual(expected);
+      
+      const expected: Array<string> = [];
+      allPlacedGameTree.potentialMoves.forEach((potentialMovement: PotentialMovement) => {
+        const curTree = potentialMovement.resultingGameTree();
+        const stringified = jsonStringifyGame(curTree.gameState);
+        expected.push(stringified);
+      })
+      expect(mapOverReachableStates(allPlacedGameTree, jsonStringifyGame)).toEqual(expected);
     });
   });
 });
