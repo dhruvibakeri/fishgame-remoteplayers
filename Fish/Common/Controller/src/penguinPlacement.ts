@@ -26,19 +26,20 @@ import {
 
 /**
  * Adds score to current player based on the number of fish at the given tile that
- * the penguin will land on
+ * the penguin is leaving. This means a player's score doesn't update when they land
+ * or are placed on a tile, it updates when they leave the tile.
  *
  * @param game Game state to find fish score and current player
- * @param landingPosition board position penguin is going to land
+ * @param landingPosition board position penguin is leaving
  * @returns the updated scoresheet from updating the current player's score.
  */
 const updatePlayerScore = (
   game: Game,
-  landingPosition: BoardPosition
+  leavingPosition: BoardPosition
 ): Map<PenguinColor, number> => {
   const newPlayerScore =
     getCurrentPlayerScore(game) +
-    getFishNumberFromPosition(game.board, landingPosition);
+    getFishNumberFromPosition(game.board, leavingPosition);
   const updatedScores = new Map(game.scores);
   updatedScores.set(getCurrentPlayerColor(game), newPlayerScore);
   return updatedScores;
@@ -153,7 +154,6 @@ const placePenguin = (
     curPlayerIndex: getNextPlayerIndex(game),
     penguinPositions: updatedPenguinPositions,
     remainingUnplacedPenguins: newUnplacedPenguins,
-    scores: updatePlayerScore(game, position),
   };
 };
 
@@ -221,7 +221,7 @@ const movePenguin = (
       ...gameWithNextActivePlayer,
       board: newBoard,
       penguinPositions: updatedPenguinPositions,
-      scores: updatePlayerScore(game, endPosition),
+      scores: updatePlayerScore(game, startPosition),
     };
   }
 };

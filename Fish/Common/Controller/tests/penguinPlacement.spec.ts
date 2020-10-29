@@ -149,14 +149,11 @@ describe("penguinMovement", () => {
       player1.color,
       game.remainingUnplacedPenguins.get(player1.color) - 1
     );
-    const expectedScores: Map<PenguinColor, number> = new Map(game.scores);
-    expectedScores.set(player1.color, 1);
     const expectedGameState: Game = {
       ...game,
       curPlayerIndex: 1,
       penguinPositions: expectedPenguinPositions,
       remainingUnplacedPenguins: expectedRemainingUnplacedPenguins,
-      scores: expectedScores,
     };
     const outOfBoundsPosition: BoardPosition = { col: 6, row: 8 };
 

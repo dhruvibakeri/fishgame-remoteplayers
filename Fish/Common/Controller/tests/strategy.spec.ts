@@ -57,7 +57,7 @@ describe("strategy", () => {
     [player2.color, 4],
   ]);
   const scoresAfterPlacement1: Map<PenguinColor, number> = new Map([
-    [player1.color, 1],
+    [player1.color, 0],
     [player2.color, 0],
   ]);
   const gameAfterPlacement1 = {
@@ -84,8 +84,8 @@ describe("strategy", () => {
     [player2.color, 3],
   ]);
   const scoresAfterPlacement2: Map<PenguinColor, number> = new Map([
-    [player1.color, 1],
-    [player2.color, 1],
+    [player1.color, 0],
+    [player2.color, 0],
   ]);
   const gameAfterPlacement2: Game = {
     ...gameAfterPlacement1,
@@ -135,8 +135,8 @@ describe("strategy", () => {
     [player2.color, 3],
   ]);
   const scoresAfterPlacement3WithHole: Map<PenguinColor, number> = new Map([
-    [player1.color, 2],
-    [player2.color, 1],
+    [player1.color, 0],
+    [player2.color, 0],
   ]);
   const gameAfterPlacement3WithHole: Game = {
     ...gameAfterPlacement2WithHole,
@@ -176,8 +176,8 @@ describe("strategy", () => {
     [player2.color, 0],
   ]);
   const scoresAfterAllPlacement: Map<PenguinColor, number> = new Map([
-    [player1.color, 4],
-    [player2.color, 4],
+    [player1.color, 0],
+    [player2.color, 0],
   ]);
   const gameAfterAllPlacement: MovementGame = {
     ...game,
@@ -193,28 +193,6 @@ describe("strategy", () => {
     { row: 2, col: 2 }
   ) as MovementGame;
   const gameTreeNoMoves: GameTree = createGameTree(gameNoMoves) as GameTree;
-
-  // const gameWithTwoPiecesPositions: Map<
-  //   PenguinColor,
-  //   Array<BoardPosition>
-  // > = new Map([
-  //   [player1.color, [{ col: 0, row: 0 }]],
-  //   [player2.color, [{ col: 2, row: 2 }]],
-  // ]);
-  // const gameWithTwoPiecesBoard: Board = {
-  //   tiles: [
-  //     [{ numOfFish: 1 }, { numOfFish: 2 }],
-  //     [{ numOfFish: 3 }, { numOfFish: 2 }],
-  //     [{ numOfFish: 1 }, { numOfFish: 2 }],
-  //   ],
-  // };
-  // const gameWithTwoPieces: Game = {
-  //   ...game,
-  //   board: gameWithTwoPiecesBoard,
-  //   penguinPositions: gameWithTwoPiecesPositions,
-  //   scores: scoresAfterPlacement2,
-  //   remainingUnplacedPenguins: remainingUnplacedPenguinsAfterAllPlacement,
-  // };
   const gameTree: GameTree = createGameTree(gameAfterAllPlacement) as GameTree;
 
   describe("getNextPenguinPlacementPosition", () => {
@@ -328,8 +306,6 @@ describe("strategy", () => {
     const gameAfterPlacement = placeAllPenguinsZigZag(
       numberedGame
     ) as MovementGame;
-    // console.log(gameAfterPlacement.board.tiles);
-    // console.log(gameAfterPlacement.penguinPositions);
     const numberedBoardWithHoles = createNumberedBoard([
       [1, 0, 5],
       [3, 0, 4, 1],
@@ -366,16 +342,16 @@ describe("strategy", () => {
 
   describe("getMinMaxScore", () => {
     it("returns the searching player's score if the depth is 0", () => {
-      expect(getMinMaxScore(gameTree, 0, 0)).toEqual(4);
+      expect(getMinMaxScore(gameTree, 0, 0)).toEqual(0);
     });
 
     it("returns the searching player's score if there are no more potential moves", () => {
-      expect(getMinMaxScore(gameTreeNoMoves, 0, 1)).toEqual(5);
+      expect(getMinMaxScore(gameTreeNoMoves, 0, 1)).toEqual(1);
     });
 
     it("returns a maximum of the found scores if it's the searching player's turn", () => {
-      expect(getMinMaxScore(gameTree, 0, 1)).toEqual(5);
-      expect(getMinMaxScore(gameTree, 0, 2)).toEqual(5);
+      expect(getMinMaxScore(gameTree, 0, 1)).toEqual(1);
+      expect(getMinMaxScore(gameTree, 0, 2)).toEqual(1);
     });
 
     it("returns a minimum of the found scores if it's not the searching player's turns", () => {
@@ -384,9 +360,9 @@ describe("strategy", () => {
         curPlayerIndex: 1,
       };
       const opponentTurnGameTree = createGameTree(opponentTurnGame) as GameTree;
-      expect(getMinMaxScore(opponentTurnGameTree, 0, 0)).toEqual(4);
-      expect(getMinMaxScore(opponentTurnGameTree, 0, 1)).toEqual(4);
-      expect(getMinMaxScore(opponentTurnGameTree, 0, 2)).toEqual(4);
+      expect(getMinMaxScore(opponentTurnGameTree, 0, 0)).toEqual(0);
+      expect(getMinMaxScore(opponentTurnGameTree, 0, 1)).toEqual(0);
+      expect(getMinMaxScore(opponentTurnGameTree, 0, 2)).toEqual(0);
     });
   });
 
