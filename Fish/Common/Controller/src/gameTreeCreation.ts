@@ -116,14 +116,7 @@ const createLazyGameTree = (
     movement.endPosition
   ) as MovementGame;
 
-  // Cast newGameTree as GameTree. This can be done because this function is only called
-  // by createGameTree, which validates that the original game state is valid for tree
-  // generation. All children of valid game tree nodes are also valid game trees.
-  const newGameTree: GameTree = createGameTreeFromMovementGame(
-    newGameState
-  ) as GameTree;
-
-  return () => newGameTree;
+  return () => createGameTreeFromMovementGame(newGameState);
 };
 
 export {
