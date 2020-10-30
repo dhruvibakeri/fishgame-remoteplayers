@@ -1,212 +1,212 @@
-[1mdiff --git a/Fish/Common/Controller/src/testHarnessConversion.ts b/Fish/Common/Controller/src/testHarnessConversion.ts[m
-[1mindex 922bd65..7343566 100644[m
-[1m--- a/Fish/Common/Controller/src/testHarnessConversion.ts[m
-[1m+++ b/Fish/Common/Controller/src/testHarnessConversion.ts[m
-[36m@@ -1,12 +1,18 @@[m
-[32m+[m[32mimport { InvalidGameStateError } from "../types/errors";[m
- import { PenguinColor, BoardPosition, Board, Tile } from "../../board";[m
-[31m-import { Player, Game } from "../../state";[m
-[32m+[m[32mimport { Movement } from "../../game-tree";[m
-[32m+[m[32mimport { Player, Game, getCurrentPlayer, MovementGame } from "../../state";[m
- import { createNumberedBoard } from "./boardCreation";[m
-[31m-import { createGameState } from "./gameStateCreation";[m
-[32m+[m[32mimport { createGameState, PENGUIN_AMOUNT_N } from "./gameStateCreation";[m
-[32m+[m[32mimport { gameIsMovementGame } from "./gameTreeCreation";[m
-[32m+[m[32mimport { movePenguin } from "./penguinPlacement";[m
- import {[m
-   InputPlayer,[m
-   InputPosition,[m
-   InputState,[m
-   InputBoard,[m
-[32m+[m[32m  Action,[m
-[32m+[m[32m  MoveResponseQuery,[m
- } from "./testHarnessInput";[m
- import { isError } from "./validation";[m
- [m
-[36m@@ -54,6 +60,24 @@[m [mconst inputPositionToBoardPosition = ([m
-   return { row: inputPosition[0], col: inputPosition[1] };[m
- };[m
- [m
-[32m+[m[32m/**[m
-[32m+[m[32m * Given two InputPositions representing the starting and ending positions of[m
-[32m+[m[32m * a Movement, create a Movement from them.[m
-[32m+[m[32m *[m
-[32m+[m[32m * @param fromPosition the starting InputPosition of the movement[m
-[32m+[m[32m * @param toPosition the ending InputPosition of the movement[m
-[32m+[m[32m * @return the converted Movement[m
-[32m+[m[32m */[m
-[32m+[m[32mconst inputPositionsToMovement = ([m
-[32m+[m[32m  fromPosition: InputPosition,[m
-[32m+[m[32m  toPosition: InputPosition[m
-[32m+[m[32m): Movement => {[m
-[32m+[m[32m  return {[m
-[32m+[m[32m    startPosition: inputPositionToBoardPosition(fromPosition),[m
-[32m+[m[32m    endPosition: inputPositionToBoardPosition(toPosition),[m
-[32m+[m[32m  };[m
-[32m+[m[32m};[m
-[32m+[m
- /**[m
-  * Transform the given array of InputPlayers into a penguin positions mapping[m
-  * from each position that holds a penguin to the penguin on that position.[m
-[36m@@ -88,6 +112,34 @@[m [mconst inputPlayersToScores = ([m
-     ])[m
-   );[m
- [m
-[32m+[m[32m/**[m
-[32m+[m[32m * Assuming all the given InputPlayers have valid amounts of placed penguins,[m
-[32m+[m[32m * create their respective mapping from each player's PenguinColor to their[m
-[32m+[m[32m * number of unplaced penguins.[m
-[32m+[m[32m *[m
-[32m+[m[32m * @param players the array of InputPlayers to transform[m
-[32m+[m[32m * @return the transformed remaining unplaced penguins mapping[m
-[32m+[m[32m */[m
-[32m+[m[32mconst inputPlayersToRemainingUnplacedPenguins = ([m
-[32m+[m[32m  players: Array<InputPlayer>[m
-[32m+[m[32m): Map<PenguinColor, number> | InvalidGameStateError => {[m
-[32m+[m[32m  const penguinsToPlace = PENGUIN_AMOUNT_N - players.length;[m
-[32m+[m[32m  const somePlayerHasTooManyPlacements = players.some([m
-[32m+[m[32m    (player: InputPlayer) => player.places.length > penguinsToPlace[m
-[32m+[m[32m  );[m
-[32m+[m
-[32m+[m[32m  if (somePlayerHasTooManyPlacements) {[m
-[32m+[m[32m    return new InvalidGameStateError();[m
-[32m+[m[32m  }[m
-[32m+[m
-[32m+[m[32m  return new Map([m
-[32m+[m[32m    players.map((player: InputPlayer) => [[m
-[32m+[m[32m      player.color,[m
-[32m+[m[32m      penguinsToPlace - player.places.length,[m
-[32m+[m[32m    ])[m
-[32m+[m[32m  );[m
-[32m+[m[32m};[m
-[32m+[m
- /**[m
-  * Attempt to transform the given InputState into a Game state, returning[m
-  * the Game state if successful and an Error if one occurred while doing[m
-[36m@@ -102,20 +154,51 @@[m [mconst inputStateToGameState = (inputState: InputState): Game | Error => {[m
-   const players = inputState.players.map(inputPlayerToPlayer);[m
-   const penguinPositions = inputPlayersToPenguinPositions(inputState.players);[m
-   const scores = inputPlayersToScores(inputState.players);[m
-[32m+[m[32m  const remainingUnplacedPenguins = inputPlayersToRemainingUnplacedPenguins([m
-[32m+[m[32m    inputState.players[m
-[32m+[m[32m  );[m
- [m
-   // If an error occurred, short circuit and return the error.[m
-   if (isError(board)) {[m
-     return board;[m
-   }[m
- [m
-[32m+[m[32m  // If an error occurred, short circuit and return the error.[m
-[32m+[m[32m  if (isError(remainingUnplacedPenguins)) {[m
-[32m+[m[32m    return remainingUnplacedPenguins;[m
-[32m+[m[32m  }[m
-[32m+[m
-   // Create the Game.[m
-   return {[m
-     ...createGameState(players, board),[m
-     penguinPositions,[m
-     scores,[m
-[32m+[m[32m    remainingUnplacedPenguins,[m
-   };[m
- };[m
- [m
-[32m+[m[32m/**[m
-[32m+[m[32m * Attempt to transform the given InputState into a MovementGame state,[m
-[32m+[m[32m * returning the MovementGame state if successful and an Error if one[m
-[32m+[m[32m * occurred while doing so.[m
-[32m+[m[32m *[m
-[32m+[m[32m * @param inputState the InputState to transform[m
-[32m+[m[32m * @return the successfully transformed MovementGame state or an error[m
-[32m+[m[32m */[m
-[32m+[m[32mconst inputStateToMovementGame = ([m
-[32m+[m[32m  inputState: InputState[m
-[32m+[m[32m): MovementGame | Error => {[m
-[32m+[m[32m  const gameOrError: Game | Error = inputStateToGameState(inputState);[m
-[32m+[m
-[32m+[m[32m  if (isError(gameOrError)) {[m
-[32m+[m[32m    // Return as an Error.[m
-[32m+[m[32m    return gameOrError;[m
-[32m+[m[32m  } else if (gameIsMovementGame(gameOrError)) {[m
-[32m+[m[32m    // Return as a MovementGame.[m
-[32m+[m[32m    return gameOrError;[m
-[32m+[m[32m  }[m
-[32m+[m[32m};[m
-[32m+[m
- /**[m
-  * Transform the given BoardPosition into an InputPosition.[m
-  *[m
-[36m@@ -182,7 +265,7 @@[m [mconst gameStateToInputPlayers = (game: Game): Array<InputPlayer> =>[m
-  * @param board the Board to transform[m
-  * @return the transformed InputBoard[m
-  */[m
-[31m-const boardToInputBoard = (board: Board): InputBoard => [m
-[32m+[m[32mconst boardToInputBoard = (board: Board): InputBoard =>[m
-   board.tiles.map((row: Array<Tile>) =>[m
-     row.map((tile: Tile) => tile.numOfFish)[m
-   );[m
-[36m@@ -200,4 +283,64 @@[m [mconst gameToInputState = (game: Game): InputState => {[m
-   };[m
- };[m
- [m
-[31m-export { inputStateToGameState, gameToInputState };[m
-[32m+[m[32m/**[m
-[32m+[m[32m * Given a MoveResponseQuery, return the Game state that results from applying[m
-[32m+[m[32m * the specified movement to the game state.[m
-[32m+[m[32m *[m
-[32m+[m[32m * Since the xtree harness assumes that the given MoveResponseQuery is valid[m
-[32m+[m[32m * and a portion of this validity means that the move outlined in the query[m
-[32m+[m[32m * is valid for the given state, these same assumptions may also be held here when[m
-[32m+[m[32m * applying the movement to the Game state. This assumption also ensures that[m
-[32m+[m[32m * the given InputState is also a valid state for movement i.e. all penguins[m
-[32m+[m[32m * are placed, since no movement would be valid otherwise.[m
-[32m+[m[32m *[m
-[32m+[m[32m * @param moveResponseQuery the MoveResponseQuery to process[m
-[32m+[m[32m * @return the Game state resulting from the query or false if for some reason[m
-[32m+[m[32m * this fails.[m
-[32m+[m[32m */[m
-[32m+[m[32mconst performMoveResponseQuery = ([m
-[32m+[m[32m  moveResponseQuery: MoveResponseQuery[m
-[32m+[m[32m): MovementGame | false => {[m
-[32m+[m[32m  // Convert the state within the query into a Game state, assuming the[m
-[32m+[m[32m  // Game is valid as specified in the xtree harness assumptions.[m
-[32m+[m[32m  const gameState: MovementGame | Error = inputStateToMovementGame([m
-[32m+[m[32m    moveResponseQuery.state[m
-[32m+[m[32m  );[m
-[32m+[m
-[32m+[m[32m  // Create a Movement from the from and to positions within the query.[m
-[32m+[m[32m  const movement: Movement = inputPositionsToMovement([m
-[32m+[m[32m    moveResponseQuery.from,[m
-[32m+[m[32m    moveResponseQuery.to[m
-[32m+[m[32m  );[m
-[32m+[m
-[32m+[m[32m  // The movement is assumed to be valid.[m
-[32m+[m[32m  if (isError(gameState)) {[m
-[32m+[m[32m    return false;[m
-[32m+[m[32m  } else {[m
-[32m+[m[32m    return movePenguin([m
-[32m+[m[32m      gameState,[m
-[32m+[m[32m      getCurrentPlayer(gameState),[m
-[32m+[m[32m      movement.startPosition,[m
-[32m+[m[32m      movement.endPosition[m
-[32m+[m[32m    ) as MovementGame;[m
-[32m+[m[32m  }[m
-[32m+[m[32m};[m
-[32m+[m
-[32m+[m[32m/**[m
-[32m+[m[32m * Convert the given Movement into an Action.[m
-[32m+[m[32m *[m
-[32m+[m[32m * @param movement the Movement to convert[m
-[32m+[m[32m * @return the converted Action[m
-[32m+[m[32m */[m
-[32m+[m[32mconst movementToAction = (movement: Movement): Action => [[m
-[32m+[m[32m  boardPositionToInputPosition(movement.startPosition),[m
-[32m+[m[32m  boardPositionToInputPosition(movement.endPosition),[m
-[32m+[m[32m];[m
-[32m+[m
-[32m+[m[32mexport {[m
-[32m+[m[32m  inputStateToGameState,[m
-[32m+[m[32m  gameToInputState,[m
-[32m+[m[32m  performMoveResponseQuery,[m
-[32m+[m[32m  inputPositionToBoardPosition,[m
-[32m+[m[32m  movementToAction,[m
-[32m+[m[32m};[m
+diff --git a/Fish/Common/Controller/src/testHarnessConversion.ts b/Fish/Common/Controller/src/testHarnessConversion.ts
+index 922bd65..7343566 100644
+--- a/Fish/Common/Controller/src/testHarnessConversion.ts
++++ b/Fish/Common/Controller/src/testHarnessConversion.ts
+@@ -1,12 +1,18 @@
++import { InvalidGameStateError } from "../types/errors";
+ import { PenguinColor, BoardPosition, Board, Tile } from "../../board";
+-import { Player, Game } from "../../state";
++import { Movement } from "../../game-tree";
++import { Player, Game, getCurrentPlayer, MovementGame } from "../../state";
+ import { createNumberedBoard } from "./boardCreation";
+-import { createGameState } from "./gameStateCreation";
++import { createGameState, PENGUIN_AMOUNT_N } from "./gameStateCreation";
++import { gameIsMovementGame } from "./gameTreeCreation";
++import { movePenguin } from "./penguinPlacement";
+ import {
+   InputPlayer,
+   InputPosition,
+   InputState,
+   InputBoard,
++  Action,
++  MoveResponseQuery,
+ } from "./testHarnessInput";
+ import { isError } from "./validation";
+ 
+@@ -54,6 +60,24 @@ const inputPositionToBoardPosition = (
+   return { row: inputPosition[0], col: inputPosition[1] };
+ };
+ 
++/**
++ * Given two InputPositions representing the starting and ending positions of
++ * a Movement, create a Movement from them.
++ *
++ * @param fromPosition the starting InputPosition of the movement
++ * @param toPosition the ending InputPosition of the movement
++ * @return the converted Movement
++ */
++const inputPositionsToMovement = (
++  fromPosition: InputPosition,
++  toPosition: InputPosition
++): Movement => {
++  return {
++    startPosition: inputPositionToBoardPosition(fromPosition),
++    endPosition: inputPositionToBoardPosition(toPosition),
++  };
++};
++
+ /**
+  * Transform the given array of InputPlayers into a penguin positions mapping
+  * from each position that holds a penguin to the penguin on that position.
+@@ -88,6 +112,34 @@ const inputPlayersToScores = (
+     ])
+   );
+ 
++/**
++ * Assuming all the given InputPlayers have valid amounts of placed penguins,
++ * create their respective mapping from each player's PenguinColor to their
++ * number of unplaced penguins.
++ *
++ * @param players the array of InputPlayers to transform
++ * @return the transformed remaining unplaced penguins mapping
++ */
++const inputPlayersToRemainingUnplacedPenguins = (
++  players: Array<InputPlayer>
++): Map<PenguinColor, number> | InvalidGameStateError => {
++  const penguinsToPlace = PENGUIN_AMOUNT_N - players.length;
++  const somePlayerHasTooManyPlacements = players.some(
++    (player: InputPlayer) => player.places.length > penguinsToPlace
++  );
++
++  if (somePlayerHasTooManyPlacements) {
++    return new InvalidGameStateError();
++  }
++
++  return new Map(
++    players.map((player: InputPlayer) => [
++      player.color,
++      penguinsToPlace - player.places.length,
++    ])
++  );
++};
++
+ /**
+  * Attempt to transform the given InputState into a Game state, returning
+  * the Game state if successful and an Error if one occurred while doing
+@@ -102,20 +154,51 @@ const inputStateToGameState = (inputState: InputState): Game | Error => {
+   const players = inputState.players.map(inputPlayerToPlayer);
+   const penguinPositions = inputPlayersToPenguinPositions(inputState.players);
+   const scores = inputPlayersToScores(inputState.players);
++  const remainingUnplacedPenguins = inputPlayersToRemainingUnplacedPenguins(
++    inputState.players
++  );
+ 
+   // If an error occurred, short circuit and return the error.
+   if (isError(board)) {
+     return board;
+   }
+ 
++  // If an error occurred, short circuit and return the error.
++  if (isError(remainingUnplacedPenguins)) {
++    return remainingUnplacedPenguins;
++  }
++
+   // Create the Game.
+   return {
+     ...createGameState(players, board),
+     penguinPositions,
+     scores,
++    remainingUnplacedPenguins,
+   };
+ };
+ 
++/**
++ * Attempt to transform the given InputState into a MovementGame state,
++ * returning the MovementGame state if successful and an Error if one
++ * occurred while doing so.
++ *
++ * @param inputState the InputState to transform
++ * @return the successfully transformed MovementGame state or an error
++ */
++const inputStateToMovementGame = (
++  inputState: InputState
++): MovementGame | Error => {
++  const gameOrError: Game | Error = inputStateToGameState(inputState);
++
++  if (isError(gameOrError)) {
++    // Return as an Error.
++    return gameOrError;
++  } else if (gameIsMovementGame(gameOrError)) {
++    // Return as a MovementGame.
++    return gameOrError;
++  }
++};
++
+ /**
+  * Transform the given BoardPosition into an InputPosition.
+  *
+@@ -182,7 +265,7 @@ const gameStateToInputPlayers = (game: Game): Array<InputPlayer> =>
+  * @param board the Board to transform
+  * @return the transformed InputBoard
+  */
+-const boardToInputBoard = (board: Board): InputBoard => 
++const boardToInputBoard = (board: Board): InputBoard =>
+   board.tiles.map((row: Array<Tile>) =>
+     row.map((tile: Tile) => tile.numOfFish)
+   );
+@@ -200,4 +283,64 @@ const gameToInputState = (game: Game): InputState => {
+   };
+ };
+ 
+-export { inputStateToGameState, gameToInputState };
++/**
++ * Given a MoveResponseQuery, return the Game state that results from applying
++ * the specified movement to the game state.
++ *
++ * Since the xtree harness assumes that the given MoveResponseQuery is valid
++ * and a portion of this validity means that the move outlined in the query
++ * is valid for the given state, these same assumptions may also be held here when
++ * applying the movement to the Game state. This assumption also ensures that
++ * the given InputState is also a valid state for movement i.e. all penguins
++ * are placed, since no movement would be valid otherwise.
++ *
++ * @param moveResponseQuery the MoveResponseQuery to process
++ * @return the Game state resulting from the query or false if for some reason
++ * this fails.
++ */
++const performMoveResponseQuery = (
++  moveResponseQuery: MoveResponseQuery
++): MovementGame | false => {
++  // Convert the state within the query into a Game state, assuming the
++  // Game is valid as specified in the xtree harness assumptions.
++  const gameState: MovementGame | Error = inputStateToMovementGame(
++    moveResponseQuery.state
++  );
++
++  // Create a Movement from the from and to positions within the query.
++  const movement: Movement = inputPositionsToMovement(
++    moveResponseQuery.from,
++    moveResponseQuery.to
++  );
++
++  // The movement is assumed to be valid.
++  if (isError(gameState)) {
++    return false;
++  } else {
++    return movePenguin(
++      gameState,
++      getCurrentPlayer(gameState),
++      movement.startPosition,
++      movement.endPosition
++    ) as MovementGame;
++  }
++};
++
++/**
++ * Convert the given Movement into an Action.
++ *
++ * @param movement the Movement to convert
++ * @return the converted Action
++ */
++const movementToAction = (movement: Movement): Action => [
++  boardPositionToInputPosition(movement.startPosition),
++  boardPositionToInputPosition(movement.endPosition),
++];
++
++export {
++  inputStateToGameState,
++  gameToInputState,
++  performMoveResponseQuery,
++  inputPositionToBoardPosition,
++  movementToAction,
++};

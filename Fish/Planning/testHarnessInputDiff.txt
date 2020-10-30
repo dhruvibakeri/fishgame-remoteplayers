@@ -1,73 +1,73 @@
-[1mdiff --git a/Fish/Common/Controller/src/testHarnessInput.ts b/Fish/Common/Controller/src/testHarnessInput.ts[m
-[1mindex 1fdd139..557c220 100644[m
-[1m--- a/Fish/Common/Controller/src/testHarnessInput.ts[m
-[1m+++ b/Fish/Common/Controller/src/testHarnessInput.ts[m
-[36m@@ -28,8 +28,8 @@[m [mtype InputBoard = Array<Array<number>>;[m
-  * @param board the InputBoard to be used in the testing harness[m
-  */[m
- interface InputBoardPosn {[m
-[31m-  position: InputPosition;[m
-[31m-  board: InputBoard;[m
-[32m+[m[32m  readonly position: InputPosition;[m
-[32m+[m[32m  readonly board: InputBoard;[m
- }[m
- [m
- /**[m
-[36m@@ -62,11 +62,45 @@[m [minterface InputPlayer {[m
- }[m
- [m
- /**[m
-[31m- * Read and parse JSON input from STDIN[m
-[32m+[m[32m * A MoveResponseQuery represents an input into the xtree testing harness.[m
-[32m+[m[32m * It describes the current state and the move that the currently active player[m
-[32m+[m[32m * has picked.[m
-[32m+[m[32m *[m
-[32m+[m[32m * The object is then invalid if the specified move is illegal in the given[m
-[32m+[m[32m * state.[m
-[32m+[m[32m *[m
-[32m+[m[32m * @param state the game state from which this move is being made[m
-[32m+[m[32m * @param from the position from which the current player of the given state[m
-[32m+[m[32m * wishes to move/where their avatar is located[m
-[32m+[m[32m * @param to the position where the current player of the given state wishes[m
-[32m+[m[32m * to move their avatar to.[m
-[32m+[m[32m */[m
-[32m+[m[32minterface MoveResponseQuery {[m
-[32m+[m[32m  readonly state: InputState;[m
-[32m+[m[32m  readonly from: InputPosition;[m
-[32m+[m[32m  readonly to: InputPosition;[m
-[32m+[m[32m}[m
-[32m+[m
-[32m+[m[32m/**[m
-[32m+[m[32m * An Action is constructed in response to a MoveResponseQuery, and represents[m
-[32m+[m[32m * either what action the next player can take to move one of their penguins to[m
-[32m+[m[32m * a place that neighbors the destination of the previous player's move as[m
-[32m+[m[32m * outlined in the MoveResponseQuery.[m
-[32m+[m[32m *[m
-[32m+[m[32m * If Action = false, then the desired move from the query is not possible.[m
-[32m+[m[32m * If Action = [InputPosition, InputPosition], then such a move is possible and[m
-[32m+[m[32m * the array describes the opponent's move from the first position to the second.[m
-[32m+[m[32m */[m
-[32m+[m[32mtype Action = false | [InputPosition, InputPosition];[m
-[32m+[m
-[32m+[m[32m/**[m
-[32m+[m[32m * Read and parse JSON input from STDIN.[m
-[32m+[m[32m *[m
-[32m+[m[32m * @return a Promise containing the parsed JSON[m
-  */[m
- const readStdin = async <T>(): Promise<T> => {[m
-   const input: string = await getStdin();[m
-[31m-  const parsed = JSON.parse(input);[m
-[32m+[m[32m  const parsed: T = JSON.parse(input);[m
-   return parsed;[m
- };[m
- [m
-[36m@@ -76,5 +110,7 @@[m [mexport {[m
-   InputBoardPosn,[m
-   InputState,[m
-   InputPlayer,[m
-[32m+[m[32m  MoveResponseQuery,[m
-[32m+[m[32m  Action,[m
-   readStdin,[m
-[31m-};[m
-\ No newline at end of file[m
-[32m+[m[32m};[m
+diff --git a/Fish/Common/Controller/src/testHarnessInput.ts b/Fish/Common/Controller/src/testHarnessInput.ts
+index 1fdd139..557c220 100644
+--- a/Fish/Common/Controller/src/testHarnessInput.ts
++++ b/Fish/Common/Controller/src/testHarnessInput.ts
+@@ -28,8 +28,8 @@ type InputBoard = Array<Array<number>>;
+  * @param board the InputBoard to be used in the testing harness
+  */
+ interface InputBoardPosn {
+-  position: InputPosition;
+-  board: InputBoard;
++  readonly position: InputPosition;
++  readonly board: InputBoard;
+ }
+ 
+ /**
+@@ -62,11 +62,45 @@ interface InputPlayer {
+ }
+ 
+ /**
+- * Read and parse JSON input from STDIN
++ * A MoveResponseQuery represents an input into the xtree testing harness.
++ * It describes the current state and the move that the currently active player
++ * has picked.
++ *
++ * The object is then invalid if the specified move is illegal in the given
++ * state.
++ *
++ * @param state the game state from which this move is being made
++ * @param from the position from which the current player of the given state
++ * wishes to move/where their avatar is located
++ * @param to the position where the current player of the given state wishes
++ * to move their avatar to.
++ */
++interface MoveResponseQuery {
++  readonly state: InputState;
++  readonly from: InputPosition;
++  readonly to: InputPosition;
++}
++
++/**
++ * An Action is constructed in response to a MoveResponseQuery, and represents
++ * either what action the next player can take to move one of their penguins to
++ * a place that neighbors the destination of the previous player's move as
++ * outlined in the MoveResponseQuery.
++ *
++ * If Action = false, then the desired move from the query is not possible.
++ * If Action = [InputPosition, InputPosition], then such a move is possible and
++ * the array describes the opponent's move from the first position to the second.
++ */
++type Action = false | [InputPosition, InputPosition];
++
++/**
++ * Read and parse JSON input from STDIN.
++ *
++ * @return a Promise containing the parsed JSON
+  */
+ const readStdin = async <T>(): Promise<T> => {
+   const input: string = await getStdin();
+-  const parsed = JSON.parse(input);
++  const parsed: T = JSON.parse(input);
+   return parsed;
+ };
+ 
+@@ -76,5 +110,7 @@ export {
+   InputBoardPosn,
+   InputState,
+   InputPlayer,
++  MoveResponseQuery,
++  Action,
+   readStdin,
+-};
+\ No newline at end of file
++};
