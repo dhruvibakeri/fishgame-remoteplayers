@@ -1,0 +1,125 @@
+[1mdiff --git a/Fish/Common/Controller/src/gameTreeCreation.ts b/Fish/Common/Controller/src/gameTreeCreation.ts[m
+[1mindex a9d86be..3d9e42b 100644[m
+[1m--- a/Fish/Common/Controller/src/gameTreeCreation.ts[m
+[1m+++ b/Fish/Common/Controller/src/gameTreeCreation.ts[m
+[36m@@ -1,24 +1,61 @@[m
+[31m-import { Game, getCurrentPlayerColor } from "../../state";[m
+[32m+[m[32mimport { Game, getCurrentPlayerColor, MovementGame } from "../../state";[m
+ import {[m
+   GameTree,[m
+   Movement,[m
+   LazyGameTree,[m
+   PotentialMovement,[m
+ } from "../../game-tree";[m
+[31m-import { BoardPosition } from "../../board";[m
+[32m+[m[32mimport { BoardPosition, PenguinColor } from "../../board";[m
+ import { getReachablePositions } from "./movementChecking";[m
+ import { movePenguin } from "./penguinPlacement";[m
+[32m+[m[32mimport { InvalidGameForTreeError } from "../types/errors";[m
+[32m+[m[32mimport { isError } from "./validation";[m
+[32m+[m[32mimport { skipToNextActivePlayer } from "./gameStateCreation";[m
+ [m
+ /**[m
+[31m- * Given a Game state, return its corresponding GameTree.[m
+[32m+[m[32m * Given a Game state, determine if the Game is a MovementGame i.e. all players[m
+[32m+[m[32m * within the Game have placed all of their penguins.[m
+[32m+[m[32m *[m
+[32m+[m[32m * @param game the Game state to check[m
+[32m+[m[32m * @return whether the Game state is a MovementGame[m
+[32m+[m[32m */[m
+[32m+[m[32mconst gameIsMovementGame = (game: Game): game is MovementGame =>[m
+[32m+[m[32m  Array.from(game.remainingUnplacedPenguins).every([m
+[32m+[m[32m    ([, unplacedPenguins]: [PenguinColor, number]) => unplacedPenguins === 0[m
+[32m+[m[32m  );[m
+[32m+[m
+[32m+[m[32m/**[m
+[32m+[m[32m * Given a Game state, return its corresponding GameTree, making sure that the[m
+[32m+[m[32m * state is within the movement stage i.e. all penguins have been placed.[m
+  *[m
+  * @param game the Game state[m
+[31m- * @return the state's corresponding GameTree[m
+[32m+[m[32m * @return the state's corresponding GameTree or an Error if it cannot be[m
+[32m+[m[32m * created.[m
+[32m+[m[32m */[m
+[32m+[m[32mconst createGameTree = (game: Game): GameTree | InvalidGameForTreeError => {[m
+[32m+[m[32m  if (gameIsMovementGame(game)) {[m
+[32m+[m[32m    return createGameTreeFromMovementGame(game);[m
+[32m+[m[32m  } else {[m
+[32m+[m[32m    return new InvalidGameForTreeError(game);[m
+[32m+[m[32m  }[m
+[32m+[m[32m};[m
+[32m+[m
+[32m+[m[32m/**[m
+[32m+[m[32m * Given a MovementGame state, return its corresponding GameTree, skipping players[m
+[32m+[m[32m * which are unable to make moves. If the result contains an empty list of[m
+[32m+[m[32m * potential moves, this then signifies a final game state.[m
+[32m+[m[32m *[m
+[32m+[m[32m * @param game the MovementGame to be made into a GameTree.[m
+[32m+[m[32m * @return the MovementState's corresponding GameTree[m
+  */[m
+[31m-const createGameTree = (game: Game): GameTree => {[m
+[32m+[m[32mconst createGameTreeFromMovementGame = (game: MovementGame): GameTree => {[m
+[32m+[m[32m  const gameSkippingInactivePlayers: MovementGame = skipToNextActivePlayer([m
+[32m+[m[32m    game[m
+[32m+[m[32m  );[m
+[32m+[m
+   return {[m
+[31m-    gameState: game,[m
+[31m-    potentialMoves: generatePotentialMoveMapping(game),[m
+[32m+[m[32m    gameState: gameSkippingInactivePlayers,[m
+[32m+[m[32m    potentialMoves: generatePotentialMoveMapping(gameSkippingInactivePlayers),[m
+   };[m
+ };[m
+ [m
+[36m@@ -29,7 +66,9 @@[m [mconst createGameTree = (game: Game): GameTree => {[m
+  * @param game the Game state[m
+  * @return a mapping from potential Movements to their resulting LazyGameTrees[m
+  */[m
+[31m-const generatePotentialMoveMapping = (game: Game): Array<PotentialMovement> => {[m
+[32m+[m[32mconst generatePotentialMoveMapping = ([m
+[32m+[m[32m  game: MovementGame[m
+[32m+[m[32m): Array<PotentialMovement> => {[m
+   // From the given starting position, get all the possible Movements from it.[m
+   const startPositionToPotentialMovements = ([m
+     startPosition: BoardPosition[m
+[36m@@ -55,15 +94,18 @@[m [mconst generatePotentialMoveMapping = (game: Game): Array<PotentialMovement> => {[m
+ };[m
+ [m
+ /**[m
+[31m- * Given a Game state and a Movement, create the resulting LazyGameTree[m
+[32m+[m[32m * Given a MovementGame state and a Movement, create the resulting LazyGameTree[m
+  * corresponding to the current player of the given state making that[m
+[31m- * Movement.[m
+[32m+[m[32m * Movement. This function is only used by createGameTree.[m
+  *[m
+  * @param game the Game state[m
+  * @param movement the Movement to apply[m
+  * @return the resultng LazyGameTree[m
+  */[m
+[31m-const createLazyGameTree = (game: Game, movement: Movement): LazyGameTree => {[m
+[32m+[m[32mconst createLazyGameTree = ([m
+[32m+[m[32m  game: MovementGame,[m
+[32m+[m[32m  movement: Movement[m
+[32m+[m[32m): LazyGameTree => {[m
+   // This resulting game state is guaranteed to receive valid inputs as it is[m
+   // only used for GameTree creation, which uses penguins and reachable positions[m
+   // that have already been validated.[m
+[36m@@ -72,8 +114,15 @@[m [mconst createLazyGameTree = (game: Game, movement: Movement): LazyGameTree => {[m
+     game.players[game.curPlayerIndex],[m
+     movement.startPosition,[m
+     movement.endPosition[m
+[31m-  ) as Game;[m
+[31m-  return () => createGameTree(newGameState);[m
+[32m+[m[32m  ) as MovementGame;[m
+[32m+[m
+[32m+[m[32m  return () => createGameTreeFromMovementGame(newGameState);[m
+ };[m
+ [m
+[31m-export { createGameTree, generatePotentialMoveMapping, createLazyGameTree };[m
+[32m+[m[32mexport {[m
+[32m+[m[32m  createGameTree,[m
+[32m+[m[32m  createGameTreeFromMovementGame,[m
+[32m+[m[32m  generatePotentialMoveMapping,[m
+[32m+[m[32m  createLazyGameTree,[m
+[32m+[m[32m  gameIsMovementGame,[m
+[32m+[m[32m};[m

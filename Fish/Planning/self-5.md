@@ -4,13 +4,19 @@ Under each of the following elements below, indicate below where your
 TAs can find:
 
 - the data definition, including interpretation, of penguin placements for setups 
+  Placing a single penguin: https://github.ccs.neu.edu/CS4500-F20/libertyhill/blob/9432785ef5beba5966da53456e0824dcfa6d38c1/Fish/Player/strategy.ts#L42-L50
+  Placing all remainng unplaced penguins in zig zag pattern: https://github.ccs.neu.edu/CS4500-F20/libertyhill/blob/9432785ef5beba5966da53456e0824dcfa6d38c1/Fish/Player/strategy.ts#L71-L77
 
 - the data definition, including interpretation, of penguin movements for turns
+  https://github.ccs.neu.edu/CS4500-F20/libertyhill/blob/9432785ef5beba5966da53456e0824dcfa6d38c1/Fish/Player/strategy.ts#L232-L241
 
 - the unit tests for the penguin placement strategy 
+  Unit tests for placing a single penguin: https://github.ccs.neu.edu/CS4500-F20/libertyhill/blob/9432785ef5beba5966da53456e0824dcfa6d38c1/Fish/Common/Controller/tests/strategy.spec.ts#L219-L252
+  Unit tests for placing all remaining unplaced penguins in zig zag pattern: https://github.ccs.neu.edu/CS4500-F20/libertyhill/blob/9432785ef5beba5966da53456e0824dcfa6d38c1/Fish/Common/Controller/tests/strategy.spec.ts#L254-L264
 
 - the unit tests for the penguin movement strategy; 
   given that the exploration depth is a parameter `N`, there should be at least two unit tests for different depths 
+  https://github.ccs.neu.edu/CS4500-F20/libertyhill/blob/9432785ef5beba5966da53456e0824dcfa6d38c1/Fish/Common/Controller/tests/strategy.spec.ts#L266-L341
   
 - any game-tree functionality you had to add to create the `xtest` test harness:
   - where the functionality is defined in `game-tree.PP`
