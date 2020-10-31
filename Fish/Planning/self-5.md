@@ -20,6 +20,8 @@ TAs can find:
   
 - any game-tree functionality you had to add to create the `xtest` test harness:
   - where the functionality is defined in `game-tree.PP`
+    - Added a separate game state type called `MovementGame` which is a game state where all penguins have been placed and is in the movement phase of game play. We added this to ensure a game tree isn't created from a game where not all penguins have been placed. We used this game state in our game tree creation to validate game state.
+    - We also added new bridge functionality to translate the expected test input into our data structures, and translate our data into the expected output json format.
   - where the functionality is used in `xtree`
   - you may wish to submit a `git-diff` for `game-tree` and any auxiliary modules 
 
