@@ -21,8 +21,13 @@ TAs can find:
 - any game-tree functionality you had to add to create the `xtest` test harness:
   - where the functionality is defined in `game-tree.PP`
     - Added a separate game state type called `MovementGame` which is a game state where all penguins have been placed and is in the movement phase of game play. We added this to ensure a game tree isn't created from a game where not all penguins have been placed. We used this game state in our game tree creation to validate game state.
+      - game-tree.ts git-diff:https://github.ccs.neu.edu/CS4500-F20/libertyhill/blob/34e931d8697929d8585b4a766f651e726680bf5f/Fish/Planning/git-diff/gameTreeDiff.txt#L11-L29
+      - gameTreeCreation.ts git-diff: https://github.ccs.neu.edu/CS4500-F20/libertyhill/blob/34e931d8697929d8585b4a766f651e726680bf5f/Fish/Planning/git-diff/gameTreeCreationDiff.txt#L22-L116
     - We also added new bridge functionality to translate the expected test input into our data structures, and translate our data into the expected output json format.
+      - data conversion (testHarnessConversion.ts) git-diff: https://github.ccs.neu.edu/CS4500-F20/libertyhill/blob/34e931d8697929d8585b4a766f651e726680bf5f/Fish/Planning/git-diff/testHarnessConversionDiff.txt#L30-L204
+      - added input data types (testHarnessInput.ts) git-diff: https://github.ccs.neu.edu/CS4500-F20/libertyhill/blob/34e931d8697929d8585b4a766f651e726680bf5f/Fish/Planning/git-diff/testHarnessInputDiff.txt#L20-L62
   - where the functionality is used in `xtree`
+    - https://github.ccs.neu.edu/CS4500-F20/libertyhill/blob/9432785ef5beba5966da53456e0824dcfa6d38c1/Fish/Common/Controller/src/xtree.ts#L16-L117
   - you may wish to submit a `git-diff` for `game-tree` and any auxiliary modules 
 
 **Please use GitHub perma-links to the range of lines in specific
