@@ -23,6 +23,7 @@ import {
   getNextPlayerIndex,
   skipToNextActivePlayer,
 } from "./gameStateCreation";
+import { Movement } from "../../game-tree";
 
 /**
  * Adds score to current player based on the number of fish at the given tile that
