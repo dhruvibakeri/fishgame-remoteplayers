@@ -8,7 +8,7 @@ import { Game } from "./state";
  * how the game played out.
  *
  * @param activePlayers represents the roster of players who remained active
- * until the end of the game, with their scores. This will be ordered by 
+ * until the end of the game, with their scores. This will be ordered by
  * descending score.
  *
  * @param kickedPlayers represents the roster of players who either failed
@@ -33,17 +33,17 @@ interface GameDebrief {
  * @param score The player's final score at the conclusion of the game
  */
 interface ActivePlayer {
-  readonly name: string,
-  readonly score: number
+  readonly name: string;
+  readonly score: number;
 }
 
 /**
  * An InactivePlayer is a player who either failed to make a move within the
- * specified timeout duration of their turn when requested, or who delivered 
+ * specified timeout duration of their turn when requested, or who delivered
  * a move that was found to be illegal based upon the GameTree of the current
- * Game's state. In either cases, the player was subsequently kicked upon 
+ * Game's state. In either cases, the player was subsequently kicked upon
  * making either violation during the course of the game.
- * 
+ *
  * @param name the name of the player given to the referee by the Tornament manager
  * before the game began. Note that this name must uniquely define this player.
  */
@@ -56,7 +56,7 @@ interface InactivePlayer {
  * that the game is starting. The referee passes the initial game state to the
  * player, but does not need or expect a response from the player. This call is
  * used by the referee exactly once at the start of the game.
- * 
+ *
  * @param game the initial starting game state
  */
 type GameIsStarting = (game: Game) => void;
@@ -89,7 +89,7 @@ type MakePlacement = (game: Game) => Promise<BoardPosition>;
  * @return the Movement which represents the starting and ending positions on
  * the board of the player's turn.
  */
-type MakeMovement = (game: Game) => Movement;
+type MakeMovement = (game: Game) => Promise<Movement>;
 
 /**
  * The GameHasEnded call allows the referee to send the player a debrief
@@ -123,5 +123,5 @@ export {
   MakePlacement,
   MakeMovement,
   GameHasEnded,
-  DisqualifyMe
-}
+  DisqualifyMe,
+};
