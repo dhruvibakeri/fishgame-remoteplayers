@@ -115,6 +115,30 @@ type GameHasEnded = (gameDebrief: GameDebrief) => void;
  */
 type DisqualifyMe = (msg: string) => void;
 
+/**
+ * A TournamentPlayer represents an implementation of the player-referee
+ * protocol, specifying both identifying information for the player, along
+ * with the various calls that the referee may make to this player in order
+ * to notify them of the game starting or ending, request the corresponding
+ * actions for their turns, and notify them of potential disqualification.
+ *
+ *
+ * @param gameIsStarting call to tell the player that the game is starting
+ * @param makePlacement call to ask the player for a penguin placement location
+ * @param makeMovement call to ask the player for a penguin movement
+ * @param gameHasEnded call to tell the player that the game has ended and give
+ * game results
+ * @param disqualifyMe call to tell the player they've been disqualified
+ */
+interface TournamentPlayer {
+  name: string;
+  gameIsStarting: GameIsStarting;
+  makePlacement: MakePlacement;
+  makeMovement: MakeMovement;
+  gameHasEnded: GameHasEnded;
+  disqualifyMe: DisqualifyMe;
+}
+
 export {
   GameDebrief,
   ActivePlayer,
@@ -124,4 +148,5 @@ export {
   MakeMovement,
   GameHasEnded,
   DisqualifyMe,
+  TournamentPlayer,
 };

@@ -1,10 +1,5 @@
 import { PenguinColor, Board, BoardPosition } from "../Common/board";
 import {
-  GameIsStarting,
-  MakePlacement,
-  MakeMovement,
-  GameHasEnded,
-  DisqualifyMe,
   GameDebrief,
   ActivePlayer,
   InactivePlayer,
@@ -17,10 +12,10 @@ import {
 } from "../Common/Controller/types/errors";
 import {
   Game,
-  getCurrentPlayer,
-  getCurrentPlayerColor,
   MovementGame,
   Player,
+  getCurrentPlayerColor,
+  getCurrentPlayer,
 } from "../Common/state";
 import { createHoledOneFishBoard } from "../Common/Controller/src/boardCreation";
 import { isError } from "../Common/Controller/src/validation";
@@ -28,38 +23,19 @@ import {
   createGameTreeFromMovementGame,
   gameIsMovementGame,
 } from "../Common/Controller/src/gameTreeCreation";
-import { createGameState } from "../Common/Controller/src/gameStateCreation";
 import {
-  movePenguin,
-  placePenguin,
-} from "../Common/Controller/src/penguinPlacement";
+  createGameState,
+  isValidNumberOfPlayers,
+  numOfPenguinsPerPlayer,
+  PENGUIN_AMOUNT_N,
+  getNextPlayerIndex,
+} from "../Common/Controller/src/gameStateCreation";
+import { placePenguin } from "../Common/Controller/src/penguinPlacement";
 import { GameTree, Movement } from "../Common/game-tree";
+import { TournamentPlayer } from "../Common/player-interface";
+import { isMovementLegal } from "../Common/Controller/src/queryGameTree";
 
 const ACTION_TIMEOUT_MS = 5000;
-
-/**
- * A TournamentPlayer represents an implementation of the player-referee
- * protocol, specifying both identifying information for the player, along
- * with the various calls that the referee may make to this player in order
- * to notify them of the game starting or ending, request the corresponding
- * actions for their turns, and notify them of potential disqualification.
- *
- *
- * @param gameIsStarting call to tell the player that the game is starting
- * @param makePlacement call to ask the player for a penguin placement location
- * @param makeMovement call to ask the player for a penguin movement
- * @param gameHasEnded call to tell the player that the game has ended and give
- * game results
- * @param disqualifyMe call to tell the player they've been disqualified
- */
-interface TournamentPlayer {
-  name: string;
-  gameIsStarting: GameIsStarting;
-  makePlacement: MakePlacement;
-  makeMovement: MakeMovement;
-  gameHasEnded: GameHasEnded;
-  disqualifyMe: DisqualifyMe;
-}
 
 /**
  * A BoardDimension represents the size of a board within a Fish game. It
@@ -97,8 +73,12 @@ interface RefereeState {
   readonly failingPlayers: Array<Player>;
 }
 
+type RefereeStateWithMovementGame = RefereeState & { game: MovementGame };
+
 /**
- * Given an array of TournamentPlayers, returns an array of corresponding Players
+ * Given an array of TournamentPlayers, returns an array of corresponding Players.
+ * The given array of tournament players is assumed to be less than or equal to
+ * 4 in length, corresponding to the max amount of players.
  *
  * @param tournamentPlayers array of TournamentPlayers in the game
  * @returns an array of Players correpsonding to the given array of TournamentPlayers
@@ -172,102 +152,120 @@ const createInitialGameState = (
   }
 };
 
-/**
- * Given an array of TournamentPlayers and a RefereeState, kick the current
- * player of the RefereeState's Game state by removing them from its
- * tournament players and the Game state's players and adding them to
- * the RefereeState's failed/cheating players.
- *
- * @param refereeState the RefereeState from which to kick the current player.
- * @return the updated RefereeState
- */
-const kickCurrentPlayer = (refereeState: RefereeState): RefereeState => {
-  // Notify the player they have been kicked.
-  const failingPlayer: TournamentPlayer =
-    refereeState.tournamentPlayers[refereeState.game.curPlayerIndex];
-  kickFailingPlayer(failingPlayer);
+const runPlacementTurn = (
+  placementPosition: BoardPosition,
+  currRefereeState: RefereeState
+): RefereeState => {
+  const resultingGameOrError: Game | Error = placePenguin(
+    currRefereeState.game.players[currRefereeState.game.curPlayerIndex],
+    currRefereeState.game,
+    placementPosition
+  );
 
-  // Remove the current player from the referee state's tournament players and game state's players.
-  // Update the Game state's current player index to the next player.
-  // Add the current player to the failed/cheating players.
-  // TODO
-
-  return refereeState; // TODO
+  if (isError(resultingGameOrError)) {
+    return disqualifyCurrentCheatingPlayer(currRefereeState);
+  } else {
+    return { ...currRefereeState, game: resultingGameOrError };
+  }
 };
 
 /**
  * Run the placement rounds of the Game within the given RefereeState, calling
- * upon players for their placements, attempting these, kicking players if
+ * upon players for their placements, attempting these, disqualifying players if
  * necessary, and returning the resulting RefereeState with all the placements
  * complete
  *
  * @param refereeState the RefereeState from which to run the placement rounds
  * @return the resulting RefereeState after running all placements
  */
-const runPlacementRounds = (refereeState: RefereeState): RefereeState => {
+const runPlacementRounds = (
+  refereeState: RefereeState
+): RefereeStateWithMovementGame => {
   // TODO get some type safety by ensuring the given game is a MovementGame
   let currRefereeState: RefereeState = refereeState;
 
-  while (!gameIsMovementGame(refereeState.game)) {
-    const placementPosition: BoardPosition = await requestPlacementFromPlayer(
+  while (!gameIsMovementGame(currRefereeState.game)) {
+    requestPlacementFromPlayer(
       currRefereeState.tournamentPlayers[currRefereeState.game.curPlayerIndex],
       currRefereeState.game
-    );
-    const resultingGameOrError: Game | Error = placePenguin(
-      currRefereeState.game.players[currRefereeState.game.curPlayerIndex],
-      currRefereeState.game,
-      placementPosition
-    );
-
-    if (isError(resultingGameOrError)) {
-      currRefereeState = kickCurrentPlayer(currRefereeState);
-    } else {
-      currRefereeState = { ...currRefereeState, game: resultingGameOrError };
-    }
+    )
+      .then((placementPosition: BoardPosition) => {
+        currRefereeState = runPlacementTurn(
+          placementPosition,
+          currRefereeState
+        );
+      })
+      .catch(() => {
+        // TODO fail the player
+      });
   }
 
-  return currRefereeState;
+  // With the invariant that the board made by the referee must contain enough
+  // positions for all of every player's placements, running all placement
+  // rounds must guarantee that the current game is a MovementGame.
+  return currRefereeState as RefereeStateWithMovementGame;
 };
 
 /**
  * Given a MovementGame, determine if the game is finished with no players able
  * to make any more moves.
+ *
+ * @param game the MovementGame to check
+ * @return whether the game is finished
  */
 const gameIsFinished = (game: MovementGame): boolean => {
   const gameTree: GameTree = createGameTreeFromMovementGame(game);
   return gameTree.potentialMoves.length === 0;
 };
 
+const runMovementTurn = (
+  movement: Movement,
+  currRefereeState: RefereeStateWithMovementGame
+): RefereeStateWithMovementGame => {
+  const gameTree: GameTree = createGameTreeFromMovementGame(
+    currRefereeState.game
+  );
+  const result: MovementGame | Error = isMovementLegal(gameTree, movement);
+
+  if (isError(result)) {
+    // Disqualifying a player only changes penguin positions by removing a player.
+    // This means that if the given RefereeState is a
+    // RefereeStateWithMovementGame, then the result must also be one.
+    return disqualifyCurrentCheatingPlayer(
+      currRefereeState,
+      result.message
+    ) as RefereeStateWithMovementGame;
+  } else {
+    return {
+      ...currRefereeState,
+      game: result,
+    };
+  }
+};
+
 /**
  * Run the movement rounds of the Game within the given RefereeState, calling
- * upon players for their movements, attempting these, kicking players if
+ * upon players for their movements, attempting these, disqualifying players if
  * necessary, and returning ther resulting RefereeState once the game is
  * complete.
  *
  * @param refereeState the RefereeState from which to run the placement rounds
  * @return the resulting RefereeState after finishing the game
  */
-const runMovementRounds = (refereeState: RefereeState) => {
-  let currRefereeState: RefereeState = refereeState;
+const runMovementRounds = (refereeState: RefereeStateWithMovementGame) => {
+  let currRefereeState: RefereeStateWithMovementGame = refereeState;
 
   while (!gameIsFinished(currRefereeState.game as MovementGame)) {
-    const movement: Movement = await requestMovementFromPlayer(
+    requestMovementFromPlayer(
       currRefereeState.tournamentPlayers[currRefereeState.game.curPlayerIndex],
       currRefereeState.game
-    );
-    const resultingGameOrError: Game | Error = movePenguin(
-      currRefereeState.game as MovementGame,
-      getCurrentPlayer(currRefereeState.game),
-      movement.startPosition,
-      movement.endPosition
-    );
-    // TODO use query game tree to validate the movement?
-
-    if (isError(resultingGameOrError)) {
-      currRefereeState = kickCurrentPlayer(refereeState);
-    } else {
-      currRefereeState = { ...currRefereeState, game: resultingGameOrError };
-    }
+    )
+      .then((movement: Movement) => {
+        currRefereeState = runMovementTurn(movement, currRefereeState);
+      })
+      .catch(() => {
+        // TODO fail player
+      });
   }
 
   return currRefereeState;
@@ -284,35 +282,192 @@ const getTournamentPlayerFromPlayer = (
 };
 
 /**
- * Call the given TournamentPlayer's DisqualifyMe call to notify them of their
- * disqualification from the game using a given message if specified.
+ * Given a RefereeState and optional message, add the current player to the list of
+ * failing players and disqualify them from the game by calling disqualifyCurrentPlayer
  *
- * @param tournamentPlayer the TournamentPlayer to disqualify
+ * @param refereState the RefereeState to remove current player from active play
  * @param message the message to give the TournamentPlayer about their
  * disqualification, defaulting to a timeout message
  */
-const kickFailingPlayer = (
-  tournamentPlayer: TournamentPlayer,
+const disqualifyCurrentFailingPlayer = (
+  refereeState: RefereeState,
   message?: string
-): void => {
-  tournamentPlayer.disqualifyMe(
+): RefereeState => {
+  // Add current player to list of failing players
+  const newFailingPlayers = [...refereeState.cheatingPlayers];
+  newFailingPlayers.push(getCurrentPlayer(refereeState.game));
+
+  const newRefereeState = disqualifyCurrentPlayer(
+    refereeState,
     message ||
       "You failed to make a placement/movement in the expected time limit"
   );
+
+  return {
+    ...newRefereeState,
+    failingPlayers: newFailingPlayers,
+  };
 };
 
-const requestPlacementFromPlayer = async (
+/**
+ * Given a RefereeState and optional message, add the current player to the list of
+ * cheating players and disqualify them from the game by calling disqualifyCurrentPlayer
+ *
+ * @param refereState the RefereeState to remove current player from active play
+ * @param message the message to give the TournamentPlayer about their
+ * disqualification, defaulting to a timeout message
+ */
+const disqualifyCurrentCheatingPlayer = (
+  refereeState: RefereeState,
+  message?: string
+): RefereeState => {
+  // Add current player to list of cheating players
+  const newCheatingPlayers = [...refereeState.cheatingPlayers];
+  newCheatingPlayers.push(getCurrentPlayer(refereeState.game));
+
+  const newRefereeState = disqualifyCurrentPlayer(
+    refereeState,
+    message || "You attempted an illegal move/placement"
+  );
+
+  return {
+    ...newRefereeState,
+    cheatingPlayers: newCheatingPlayers,
+  };
+};
+
+/**
+ * Given a RefereeState, disqualify the current player of the RefereeState's Game
+ * state by removing them from the Game state and tournamentPlayers. Also notifies
+ * the failing/cheating TournamentPlayer (current player) that they have been disqualified
+ * and sends message as to why they've been disqualified.
+ *
+ * @param refereeState the RefereeState from which to disqualify the current player.
+ * @param message string message for reason player is being disqualified
+ * @return the updated RefereeState
+ */
+const disqualifyCurrentPlayer = (
+  refereeState: RefereeState,
+  message: string
+): RefereeState => {
+  // Notify player they were disqualified
+  refereeState.tournamentPlayers[refereeState.game.curPlayerIndex].disqualifyMe(
+    message
+  );
+
+  // Remove player from list of TournamentPlayers
+  const newTournamentPlayers = [...refereeState.tournamentPlayers];
+  newTournamentPlayers.splice(refereeState.game.curPlayerIndex, 1);
+
+  // Remove player from game
+  const newGame = removeDisqualifiedPlayerFromGame(refereeState.game);
+
+  return {
+    ...refereeState,
+    game: newGame,
+    tournamentPlayers: newTournamentPlayers,
+  };
+};
+
+/**
+ * Removes current player from given game by removing their color mapping from
+ * scores, penguinPositions, remainingUnplacedPenguins, and removes player from
+ * list fo players
+ */
+const removeDisqualifiedPlayerFromGame = (game: Game): Game => {
+  const disqualifiedPlayerColor = getCurrentPlayerColor(game);
+
+  // Remove player from game scores
+  const newScores = new Map([...game.scores]);
+  newScores.delete(disqualifiedPlayerColor);
+
+  // Remove player from game penguinPositions
+  const newPenguinPositions = new Map([...game.penguinPositions]);
+  newPenguinPositions.delete(disqualifiedPlayerColor);
+
+  // Remove player from game remainingUnplacedPenguins
+  const newRemainingUnplacedPenguins = new Map([
+    ...game.remainingUnplacedPenguins,
+  ]);
+  newRemainingUnplacedPenguins.delete(disqualifiedPlayerColor);
+
+  // Remove player from game players
+  const newPlayers = [...game.players].splice(game.curPlayerIndex, 1);
+
+  const nextPlayerIndex =
+    getNextPlayerIndex(game) - 1 > 0 ? getNextPlayerIndex(game) : 0;
+
+  const newGame = {
+    ...game,
+    scores: newScores,
+    penguinPositions: newPenguinPositions,
+    remainingUnplacedPenguins: newRemainingUnplacedPenguins,
+    players: newPlayers,
+  };
+
+  return {
+    ...game,
+    scores: newScores,
+    penguinPositions: newPenguinPositions,
+    remainingUnplacedPenguins: newRemainingUnplacedPenguins,
+    players: newPlayers,
+    curPlayerIndex: nextPlayerIndex,
+  };
+};
+
+/**
+ * Create a Promise which rejects after a timeout period, with an error
+ * message, meant to be used to apply a timeout to a request to a
+ * player that requires a response.
+ *
+ * @param currentPlayer the TournamentPlayer who is being requested
+ * @return a Promise that will reject after a timeout
+ */
+const setTimeoutPlayerRequest = <T>(currentPlayer: TournamentPlayer) =>
+  new Promise<T>((resolve, reject) => {
+    setTimeout(
+      () =>
+        reject(
+          `${currentPlayer.name} did not respond within ${ACTION_TIMEOUT_MS}ms.`
+        ),
+      ACTION_TIMEOUT_MS
+    );
+  });
+
+/**
+ * Request a given TournamentPlayer's next placement for the given Game,
+ * along with a timeout.
+ *
+ * @param tournamentPlayer the TournamentPlayer being requested
+ * @param game the Game from which they must place a penguin
+ * @return a Promise containing their placement BoardPosition
+ */
+const requestPlacementFromPlayer = (
   tournamentPlayer: TournamentPlayer,
   game: Game
 ): Promise<BoardPosition> => {
-  return tournamentPlayer.makePlacement(game);
+  return Promise.race([
+    tournamentPlayer.makePlacement(game),
+    setTimeoutPlayerRequest<BoardPosition>(tournamentPlayer),
+  ]);
 };
 
-const requestMovementFromPlayer = async (
+/**
+ * Request a given TournamentPlayer's next movement for the given Game,
+ * along with a timeout.
+ *
+ * @param tournamentPlayer the TournamentPlayer being requested
+ * @param game the Game from which they must move a penguin
+ * @return a Promise containing their Movement
+ */
+const requestMovementFromPlayer = (
   tournamentPlayer: TournamentPlayer,
   game: Game
 ): Promise<Movement> => {
-  return tournamentPlayer.makeMovement(game);
+  return Promise.race([
+    tournamentPlayer.makeMovement(game),
+    setTimeoutPlayerRequest<Movement>(tournamentPlayer),
+  ]);
 };
 
 /**
@@ -360,6 +515,40 @@ const notifyPlayersOfOutcome = (
   );
 };
 
+const numberOfPenguinPlacements = (numOfPlayers: number) => {
+  return numOfPenguinsPerPlayer(numOfPlayers) * numOfPlayers;
+};
+
+/**
+ * Given an array of TournamentPlayers and BoardDimensions i.e. the input to a
+ * Referee's runGame, determine whether the specified game is valid, returning
+ * true if it is or the corresponding error if not.
+ *
+ * @param tournamentPlayers the TournamentPlayers participating in the game
+ * @param boardDimension the dimensions of the board to be created in the game
+ * @return true if the inputs specify a valid game (board is big enough for
+ * all placements, valid number of players) and the corresponding Error if not
+ */
+const validGameSpecified = (
+  tournamentPlayers: Array<TournamentPlayer>,
+  boardDimension: BoardDimension
+): true | InvalidBoardConstraintsError | InvalidNumberOfPlayersError => {
+  const numOfPlacements = numberOfPenguinPlacements(tournamentPlayers.length);
+  const numOfTilesOnBoard = boardDimension.cols * boardDimension.rows;
+  const enoughPlacements = numOfPlacements <= numOfTilesOnBoard;
+
+  if (!enoughPlacements) {
+    return new InvalidBoardConstraintsError(
+      boardDimension.cols,
+      boardDimension.rows
+    );
+  } else if (!isValidNumberOfPlayers(tournamentPlayers.length)) {
+    return new InvalidNumberOfPlayersError(tournamentPlayers.length);
+  } else {
+    return true;
+  }
+};
+
 /**
  * Given an array of participating TournamentPlayers and a set of
  * BoardDimenesions, setup and run a full Fish game. This call represents the
@@ -376,8 +565,17 @@ const runGame = (
   tournamentPlayers: Array<TournamentPlayer>,
   boardDimensions: BoardDimension
 ): GameDebrief | Error => {
-  // TODO validate input
-  // TODO say the specific errors that could occur
+  // Ensure that the board is big enough for all placements and that the
+  // number of players given is valid.
+  const isValidInputsOrError: true | Error = validGameSpecified(
+    tournamentPlayers,
+    boardDimensions
+  );
+
+  if (isError(isValidInputsOrError)) {
+    return isValidInputsOrError;
+  }
+
   // Create the initial state, return error if fails.
   const initialGameOrError: Game | Error = createInitialGameState(
     tournamentPlayers,
@@ -414,3 +612,5 @@ const runGame = (
   notifyPlayersOfOutcome(tournamentPlayers, gameDebrief); // TODO currently this notifies ALL players of the outcome regardless of whether they've been kicked. Is this what we want?
   return gameDebrief;
 };
+
+export { tournamentPlayersToGamePlayers };
