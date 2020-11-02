@@ -94,6 +94,20 @@ interface MoveResponseQuery {
 type Action = false | [InputPosition, InputPosition];
 
 /**
+ * InputDepth represents the depth to explore a GameTree to find the best possible
+ * move for that depth. The depth can either be 1 or 2, to avoid excessively
+ * long test runtimes.
+ */
+type InputDepth = 1 | 2;
+
+/**
+ * InputDepthState represents a Game State and a depth to explore. The InputState represents
+ * the Game state to create a GameTree from, and the InputDepth is the depth at which
+ * to explore the generated GameTree for a best move.
+ */
+type InputDepthState = [InputDepth, InputState];
+
+/**
  * Read and parse JSON input from STDIN.
  *
  * @return a Promise containing the parsed JSON
@@ -112,5 +126,7 @@ export {
   InputPlayer,
   MoveResponseQuery,
   Action,
+  InputDepth,
+  InputDepthState,
   readStdin,
 };

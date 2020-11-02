@@ -9,17 +9,10 @@ import {
   inputPositionToBoardPosition,
   movementToAction,
   performMoveResponseQuery,
+  printFalse
 } from "./testHarnessConversion";
 import { Action, MoveResponseQuery, readStdin } from "./testHarnessInput";
 import { SillyStrategyDirections } from "./testHarnessStrategy";
-
-/**
- * Utility function for outputting false to signify errors that occurred in the
- * test harness, whether these be due to being given invalid states/movements
- * or if the condition wasn't satisfied that the player after the MoveResponseQuery
- * cannot move any penguins to neighbor the previous' destination.
- */
-const printFalse = (): void => console.log(JSON.stringify(false));
 
 /**
  * Given a target BoardPosition, determine if a given Movement's destination is

@@ -17,6 +17,14 @@ import {
 import { isError } from "./validation";
 
 /**
+ * Utility function for outputting false to signify errors that occurred in the
+ * test harness, whether these be due to being given invalid states/movements
+ * or if the condition wasn't satisfied that the player after the MoveResponseQuery
+ * cannot move any penguins to neighbor the previous' destination.
+ */
+const printFalse = (): void => console.log(JSON.stringify(false));
+
+/**
  * Given an InputPlayer, derive a unique name for this player.
  *
  * This is used to bridge the gap between the InputPlayer
@@ -338,6 +346,7 @@ const movementToAction = (movement: Movement): Action => [
 ];
 
 export {
+  printFalse,
   inputStateToGameState,
   gameToInputState,
   performMoveResponseQuery,
