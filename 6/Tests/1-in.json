@@ -3,14 +3,6 @@
     {
         "players": [
             {
-                "color": "brown",
-                "score": 0,
-                "places": [
-                    [0,0],
-                    [1,0]
-                ]
-            },
-            {
                 "color": "white",
                 "score": 0,
                 "places": [
@@ -18,6 +10,15 @@
                     [1,1]
                 ]
             },
+            {
+                "color": "brown",
+                "score": 0,
+                "places": [
+                    [0,0],
+                    [1,0]
+                ]
+            },
+            
             {
                 "color": "red",
                 "score": 0,
