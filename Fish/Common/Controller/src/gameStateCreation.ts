@@ -63,6 +63,10 @@ const skipToNextActivePlayer = (game: MovementGame): MovementGame => {
   return skipToNextActivePlayerRecursive(game, 0);
 };
 
+// TODO test
+const numOfPenguinsPerPlayer = (numOfPlayers: number) =>
+  PENGUIN_AMOUNT_N - numOfPlayers;
+
 /**
  * Creates a mapping from the given array of Players to their initial amount of
  * unplaced penguins for initial game state. Adds 6 - players.length penguins for each player.
@@ -73,7 +77,7 @@ const buildUnplacedPenguinMap = (
   players: Array<Player>
 ): Map<PenguinColor, number> => {
   const unplacedPenguins: Map<PenguinColor, number> = new Map();
-  const numPenguins: number = PENGUIN_AMOUNT_N - players.length;
+  const numPenguins: number = numOfPenguinsPerPlayer(players.length);
   for (const player of players) {
     unplacedPenguins.set(player.color, numPenguins);
   }
@@ -116,6 +120,11 @@ const createEmptyScoreSheet = (
   return new Map(playerColorToZero);
 };
 
+// TODO test
+const isValidNumberOfPlayers = (numOfPlayers: number): boolean =>
+  numOfPlayers >= MIN_NUMBER_OF_PLAYERS &&
+  numOfPlayers <= MAX_NUMBER_OF_PLAYERS;
+
 /**
  * Create a new Game state given an array of Players and a created board.
  *
@@ -128,10 +137,7 @@ const createGameState = (
   board: Board
 ): Game | InvalidNumberOfPlayersError | InvalidGameStateError => {
   // Error check whether the number of players given is valid.
-  if (
-    players.length < MIN_NUMBER_OF_PLAYERS ||
-    players.length > MAX_NUMBER_OF_PLAYERS
-  ) {
+  if (!isValidNumberOfPlayers(players.length)) {
     return new InvalidNumberOfPlayersError(players.length);
   }
 
@@ -179,4 +185,6 @@ export {
   createEmptyPenguinPositions,
   buildUnplacedPenguinMap,
   skipToNextActivePlayer,
+  isValidNumberOfPlayers,
+  numOfPenguinsPerPlayer,
 };

@@ -1,11 +1,11 @@
-import { Game, getCurrentPlayer, Player } from "../../state";
+import { Game, getCurrentPlayer, MovementGame, Player } from "../../state";
 import { GameTree, Movement, PotentialMovement } from "../../game-tree";
 import { movePenguin, positionsAreEqual } from "./penguinPlacement";
 import { IllegalMovementError } from "../types/errors";
 
 /**
  * Checks if given movement can be made with the given GameTree node. If it can,
- * returns theresulting game state of the move on the given game tree's current
+ * returns the resulting game state of the move on the given game tree's current
  * game state, otherwise returns IllegalMovementError
  *
  * @param gameTree Starting GameTree node
@@ -15,7 +15,7 @@ import { IllegalMovementError } from "../types/errors";
 const isMovementLegal = (
   gameTree: GameTree,
   movement: Movement
-): Game | IllegalMovementError => {
+): MovementGame | IllegalMovementError => {
   // Determine if the movement is legal by comparing it to the possible
   // movements within the GameTree's potential moves and seeing if it
   // exists there.
@@ -40,7 +40,7 @@ const isMovementLegal = (
     getCurrentPlayer(gameTree.gameState),
     movement.startPosition,
     movement.endPosition
-  ) as Game;
+  ) as MovementGame;
 
   return newGameState;
 };
