@@ -47,10 +47,10 @@ export interface BoardPosition {
  * avatar in the game of Fish.
  */
 export enum PenguinColor {
-  Red = "red",
-  White = "white",
-  Brown = "brown",
-  Black = "black",
+  Red = "Red",
+  White = "White",
+  Brown = "Brown",
+  Black = "Black",
 }
 
 /**

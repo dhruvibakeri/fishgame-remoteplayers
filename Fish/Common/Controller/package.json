@@ -31,7 +31,8 @@
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "node",
-    "maxWorkers": "1"
+    "maxWorkers": "1",
+    "verbose": true
   },
   "license": "ISC"
 }

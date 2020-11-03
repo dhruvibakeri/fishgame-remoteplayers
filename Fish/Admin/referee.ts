@@ -27,7 +27,6 @@ import {
   createGameState,
   isValidNumberOfPlayers,
   numOfPenguinsPerPlayer,
-  PENGUIN_AMOUNT_N,
   getNextPlayerIndex,
 } from "../Common/Controller/src/gameStateCreation";
 import { placePenguin } from "../Common/Controller/src/penguinPlacement";
@@ -91,7 +90,7 @@ const tournamentPlayersToGamePlayers = (
     if (players.length < tournamentPlayers.length) {
       players.push({
         name: tournamentPlayers[players.length].name,
-        color: PenguinColor[penguinColor],
+        color: penguinColor as PenguinColor,
       });
     }
   }
@@ -152,6 +151,18 @@ const createInitialGameState = (
   }
 };
 
+/**
+ * Given a placement position and the current RefereeState, make a placement
+ * for the current player of the RefereeState's Game state and update the
+ * RefereeState to reflect the result. If the placement was invalid, mark
+ * the player as a cheater and kick them from the game.
+ *
+ * @param placementPosition the position to make a placement on for the
+ * current player
+ * @param currRefereeState the current RefereeState from which the placement is
+ * being made
+ * @return the updated RefereeState
+ */
 const runPlacementTurn = (
   placementPosition: BoardPosition,
   currRefereeState: RefereeState
@@ -218,6 +229,17 @@ const gameIsFinished = (game: MovementGame): boolean => {
   return gameTree.potentialMoves.length === 0;
 };
 
+/**
+ * Given a Movement and the current RefereeState, make a movement for the
+ * current player of the RefereeState's Game state and update the RefereeState
+ * to reflect the result. If the movement was invalid, mark the player as a
+ * cheater and kick them from the game.
+ *
+ * @param movement the movement for to make for the current player
+ * @param currRefereeState the current RefereeState from which the movement is
+ * being made
+ * @return the updated RefereeState
+ */
 const runMovementTurn = (
   movement: Movement,
   currRefereeState: RefereeStateWithMovementGame
@@ -269,16 +291,6 @@ const runMovementRounds = (refereeState: RefereeStateWithMovementGame) => {
   }
 
   return currRefereeState;
-};
-
-const getTournamentPlayerFromPlayer = (
-  tournamentPlayers: Array<TournamentPlayer>,
-  player: Player
-): TournamentPlayer => {
-  return tournamentPlayers.find(
-    (tournamentPlayer: TournamentPlayer) =>
-      tournamentPlayer.name === player.name
-  );
 };
 
 /**
@@ -394,16 +406,7 @@ const removeDisqualifiedPlayerFromGame = (game: Game): Game => {
   // Remove player from game players
   const newPlayers = [...game.players].splice(game.curPlayerIndex, 1);
 
-  const nextPlayerIndex =
-    getNextPlayerIndex(game) - 1 > 0 ? getNextPlayerIndex(game) : 0;
-
-  const newGame = {
-    ...game,
-    scores: newScores,
-    penguinPositions: newPenguinPositions,
-    remainingUnplacedPenguins: newRemainingUnplacedPenguins,
-    players: newPlayers,
-  };
+  //const nextPlayerIndex = cur;
 
   return {
     ...game,
@@ -411,7 +414,7 @@ const removeDisqualifiedPlayerFromGame = (game: Game): Game => {
     penguinPositions: newPenguinPositions,
     remainingUnplacedPenguins: newRemainingUnplacedPenguins,
     players: newPlayers,
-    curPlayerIndex: nextPlayerIndex,
+    curPlayerIndex: getNextPlayerIndex(game),
   };
 };
 
@@ -519,21 +522,21 @@ const numberOfPenguinPlacements = (numOfPlayers: number) => {
   return numOfPenguinsPerPlayer(numOfPlayers) * numOfPlayers;
 };
 
+// TODO don't need to check for valid number of players, this is already handled when creating the game state
 /**
- * Given an array of TournamentPlayers and BoardDimensions i.e. the input to a
- * Referee's runGame, determine whether the specified game is valid, returning
- * true if it is or the corresponding error if not.
+ * Given a number of players and BoardDimensions, determine whether the board
+ * is big enough to house all of the players' penguins.
  *
- * @param tournamentPlayers the TournamentPlayers participating in the game
+ * @param numOfPlayers the number of participating players
  * @param boardDimension the dimensions of the board to be created in the game
- * @return true if the inputs specify a valid game (board is big enough for
- * all placements, valid number of players) and the corresponding Error if not
+ * @return true if the inputs specify the board is big enough and the
+ * corresponding Error if not
  */
-const validGameSpecified = (
-  tournamentPlayers: Array<TournamentPlayer>,
+const boardIsBigEnough = (
+  numOfPlayers: number,
   boardDimension: BoardDimension
-): true | InvalidBoardConstraintsError | InvalidNumberOfPlayersError => {
-  const numOfPlacements = numberOfPenguinPlacements(tournamentPlayers.length);
+): true | InvalidBoardConstraintsError => {
+  const numOfPlacements = numberOfPenguinPlacements(numOfPlayers);
   const numOfTilesOnBoard = boardDimension.cols * boardDimension.rows;
   const enoughPlacements = numOfPlacements <= numOfTilesOnBoard;
 
@@ -542,8 +545,6 @@ const validGameSpecified = (
       boardDimension.cols,
       boardDimension.rows
     );
-  } else if (!isValidNumberOfPlayers(tournamentPlayers.length)) {
-    return new InvalidNumberOfPlayersError(tournamentPlayers.length);
   } else {
     return true;
   }
@@ -565,15 +566,14 @@ const runGame = (
   tournamentPlayers: Array<TournamentPlayer>,
   boardDimensions: BoardDimension
 ): GameDebrief | Error => {
-  // Ensure that the board is big enough for all placements and that the
-  // number of players given is valid.
-  const isValidInputsOrError: true | Error = validGameSpecified(
-    tournamentPlayers,
+  // Ensure that the board is big enough for all placements.
+  const isBoardBigEnoughOrError = boardIsBigEnough(
+    tournamentPlayers.length,
     boardDimensions
   );
 
-  if (isError(isValidInputsOrError)) {
-    return isValidInputsOrError;
+  if (isError(isBoardBigEnoughOrError)) {
+    return isBoardBigEnoughOrError;
   }
 
   // Create the initial state, return error if fails.
@@ -609,8 +609,17 @@ const runGame = (
   const gameDebrief: GameDebrief = createGameDebrief(
     refereeStateAfterMovements
   );
-  notifyPlayersOfOutcome(tournamentPlayers, gameDebrief); // TODO currently this notifies ALL players of the outcome regardless of whether they've been kicked. Is this what we want?
+  notifyPlayersOfOutcome(tournamentPlayers, gameDebrief);
+
   return gameDebrief;
 };
 
-export { tournamentPlayersToGamePlayers };
+export {
+  RefereeState,
+  tournamentPlayersToGamePlayers,
+  notifyPlayersGameStarting,
+  runPlacementRounds,
+  notifyPlayersOfOutcome,
+  boardIsBigEnough,
+  gameIsFinished,
+};
