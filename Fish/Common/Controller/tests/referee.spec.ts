@@ -437,4 +437,20 @@ describe("referee", () => {
 
     it("rejects an invalid number of players");
   });
+
+  describe("disqualifyCurrentCheatingPlayer", () => {
+    // it("disqualifies current player for cheating", () => {});
+  });
+
+  describe("disqualifyCurrentFailingPlayer", () => {
+    // it("disqualifies current player for cheating", () => {});
+  });
+
+  describe("disqualifyCurrentPlayer", () => {
+    // it("disqualifies current player", () => {});
+  });
+
+  describe("removeDisqualifiedPlayerFromGame", () => {
+    // it("removes current player from game", () => {});
+  });
 });

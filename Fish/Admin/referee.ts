@@ -622,4 +622,8 @@ export {
   notifyPlayersOfOutcome,
   boardIsBigEnough,
   gameIsFinished,
+  disqualifyCurrentCheatingPlayer,
+  disqualifyCurrentFailingPlayer,
+  disqualifyCurrentPlayer,
+  removeDisqualifiedPlayerFromGame,
 };
