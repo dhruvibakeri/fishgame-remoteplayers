@@ -33,8 +33,6 @@ import { GameTree, Movement } from "../Common/game-tree";
 import { TournamentPlayer } from "../Common/player-interface";
 import { isMovementLegal } from "../Common/Controller/src/queryGameTree";
 
-const ACTION_TIMEOUT_MS = 5000;
-
 /**
  * A BoardDimension represents the size of a board within a Fish game. It
  * specifies both the number of rows and the number of columns in the board.
@@ -590,6 +588,7 @@ const runGame = (
 
 export {
   RefereeState,
+  RefereeStateWithMovementGame,
   tournamentPlayersToGamePlayers,
   notifyPlayersGameStarting,
   runPlacementRounds,
@@ -600,4 +599,7 @@ export {
   disqualifyCurrentFailingPlayer,
   disqualifyCurrentPlayer,
   removeDisqualifiedPlayerFromGame,
+  createInitialGameState,
+  runPlacementTurn,
+  runMovementTurn,
 };
