@@ -122,7 +122,7 @@ const getMinMaxScore = (
   lookAheadTurnsDepth: number
 ): number => {
   // If current node is root node or if we've reached the desired depth, return current player score.
-  if (lookAheadTurnsDepth === 0 || gameTree.potentialMoves.length === 0) {
+  if (lookAheadTurnsDepth === 1 || gameTree.potentialMoves.length === 0) {
     return gameTree.gameState.scores.get(
       gameTree.gameState.players[searchingPlayerIndex].color
     );
