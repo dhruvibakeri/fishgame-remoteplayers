@@ -4,7 +4,7 @@
 
 The following details all the calling conventions within the Tournament Manager API which a Tournament Manager must implement. It details how to supply players and observers to a Tournament Manager and request it to run a tournament with these inputs, returning the result of this.
 
-The purpose of a Tournament Manager is to run tournaments for the game company. To run a tournament, the sign up server
+The purpose of a Tournament Manager is to run tournaments for the game company. To run a tournament, the sign up server will handle the sign-ups and acceptance of remote-player connections, collect them for a certain period, and then hand them off to the tournament manager via it's `RunTournament` call to run the tournament and return the results.
 
 ---
 
