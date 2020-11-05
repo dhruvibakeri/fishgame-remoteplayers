@@ -342,7 +342,7 @@ describe("strategy", () => {
 
   describe("getMinMaxScore", () => {
     it("returns the searching player's score if the depth is 0", () => {
-      expect(getMinMaxScore(gameTree, 0, 0)).toEqual(0);
+      expect(getMinMaxScore(gameTree, 0, 1)).toEqual(0);
     });
 
     it("returns the searching player's score if there are no more potential moves", () => {
@@ -350,7 +350,6 @@ describe("strategy", () => {
     });
 
     it("returns a maximum of the found scores if it's the searching player's turn", () => {
-      expect(getMinMaxScore(gameTree, 0, 1)).toEqual(1);
       expect(getMinMaxScore(gameTree, 0, 2)).toEqual(1);
     });
 
