@@ -25,8 +25,8 @@ import {
 } from "../Common/Controller/src/gameTreeCreation";
 import {
   createGameState,
-  numOfPenguinsPerPlayer,
   getNextPlayerIndex,
+  numOfPenguinsPerPlayer,
 } from "../Common/Controller/src/gameStateCreation";
 import { placePenguin } from "../Common/Controller/src/penguinPlacement";
 import { GameTree, Movement } from "../Common/game-tree";
@@ -419,13 +419,17 @@ const removeDisqualifiedPlayerFromGame = (game: Game): Game => {
     (player: Player) => player.color !== disqualifiedPlayerColor
   );
 
-  return {
+  const updatedGame: Game = {
     ...game,
     scores: newScores,
     penguinPositions: newPenguinPositions,
     remainingUnplacedPenguins: newRemainingUnplacedPenguins,
     players: newPlayers,
-    curPlayerIndex: getNextPlayerIndex(game),
+  };
+
+  return {
+    ...updatedGame,
+    curPlayerIndex: getNextPlayerIndex(updatedGame),
   };
 };
 
