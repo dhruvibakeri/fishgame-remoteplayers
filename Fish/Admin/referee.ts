@@ -653,4 +653,6 @@ export {
   runMovementRounds,
   createGameDebrief,
   addScoresOfPlacedPenguins,
+  numberOfPenguinPlacements,
+  runGame,
 };

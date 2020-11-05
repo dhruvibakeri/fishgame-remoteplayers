@@ -17,6 +17,8 @@ import {
   tournamentPlayersToGamePlayers,
   runMovementRounds,
   addScoresOfPlacedPenguins,
+  numberOfPenguinPlacements,
+  runGame,
 } from "../../../Admin/referee";
 import { GameDebrief, TournamentPlayer } from "../../player-interface";
 import { createSamplePlayer } from "../../../Player/player";
@@ -796,7 +798,9 @@ describe("referee", () => {
   });
 
   describe("numberOfPenguinPlacements", () => {
-    it("returns the correct number of placements", () => {});
+    it("returns the correct number of placements", () => {
+      expect(numberOfPenguinPlacements(4)).toEqual(8);
+    });
   });
 
   describe("isBoardBigEnoughOrError", () => {
@@ -812,11 +816,32 @@ describe("referee", () => {
   });
 
   describe("runGame", () => {
-    it("runs an entire game", () => {});
+    const expectedGameDebrief: GameDebrief = {
+      activePlayers: [
+        { name: player1Name, score: 8 },
+        { name: player2Name, score: 8 },
+      ],
+      kickedPlayers: [],
+    };
+    const players = [tournamentPlayer1, tournamentPlayer2];
 
-    it("rejects not enough positions for the number of placements", () => {});
+    it("runs an entire game", () => {
+      expect(runGame(players, { cols: 4, rows: 4 })).toEqual(
+        expectedGameDebrief
+      );
+    });
 
-    it("rejects an invalid number of players", () => {});
+    it("rejects not enough positions for the number of placements", () => {
+      expect(runGame(players, { cols: 2, rows: 2 })).toEqual(
+        new InvalidBoardConstraintsError(2, 2)
+      );
+    });
+
+    it("rejects an invalid number of players", () => {
+      expect(runGame([], { cols: 4, rows: 3 })).toEqual(
+        new InvalidNumberOfPlayersError(0)
+      );
+    });
   });
 
   describe("disqualifyCurrentCheatingPlayer", () => {
