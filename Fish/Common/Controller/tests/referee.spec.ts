@@ -16,6 +16,7 @@ import {
   runPlacementTurn,
   tournamentPlayersToGamePlayers,
   runMovementRounds,
+  addScoresOfPlacedPenguins,
 } from "../../../Admin/referee";
 import { GameDebrief, TournamentPlayer } from "../../player-interface";
 import { createSamplePlayer } from "../../../Player/player";
@@ -732,6 +733,20 @@ describe("referee", () => {
     });
   });
 
+  describe("addScoresOfPlacedPenguins", () => {
+    it("adds the scores of all player's current placed penguins", () => {
+      const expectedScores: Map<PenguinColor, number> = new Map([
+        [player1.color, 20],
+        [player2.color, 22],
+      ]);
+      const expectedGame: Game = {
+        ...twoGameFinalGame,
+        scores: expectedScores,
+      };
+      expect(addScoresOfPlacedPenguins(twoGameFinalGame)).toEqual(expectedGame);
+    });
+  });
+
   describe("createGameDebrief", () => {
     it("creates a game debrief", () => {
       const refereeState: RefereeStateWithMovementGame = {
@@ -743,8 +758,8 @@ describe("referee", () => {
 
       const expectedGameDebrief: GameDebrief = {
         activePlayers: [
-          { name: player1Name, score: 8 },
-          { name: player2Name, score: 10 },
+          { name: player1Name, score: 20 },
+          { name: player2Name, score: 22 },
         ],
         kickedPlayers: [{ name: player3Name }, { name: player4Name }],
       };

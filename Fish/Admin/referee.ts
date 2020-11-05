@@ -1,4 +1,4 @@
-import { PenguinColor, Board, BoardPosition } from "../Common/board";
+import { PenguinColor, Board, BoardPosition, Tile } from "../Common/board";
 import {
   GameDebrief,
   ActivePlayer,
@@ -17,7 +17,10 @@ import {
   getCurrentPlayerColor,
   getCurrentPlayer,
 } from "../Common/state";
-import { createHoledOneFishBoard } from "../Common/Controller/src/boardCreation";
+import {
+  createHoledOneFishBoard,
+  getTileOnBoard,
+} from "../Common/Controller/src/boardCreation";
 import { isError } from "../Common/Controller/src/validation";
 import {
   createGameTreeFromMovementGame,
@@ -132,7 +135,6 @@ const createInitialGameState = (
   | InvalidPositionError
   | InvalidNumberOfPlayersError
   | InvalidGameStateError => {
-  // TODO randomize board creation (fish amounts, holes)
   // Create the game board to the given dimensions.
   const board:
     | Board
@@ -289,9 +291,6 @@ const runMovementRounds = (refereeState: RefereeStateWithMovementGame) => {
     currRefereeState = runMovementTurn(movement, currRefereeState);
   }
 
-  // TODO since game is finished, add the scores on the tiles of each placed
-  // penguin to their respective players' scores
-
   return currRefereeState;
 };
 
@@ -434,26 +433,66 @@ const removeDisqualifiedPlayerFromGame = (game: Game): Game => {
 };
 
 /**
+ * Add to the scores of each of the given Game's Players the sum of all of
+ * the tiles of all of their currently placed penguins.
+ *
+ * This should only ever be called at the end of the game, after there
+ * are no more possible movements. This is only necessary since tile
+ * amounts are not added to a player's score until they move from
+ * that tile.
+ *
+ * @param game the Game state to update the scores of
+ * @return the update Game state
+ */
+const addScoresOfPlacedPenguins = (game: Game): Game => {
+  const scoresCopy: Map<PenguinColor, number> = new Map(game.scores);
+
+  for (const positionsPerColor of Array.from(game.penguinPositions)) {
+    const penguinColor: PenguinColor = positionsPerColor[0];
+    const scoreOfPlacedPenguins = positionsPerColor[1].reduce<number>(
+      (sum: number, boardPosition: BoardPosition) =>
+        sum + (getTileOnBoard(game.board, boardPosition) as Tile).numOfFish,
+      0
+    );
+
+    scoresCopy.set(
+      penguinColor,
+      scoresCopy.get(penguinColor) + scoreOfPlacedPenguins
+    );
+  }
+
+  return {
+    ...game,
+    scores: scoresCopy,
+  };
+};
+
+/**
  * Generate a GameDevrief from the given RefereeState once the game is complete.
  *
  * @param refereeState the RefereeState to generate the GameDebrief from
  * @return the created GameDebrief
  */
 const createGameDebrief = (refereeState: RefereeState): GameDebrief => {
+  const updatedScoresRefereeState: RefereeState = {
+    ...refereeState,
+    game: addScoresOfPlacedPenguins(refereeState.game),
+  };
+
   // Get the active players from the Game's roster of players.
-  const activePlayers: Array<ActivePlayer> = refereeState.game.players.map(
+  const activePlayers: Array<ActivePlayer> = updatedScoresRefereeState.game.players.map(
     (player: Player) => {
       return {
         name: player.name,
-        score: refereeState.game.scores.get(player.color),
+        score: updatedScoresRefereeState.game.scores.get(player.color),
       };
     }
   );
 
   // Get kicked players from the RefereeState.
   const kickedPlayers: Array<InactivePlayer> = [
-    ...refereeState.cheatingPlayers,
-    ...refereeState.failingPlayers,
+    ...updatedScoresRefereeState.cheatingPlayers,
+    ...updatedScoresRefereeState.failingPlayers,
   ].map((player: Player) => {
     return { name: player.name };
   });
@@ -613,4 +652,5 @@ export {
   runMovementTurn,
   runMovementRounds,
   createGameDebrief,
+  addScoresOfPlacedPenguins,
 };
