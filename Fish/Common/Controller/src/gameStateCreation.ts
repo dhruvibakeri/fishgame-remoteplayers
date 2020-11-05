@@ -63,8 +63,14 @@ const skipToNextActivePlayer = (game: MovementGame): MovementGame => {
   return skipToNextActivePlayerRecursive(game, 0);
 };
 
-// TODO test
-const numOfPenguinsPerPlayer = (numOfPlayers: number) =>
+/**
+ * Get the number of penguins that is alotted to a single player within a game
+ * with the given number of players.
+ *
+ * @param numOfPlayers the number of players to compute for
+ * @return the number of penguins per player
+ */
+const numOfPenguinsPerPlayer = (numOfPlayers: number): number =>
   PENGUIN_AMOUNT_N - numOfPlayers;
 
 /**
@@ -120,7 +126,10 @@ const createEmptyScoreSheet = (
   return new Map(playerColorToZero);
 };
 
-// TODO test
+/**
+ * Determine whether the given number of players is
+ * @param numOfPlayers
+ */
 const isValidNumberOfPlayers = (numOfPlayers: number): boolean =>
   numOfPlayers >= MIN_NUMBER_OF_PLAYERS &&
   numOfPlayers <= MAX_NUMBER_OF_PLAYERS;

@@ -11,6 +11,8 @@ import {
   createGameState,
   createTestGameState,
   getNextPlayerIndex,
+  isValidNumberOfPlayers,
+  numOfPenguinsPerPlayer,
   skipToNextActivePlayer,
 } from "../src/gameStateCreation";
 
@@ -116,6 +118,20 @@ describe("gameStateCreation", () => {
       expect(skipToNextActivePlayer(movementGameNoMoves)).toEqual(
         movementGameNoMoves
       );
+    });
+  });
+
+  describe("numOfPenguinsPerPlayer", () => {
+    it("gives the right amount for 2 players", () => {
+      expect(numOfPenguinsPerPlayer(2)).toEqual(4);
+    });
+
+    it("gives the right amount for 3 players", () => {
+      expect(numOfPenguinsPerPlayer(3)).toEqual(3);
+    });
+
+    it("gives the right amount for 4 players", () => {
+      expect(numOfPenguinsPerPlayer(4)).toEqual(2);
     });
   });
 
@@ -231,6 +247,28 @@ describe("gameStateCreation", () => {
 
     it("creates an empty map for an empty array of players", () => {
       expect(createEmptyScoreSheet([])).toEqual(new Map());
+    });
+  });
+
+  describe("isValidNumberOfPlayers", () => {
+    it("rejects under the minimum", () => {
+      expect(isValidNumberOfPlayers(1)).toEqual(false);
+    });
+
+    it("accepts the minimum", () => {
+      expect(isValidNumberOfPlayers(2)).toEqual(true);
+    });
+
+    it("accepts within the bounds", () => {
+      expect(isValidNumberOfPlayers(3)).toEqual(true);
+    });
+
+    it("accepts the maximum", () => {
+      expect(isValidNumberOfPlayers(4)).toEqual(true);
+    });
+
+    it("rejects above the maximum", () => {
+      expect(isValidNumberOfPlayers(5)).toEqual(false);
     });
   });
 
