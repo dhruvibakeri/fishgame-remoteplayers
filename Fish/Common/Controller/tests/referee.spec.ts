@@ -6,6 +6,10 @@ import {
   notifyPlayersOfOutcome,
   RefereeState,
   RefereeStateWithMovementGame,
+  disqualifyCurrentCheatingPlayer,
+  disqualifyCurrentFailingPlayer,
+  disqualifyCurrentPlayer,
+  removeDisqualifiedPlayerFromGame,
   runMovementTurn,
   runPlacementRounds,
   runPlacementTurn,
@@ -669,18 +673,140 @@ describe("referee", () => {
   });
 
   describe("disqualifyCurrentCheatingPlayer", () => {
-    // it("disqualifies current player for cheating", () => {});
+    it("disqualifies current player for cheating", () => {
+      const mockCall = jest.fn();
+      tournamentPlayer1.disqualifyMe = mockCall;
+      const newScores = new Map(numberedGame.scores);
+      newScores.delete(PenguinColor.Red);
+      const newPenguinPositions = new Map(numberedGame.penguinPositions);
+      newPenguinPositions.delete(PenguinColor.Red);
+      const newUnplacedPenguins = new Map(numberedGame.remainingUnplacedPenguins);
+      newUnplacedPenguins.delete(PenguinColor.Red);
+      const newPlayers = [...numberedGame.players];
+      newPlayers.splice(0, 1);
+      const expectedGame: Game = {
+        ...numberedGame,
+        scores: newScores,
+        penguinPositions: newPenguinPositions,
+        remainingUnplacedPenguins: newUnplacedPenguins,
+        players: newPlayers
+      };
+      const initialRefereeState: RefereeState = {
+        game: numberedGame,
+        tournamentPlayers: [tournamentPlayer1, tournamentPlayer2],
+        cheatingPlayers: [],
+        failingPlayers: [],
+      };
+      const expectedRefereeState: RefereeState = {
+        game: expectedGame,
+        tournamentPlayers: [tournamentPlayer2],
+        cheatingPlayers: [player1],
+        failingPlayers: [],
+      };
+
+      const resultingRefereeState = disqualifyCurrentCheatingPlayer(initialRefereeState, "you have been disqualified");
+      expect(resultingRefereeState).toEqual(expectedRefereeState);
+      expect(mockCall).toHaveBeenCalled();
+      expect(mockCall).toHaveBeenCalledWith("you have been disqualified");
+    });
   });
 
   describe("disqualifyCurrentFailingPlayer", () => {
-    // it("disqualifies current player for cheating", () => {});
+    it("disqualifies current player for cheating", () => {
+      const mockCall = jest.fn();
+      tournamentPlayer1.disqualifyMe = mockCall;
+      const newScores = new Map(numberedGame.scores);
+      newScores.delete(PenguinColor.Red);
+      const newPenguinPositions = new Map(numberedGame.penguinPositions);
+      newPenguinPositions.delete(PenguinColor.Red);
+      const newUnplacedPenguins = new Map(numberedGame.remainingUnplacedPenguins);
+      newUnplacedPenguins.delete(PenguinColor.Red);
+      const newPlayers = [...numberedGame.players];
+      newPlayers.splice(0, 1);
+      const expectedGame: Game = {
+        ...numberedGame,
+        scores: newScores,
+        penguinPositions: newPenguinPositions,
+        remainingUnplacedPenguins: newUnplacedPenguins,
+        players: newPlayers
+      };
+      const initialRefereeState: RefereeState = {
+        game: numberedGame,
+        tournamentPlayers: [tournamentPlayer1, tournamentPlayer2],
+        cheatingPlayers: [],
+        failingPlayers: [],
+      };
+      const expectedRefereeState: RefereeState = {
+        game: expectedGame,
+        tournamentPlayers: [tournamentPlayer2],
+        cheatingPlayers: [],
+        failingPlayers: [player1],
+      };
+
+      const resultingRefereeState = disqualifyCurrentFailingPlayer(initialRefereeState, "you have been disqualified");
+      expect(resultingRefereeState).toEqual(expectedRefereeState);
+      expect(mockCall).toHaveBeenCalled();
+      expect(mockCall).toHaveBeenCalledWith("you have been disqualified");
+    });
   });
 
   describe("disqualifyCurrentPlayer", () => {
-    // it("disqualifies current player", () => {});
+    it("disqualifies current player", () => {
+      const mockCall = jest.fn();
+      tournamentPlayer1.disqualifyMe = mockCall;
+      const newScores = new Map(numberedGame.scores);
+      newScores.delete(PenguinColor.Red);
+      const newPenguinPositions = new Map(numberedGame.penguinPositions);
+      newPenguinPositions.delete(PenguinColor.Red);
+      const newUnplacedPenguins = new Map(numberedGame.remainingUnplacedPenguins);
+      newUnplacedPenguins.delete(PenguinColor.Red);
+      const newPlayers = [...numberedGame.players];
+      newPlayers.splice(0, 1);
+      const expectedGame: Game = {
+        ...numberedGame,
+        scores: newScores,
+        penguinPositions: newPenguinPositions,
+        remainingUnplacedPenguins: newUnplacedPenguins,
+        players: newPlayers
+      };
+      const initialRefereeState: RefereeState = {
+        game: numberedGame,
+        tournamentPlayers: [tournamentPlayer1, tournamentPlayer2],
+        cheatingPlayers: [],
+        failingPlayers: [],
+      };
+      const expectedRefereeState: RefereeState = {
+        game: expectedGame,
+        tournamentPlayers: [tournamentPlayer2],
+        cheatingPlayers: [],
+        failingPlayers: [],
+      };
+
+      const resultingRefereeState = disqualifyCurrentPlayer(initialRefereeState, "you have been disqualified");
+      expect(resultingRefereeState).toEqual(expectedRefereeState);
+      expect(mockCall).toHaveBeenCalled();
+      expect(mockCall).toHaveBeenCalledWith("you have been disqualified");
+    });
   });
 
   describe("removeDisqualifiedPlayerFromGame", () => {
-    // it("removes current player from game", () => {});
+    it("removes current player from game", () => {
+      const newScores = new Map(numberedGame.scores);
+      newScores.delete(PenguinColor.Red);
+      const newPenguinPositions = new Map(numberedGame.penguinPositions);
+      newPenguinPositions.delete(PenguinColor.Red);
+      const newUnplacedPenguins = new Map(numberedGame.remainingUnplacedPenguins);
+      newUnplacedPenguins.delete(PenguinColor.Red);
+      const newPlayers = [...numberedGame.players];
+      newPlayers.splice(0, 1);
+      const expectedGame: Game = {
+        ...numberedGame,
+        scores: newScores,
+        penguinPositions: newPenguinPositions,
+        remainingUnplacedPenguins: newUnplacedPenguins,
+        players: newPlayers
+      };
+      expect(removeDisqualifiedPlayerFromGame(numberedGame)).toEqual(expectedGame);
+    });
   });
 });
