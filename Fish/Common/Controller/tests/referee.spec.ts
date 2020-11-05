@@ -1,11 +1,13 @@
 import {
   boardIsBigEnough,
+  createGameDebrief,
   createInitialGameState,
   gameIsFinished,
   notifyPlayersGameStarting,
   notifyPlayersOfOutcome,
   RefereeState,
   RefereeStateWithMovementGame,
+  runMovementRounds,
   runMovementTurn,
   runPlacementRounds,
   runPlacementTurn,
@@ -20,7 +22,6 @@ import { createGameState } from "../src/gameStateCreation";
 import { Movement } from "../../game-tree";
 import {
   InvalidBoardConstraintsError,
-  InvalidGameStateError,
   InvalidNumberOfPlayersError,
 } from "../types/errors";
 
@@ -302,6 +303,7 @@ describe("referee", () => {
   ]);
   const twoGameFinalGame: MovementGame = {
     ...numberedGame,
+    board: twoGameFinalBoard,
     penguinPositions: twoGameFinalPenguinPositions,
     remainingUnplacedPenguins: twoGameNoUnplacedPenguins,
     scores: twoGameFinalScores,
@@ -398,19 +400,6 @@ describe("referee", () => {
         })
       ).toEqual(new InvalidNumberOfPlayersError(0));
     });
-
-    it("rejects players with repeat colors", () => {
-      const tournamentPlayers: Array<TournamentPlayer> = [
-        tournamentPlayer1,
-        tournamentPlayer1,
-      ];
-      expect(
-        createInitialGameState(tournamentPlayers, {
-          cols: 4,
-          rows: 4,
-        })
-      ).toEqual(new InvalidGameStateError());
-    });
   });
 
   describe("runPlacementTurn", () => {
@@ -431,6 +420,7 @@ describe("referee", () => {
     > = new Map(numberedGame.remainingUnplacedPenguins).set(player1.color, 3);
     const gameStateAfterPlacement1: Game = {
       ...numberedGame,
+      curPlayerIndex: 1,
       penguinPositions: penguinPositionsAfterPlacement1,
       remainingUnplacedPenguins: remainingUnplacedPenguinsAfterPlacement1,
     };
@@ -459,6 +449,7 @@ describe("referee", () => {
     };
     const refereeStateAfterBadPlacement2: RefereeState = {
       ...refereeStateAfterPlacement1,
+      tournamentPlayers: [tournamentPlayer1],
       cheatingPlayers: [player2],
       game: gameAfterBadPlacement2,
     };
@@ -505,25 +496,27 @@ describe("referee", () => {
     });
 
     it("recovers from a kicked player and places all penguins", () => {
-      const player1: TournamentPlayer = createDummyPlayer(
+      const tournamentPlayer1: TournamentPlayer = createDummyPlayer(
         player1Name,
         player1TwoGamePlacements,
         player1TwoGameMovements
       );
-      const player2: TournamentPlayer = createDummyPlayer(
+      const tournamentPlayer2: TournamentPlayer = createDummyPlayer(
         player2Name,
         player2TwoGamePlacementsDuplicate,
         player2TwoGameMovements
       );
       const initialRefereeState: RefereeState = {
         game: numberedGame,
-        tournamentPlayers: [player1, player2],
+        tournamentPlayers: [tournamentPlayer1, tournamentPlayer2],
         cheatingPlayers: [],
         failingPlayers: [],
       };
       const expectedRefereeState: RefereeState = {
         ...initialRefereeState,
+        tournamentPlayers: [tournamentPlayer1],
         game: twoGameAfterPlacementsKickPlayer2,
+        cheatingPlayers: [player2],
       };
 
       expect(runPlacementRounds(initialRefereeState)).toEqual(
@@ -555,8 +548,15 @@ describe("referee", () => {
     const scoresAfterMovement1: Map<PenguinColor, number> = new Map(
       twoGameAfterPlacements.scores
     ).set(player1.color, 1);
+    const boardAfterMovement1: Board = createNumberedBoard([
+      [0, 3, 5, 4],
+      [3, 2, 4, 1],
+      [2, 3, 5, 1],
+      [4, 1, 1, 2],
+    ]) as Board;
     const gameAfterMovement1: MovementGame = {
       ...twoGameAfterPlacements,
+      board: boardAfterMovement1,
       curPlayerIndex: 1,
       penguinPositions: penguinPositionsAfterMovement1,
       scores: scoresAfterMovement1,
@@ -595,6 +595,7 @@ describe("referee", () => {
     };
     const refereeStateAfterBadMovement2: RefereeStateWithMovementGame = {
       ...refereeStateAfterMovement1,
+      tournamentPlayers: [tournamentPlayer1],
       game: gameAfterBadMovement2,
       cheatingPlayers: [player2],
       failingPlayers: [],
@@ -614,13 +615,138 @@ describe("referee", () => {
   });
 
   describe("runMovementRounds", () => {
-    it("makes movements for all players, finishing a game without any kicks", () => {});
+    it("makes movements for all players, finishing a game without any kicks", () => {
+      const player1: TournamentPlayer = createDummyPlayer(
+        player1Name,
+        player1TwoGamePlacements,
+        player1TwoGameMovements
+      );
+      const player2: TournamentPlayer = createDummyPlayer(
+        player2Name,
+        player2TwoGamePlacements,
+        player2TwoGameMovements
+      );
 
-    it("recovers from a kicked player and finishes a game", () => {});
+      const initialRefereeState: RefereeStateWithMovementGame = {
+        tournamentPlayers: [player1, player2],
+        game: twoGameAfterPlacements,
+        failingPlayers: [],
+        cheatingPlayers: [],
+      };
+      const expectedRefereeState: RefereeStateWithMovementGame = {
+        ...initialRefereeState,
+        game: twoGameFinalGame,
+      };
+
+      expect(runMovementRounds(initialRefereeState)).toEqual(
+        expectedRefereeState
+      );
+    });
+
+    it("recovers from a kicked player and finishes a game", () => {
+      const tournamentPlayer1: TournamentPlayer = createSamplePlayer(
+        player1Name
+      );
+      const player2TwoGamePosition1: BoardPosition = {
+        col: 1,
+        row: 0,
+      };
+      const player2TwoGamePosition2: BoardPosition = {
+        col: 3,
+        row: 0,
+      };
+      const player2TwoGamePosition3: BoardPosition = {
+        col: 0,
+        row: 3,
+      };
+      const player2TwoGamePosition4: BoardPosition = {
+        col: 2,
+        row: 3,
+      };
+      const player2TwoGamePlacements: Array<BoardPosition> = [
+        player2TwoGamePosition1,
+        player2TwoGamePosition2,
+        player2TwoGamePosition3,
+        player2TwoGamePosition4,
+      ];
+      const tournamentPlayer2: TournamentPlayer = createDummyPlayer(
+        player2Name,
+        player2TwoGamePlacements,
+        player1TwoGameMovements
+      );
+
+      const initialRefereeState: RefereeStateWithMovementGame = {
+        tournamentPlayers: [tournamentPlayer1, tournamentPlayer2],
+        game: twoGameAfterPlacements,
+        failingPlayers: [],
+        cheatingPlayers: [],
+      };
+
+      const expectedPenguinPositions = new Map([
+        [
+          player1.color,
+          [
+            { col: 0, row: 0 },
+            { col: 0, row: 2 },
+            { col: 2, row: 3 },
+            { col: 3, row: 2 },
+          ],
+        ],
+      ]);
+      const expectedRemainingUnplacedPenguins = new Map(
+        twoGameAfterPlacements.remainingUnplacedPenguins
+      );
+      expectedRemainingUnplacedPenguins.delete(player2.color);
+      const expectedScores = new Map(twoGameAfterPlacements.scores);
+      expectedScores.delete(player2.color);
+      expectedScores.set(player1.color, 31);
+      const expectedBoard: Board = createNumberedBoard([
+        [1, 0, 0, 0],
+        [0, 2, 0, 0],
+        [2, 3, 0, 1],
+        [0, 1, 1, 0],
+      ]) as Board;
+      const expectedGame: MovementGame = {
+        ...twoGameAfterPlacements,
+        board: expectedBoard,
+        players: [player1],
+        penguinPositions: expectedPenguinPositions,
+        remainingUnplacedPenguins: expectedRemainingUnplacedPenguins,
+        scores: expectedScores,
+      };
+
+      const expectedRefereeState: RefereeStateWithMovementGame = {
+        ...initialRefereeState,
+        tournamentPlayers: [tournamentPlayer1],
+        game: expectedGame,
+        cheatingPlayers: [player2],
+      };
+
+      expect(runMovementRounds(initialRefereeState)).toEqual(
+        expectedRefereeState
+      );
+    });
   });
 
   describe("createGameDebrief", () => {
-    it("creates a game debrief", () => {});
+    it("creates a game debrief", () => {
+      const refereeState: RefereeStateWithMovementGame = {
+        tournamentPlayers: [tournamentPlayer1, tournamentPlayer2],
+        game: twoGameFinalGame,
+        cheatingPlayers: [player3],
+        failingPlayers: [player4],
+      };
+
+      const expectedGameDebrief: GameDebrief = {
+        activePlayers: [
+          { name: player1Name, score: 8 },
+          { name: player2Name, score: 10 },
+        ],
+        kickedPlayers: [{ name: player3Name }, { name: player4Name }],
+      };
+
+      expect(createGameDebrief(refereeState)).toEqual(expectedGameDebrief);
+    });
   });
 
   describe("notifyPlayersOfOutcome", () => {
@@ -645,9 +771,13 @@ describe("referee", () => {
       );
 
       for (var i = 0; i < mockedTournamentPlayers.length; i++) {
-        expect(mockGameHasEnded.mock.calls[i][0]).toEqual(numberedGame);
+        expect(mockGameHasEnded.mock.calls[i][0]).toEqual(gameDebrief);
       }
     });
+  });
+
+  describe("numberOfPenguinPlacements", () => {
+    it("returns the correct number of placements", () => {});
   });
 
   describe("isBoardBigEnoughOrError", () => {
@@ -656,7 +786,9 @@ describe("referee", () => {
     });
 
     it("rejects not enough positions for the number of placements", () => {
-      expect(boardIsBigEnough(2, { rows: 2, cols: 2 })).toEqual(false);
+      expect(boardIsBigEnough(2, { rows: 2, cols: 2 })).toEqual(
+        new InvalidBoardConstraintsError(2, 2)
+      );
     });
   });
 
@@ -665,7 +797,7 @@ describe("referee", () => {
 
     it("rejects not enough positions for the number of placements", () => {});
 
-    it("rejects an invalid number of players");
+    it("rejects an invalid number of players", () => {});
   });
 
   describe("disqualifyCurrentCheatingPlayer", () => {

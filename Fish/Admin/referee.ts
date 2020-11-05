@@ -174,7 +174,7 @@ const runPlacementTurn = (
   currRefereeState: RefereeState
 ): RefereeState => {
   const resultingGameOrError: Game | Error = placePenguin(
-    currRefereeState.game.players[currRefereeState.game.curPlayerIndex],
+    getCurrentPlayer(currRefereeState.game),
     currRefereeState.game,
     placementPosition
   );
@@ -289,6 +289,9 @@ const runMovementRounds = (refereeState: RefereeStateWithMovementGame) => {
     currRefereeState = runMovementTurn(movement, currRefereeState);
   }
 
+  // TODO since game is finished, add the scores on the tiles of each placed
+  // penguin to their respective players' scores
+
   return currRefereeState;
 };
 
@@ -400,7 +403,7 @@ const removeDisqualifiedPlayerFromGame = (game: Game): Game => {
   const disqualifiedPlayerColor = getCurrentPlayerColor(game);
 
   // Remove player from game scores
-  const newScores = new Map([...game.scores]);
+  const newScores = new Map(game.scores);
   newScores.delete(disqualifiedPlayerColor);
 
   // Remove player from game penguinPositions
@@ -412,7 +415,9 @@ const removeDisqualifiedPlayerFromGame = (game: Game): Game => {
   newRemainingUnplacedPenguins.delete(disqualifiedPlayerColor);
 
   // Remove player from game players
-  const newPlayers = [...game.players].splice(game.curPlayerIndex, 1);
+  const newPlayers = game.players.filter(
+    (player: Player) => player.color !== disqualifiedPlayerColor
+  );
 
   return {
     ...game,
@@ -602,4 +607,6 @@ export {
   createInitialGameState,
   runPlacementTurn,
   runMovementTurn,
+  runMovementRounds,
+  createGameDebrief,
 };
