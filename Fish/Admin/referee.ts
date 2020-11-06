@@ -30,6 +30,7 @@ import {
   createGameState,
   getNextPlayerIndex,
   numOfPenguinsPerPlayer,
+  skipToNextActivePlayer,
 } from "../Common/Controller/src/gameStateCreation";
 import { placePenguin } from "../Common/Controller/src/penguinPlacement";
 import { GameTree, Movement } from "../Common/game-tree";
@@ -418,18 +419,22 @@ const removeDisqualifiedPlayerFromGame = (game: Game): Game => {
     (player: Player) => player.color !== disqualifiedPlayerColor
   );
 
+  // Calculate next player index
+  const nextPlayerIndex =
+    game.curPlayerIndex === game.players.length - 1 ? 0 : game.curPlayerIndex;
+
   const updatedGame: Game = {
     ...game,
     scores: newScores,
     penguinPositions: newPenguinPositions,
     remainingUnplacedPenguins: newRemainingUnplacedPenguins,
     players: newPlayers,
+    curPlayerIndex: nextPlayerIndex,
   };
 
-  return {
-    ...updatedGame,
-    curPlayerIndex: getNextPlayerIndex(updatedGame),
-  };
+  return gameIsMovementGame(updatedGame)
+    ? skipToNextActivePlayer(updatedGame)
+    : updatedGame;
 };
 
 /**
