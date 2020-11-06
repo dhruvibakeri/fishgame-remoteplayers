@@ -28,7 +28,6 @@ import {
 } from "../Common/Controller/src/gameTreeCreation";
 import {
   createGameState,
-  getNextPlayerIndex,
   numOfPenguinsPerPlayer,
   skipToNextActivePlayer,
 } from "../Common/Controller/src/gameStateCreation";
