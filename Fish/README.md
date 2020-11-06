@@ -1,5 +1,49 @@
 # Fish - Andrew Leung and Fiona Gridley
 
+## 6 &mdash; Games!
+
+These additions are for the assignment, [6 - Games!](https://felleisen.org/matthias/4500-f20/6.html). The purpose of this assignment is to implement the referee component along with a sample implementation of the player-referee protocol as previously designed, and design the upcoming tournament manager component.
+
+<details>
+  <summary>Click to see the new elements:</summary>
+  
+- `Fish`
+  - `Admin` : Directory containing all admin components including the referee and tournamnet manager
+    - `manager-interface.ts` : TypeScript file with tournament manager interface declarations
+    - `referee.ts` : TypeScript file with referee component implementation
+  - `Common`
+    - `Controller`
+      - `src`
+        - `xstrategy.ts` : TypeScript file with implementation for the assignment test harness
+      - `tests`
+        - `referee.spec.ts` : `referee.ts` test file
+  - `Planning` : Directory containing all planning documents for the Fish project
+    - `manager-protocol.md` : Design document for the tournament manager protocol
+  - `Player` : Directory containing elements of a Player component
+    - `player.ts` : TypeScript file with player-referee protocol implementation
+
+</details>
+<br/>
+
+### How To Test
+
+#### Our test suite
+
+Running the test suite for milestone 6 is the same as for milestone 5, see below.
+
+#### The test harness
+
+As requested within the assignment, we have created a test harness available in `libertyhill/6`. It consumes test data like those within `6/Test` (any file marked as input such like `<n>-in.json`) via STDIN and outputs via STDOUT.
+
+To run the harness from the `6` directory, run the following:
+
+```
+make
+./xstrategy < Tests/<n>-in.json
+```
+
+---
+
 ## 5 &mdash; The Strategy
 
 These additions are for the assignment, [5 - The Strategy](https://felleisen.org/matthias/4500-f20/5.html). The purpose of this assignment is to design and implement a strategy component that decides where to place penguins (zig-zag pattern), and where to move penguins for the player who's turn it is by using the minimax algorithm to evaluate scores.
