@@ -10,7 +10,8 @@ The purpose of a Tournament Manager is to run tournaments for the game company. 
 
 ### `RunTournament: (Array<TournamentPlayer, Array<TournamentObserver>>) => TournamentStatistics`
 
-The RunTournament call signals to the Tournament Manager to run an entire tournament with the given array of TournamentPlayers. This puts the manager/this call in charge of: 
+The RunTournament call signals to the Tournament Manager to run an entire tournament with the given array of TournamentPlayers. This puts the manager/this call in charge of:
+
 - creating matchups
 - running each round of games
 - identifying the winners/losers
