@@ -257,11 +257,19 @@ const isValidInputState = (inputState: InputState): boolean => {
  * @return whether the MovementGame's current player has any remaining moves
  */
 const currentPlayerHasMoves = (movementGame: MovementGame): boolean => {
-  const curPlayerPenguins = movementGame.penguinPositions.get(getCurrentPlayerColor(movementGame)) as BoardPosition[];
-  const reachablePositions = curPlayerPenguins.map((penguinPosition: BoardPosition) => getReachablePositions(movementGame, penguinPosition));
-  const hasMoves = reachablePositions.some((reachablePositionsFromMove: Array<BoardPosition>) => reachablePositionsFromMove.length > 0);
+  const curPlayerPenguins = movementGame.penguinPositions.get(
+    getCurrentPlayerColor(movementGame)
+  ) as BoardPosition[];
+  const reachablePositions = curPlayerPenguins.map(
+    (penguinPosition: BoardPosition) =>
+      getReachablePositions(movementGame, penguinPosition)
+  );
+  const hasMoves = reachablePositions.some(
+    (reachablePositionsFromMove: Array<BoardPosition>) =>
+      reachablePositionsFromMove.length > 0
+  );
   return hasMoves;
-}
+};
 
 export {
   positionIsOnBoard,
