@@ -115,7 +115,7 @@ describe("referee", () => {
     [3, 2, 4, 1],
     [2, 3, 5, 1],
     [4, 1, 1, 2],
-  ]) as Board;
+  ]).unsafelyUnwrap();
   const numberedGame = createGameState(
     [player1, player2],
     numberedBoard
@@ -280,7 +280,7 @@ describe("referee", () => {
     [3, 0, 4, 0],
     [2, 0, 5, 1],
     [0, 0, 1, 0],
-  ]) as Board;
+  ]).unsafelyUnwrap();
   const twoGameFinalPenguinPositions: Map<
     PenguinColor,
     Array<BoardPosition>
@@ -378,7 +378,7 @@ describe("referee", () => {
       [1, 1, 1, 1],
       [1, 1, 1, 1],
       [1, 1, 1, 1],
-    ]) as Board;
+    ]).unsafelyUnwrap();
     const expectedGameState: Game = createGameState(players, board) as Game;
 
     it("successfully creates an initial Game state", () => {
@@ -560,7 +560,7 @@ describe("referee", () => {
       [3, 2, 4, 1],
       [2, 3, 5, 1],
       [4, 1, 1, 2],
-    ]) as Board;
+    ]).unsafelyUnwrap();
     const gameAfterMovement1: MovementGame = {
       ...twoGameAfterPlacements,
       board: boardAfterMovement1,
@@ -712,7 +712,7 @@ describe("referee", () => {
         [0, 2, 0, 0],
         [2, 3, 0, 1],
         [0, 1, 1, 0],
-      ]) as Board;
+      ]).unsafelyUnwrap();
       const expectedGame: MovementGame = {
         ...twoGameAfterPlacements,
         board: expectedBoard,

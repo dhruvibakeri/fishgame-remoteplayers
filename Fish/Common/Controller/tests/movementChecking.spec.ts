@@ -33,7 +33,7 @@ import { isError } from "../src/validation";
 import { placePenguin } from "../src/penguinPlacement";
 
 describe("movementChecking", () => {
-  const board: Board = createBlankBoard(4, 3, 1) as Board;
+  const board: Board = createBlankBoard(4, 3, 1).unsafelyUnwrap();
   const center: BoardPosition = { row: 2, col: 1 };
   const up: BoardPosition = { row: 0, col: 1 };
   const upRight: BoardPosition = { row: 1, col: 1 };
@@ -175,7 +175,7 @@ describe("movementChecking", () => {
       const boardWithHole: Board = setTileToHole(board, {
         row: 1,
         col: 1,
-      }) as Board;
+      }).unsafelyUnwrap();
       const gameWithHoleOrError:
         | Game
         | InvalidNumberOfPlayersError
@@ -231,7 +231,7 @@ describe("movementChecking", () => {
         [0, 0, 0],
         [0, 0, 5],
         [0, 0, 0],
-      ]) as Board;
+      ]).unsafelyUnwrap();
       const holeGame: Game = {
         ...game,
         curPlayerIndex: 2,
@@ -249,7 +249,7 @@ describe("movementChecking", () => {
         [0, 0, 1],
         [0, 0, 5],
         [0, 0, 0],
-      ]) as Board;
+      ]).unsafelyUnwrap();
       const holeGame: Game = {
         ...game,
         curPlayerIndex: 2,
@@ -290,7 +290,7 @@ describe("movementChecking", () => {
         [0, 0, 0],
         [0, 0, 5],
         [0, 0, 0],
-      ]) as Board;
+      ]).unsafelyUnwrap();
       const holeGame: Game = {
         ...game,
         curPlayerIndex: 1,
@@ -311,7 +311,7 @@ describe("movementChecking", () => {
         [0, 0, 1],
         [0, 0, 5],
         [0, 0, 0],
-      ]) as Board;
+      ]).unsafelyUnwrap();
       const holeGame: Game = {
         ...game,
         curPlayerIndex: 2,

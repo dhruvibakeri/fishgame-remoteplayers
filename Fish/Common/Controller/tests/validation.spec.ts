@@ -36,7 +36,12 @@ describe("validation", () => {
   const holePositions: Array<BoardPosition> = [holePosition];
   const validStartPosition: BoardPosition = { col: 0, row: 0 };
   const validEndPosition: BoardPosition = { col: 0, row: 1 };
-  const board: Board = createHoledOneFishBoard(2, 2, holePositions, 1) as Board;
+  const board: Board = createHoledOneFishBoard(
+    2,
+    2,
+    holePositions,
+    1
+  ).unsafelyUnwrap();
   const penguinPositions: Map<PenguinColor, Array<BoardPosition>> = new Map([
     [player1.color, [validStartPosition]],
   ]);
@@ -75,7 +80,11 @@ describe("validation", () => {
       colPos: number
     ): boolean => {
       const position: BoardPosition = { row: rowPos, col: colPos };
-      const board: Board = createBlankBoard(numRows, numCols, 1) as Board;
+      const board: Board = createBlankBoard(
+        numRows,
+        numCols,
+        1
+      ).unsafelyUnwrap();
       return positionIsOnBoard(board, position);
     };
 
@@ -110,9 +119,9 @@ describe("validation", () => {
     it("accepts a position within the bounds which is a hole", () => {
       const position: BoardPosition = { row: 2, col: 1 };
       const board: Board = setTileToHole(
-        createBlankBoard(3, 3, 1) as Board,
+        createBlankBoard(3, 3, 1).unsafelyUnwrap(),
         position
-      ) as Board;
+      ).unsafelyUnwrap();
 
       expect(positionIsOnBoard(board, position)).toEqual(true);
     });
@@ -481,7 +490,7 @@ describe("validation", () => {
   });
 
   describe("currentPlayerHasMoves", () => {
-    const board: Board = createBlankBoard(4, 4, 1) as Board;
+    const board: Board = createBlankBoard(4, 4, 1).unsafelyUnwrap();
     const boardNoMoves: Board = createHoledOneFishBoard(
       4,
       4,
@@ -496,7 +505,7 @@ describe("validation", () => {
         { col: 3, row: 3 },
       ],
       1
-    ) as Board;
+    ).unsafelyUnwrap();
     const game: Game = createGameState(players, board) as Game;
     const movementGame: MovementGame = placeAllPenguinsZigZag(
       game
