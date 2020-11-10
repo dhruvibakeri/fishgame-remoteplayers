@@ -22,15 +22,17 @@ interface Movement {
 type LazyGameTree = () => GameTree;
 
 /**
- * A PotentialMovement represents a potential move from a Game state and all
- * possible moves from that point. It is made up of an action and the results
- * and a tree of results from that action, which is not evaluated until called.
+ * A MovementToResultingTree represents a potential move from an initial Game
+ * state and the resulting LazyGameTree representing all possible moves from that
+ * point. It is made up of a the Movement being made and a tree of results from
+ * that Movement, which is not evaluated until called.
  *
  * @param movement the Movement from a Game state
- * @param resultingGameTree a LazyGameTree which is the resulting tree of states
- * and moves that result from making the movement
+ * @param resultingGameTree a LazyGameTree which is the resulting tree containing
+ * the resulting Game state of the Movement and all of the possible
+ * MovementToResultingTrees from that state.
  */
-interface PotentialMovement {
+interface MovementToResultingTree {
   readonly movement: Movement;
   readonly resultingGameTree: LazyGameTree;
 }
@@ -45,9 +47,12 @@ interface PotentialMovement {
  * state's current player to a LazyGameTree, which represents the next GameTree
  * node from making that movement.
  *
- * The process of creating a GameTree automatically skips players without any
- * further moves, where a GameTree with an empty array of PotentialMovements
- * symbolizes a completed game, where the game state is the final state.
+ * The `createGameTree` functions defined within `gameTreeCreation.ts` should
+ * be used for creating GameTrees. These functions handle skipping players
+ * without any further moves, meaning that any MovementGame state within a
+ * GameTree must be a vaild state from which the current player can make a
+ * move. Additionally, a GameTree with an empty array of MovementToResultingTrees
+ * represents a completed game, where the game state is the final state.
  *
  * @param gameState the state of the game at this node of the GameTree, this
  * must be a MovementGame since GameTrees are only applicable once all penguins
@@ -59,7 +64,7 @@ interface PotentialMovement {
  */
 interface GameTree {
   readonly gameState: MovementGame;
-  readonly potentialMoves: Array<PotentialMovement>;
+  readonly potentialMoves: Array<MovementToResultingTree>;
 }
 
-export { Movement, LazyGameTree, PotentialMovement, GameTree };
+export { Movement, LazyGameTree, MovementToResultingTree, GameTree };

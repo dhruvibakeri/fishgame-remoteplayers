@@ -11,7 +11,11 @@ import {
   NoMoreMovementsError,
   NoMorePlacementsError,
 } from "../Common/Controller/types/errors";
-import { Movement, GameTree, PotentialMovement } from "../Common/game-tree";
+import {
+  Movement,
+  GameTree,
+  MovementToResultingTree,
+} from "../Common/game-tree";
 import {
   createGameTreeFromMovementGame,
   gameIsMovementGame,
@@ -136,9 +140,9 @@ const getMinMaxScore = (
 
   // Get minimax scores for all child nodes of current gameTree.
   const scores: Array<number> = gameTree.potentialMoves.map(
-    (potentialMove: PotentialMovement) =>
+    (movementToResultingTree: MovementToResultingTree) =>
       getMinMaxScore(
-        potentialMove.resultingGameTree(),
+        movementToResultingTree.resultingGameTree(),
         searchingPlayerIndex,
         curLookAheadTurnsDepth
       )
@@ -255,14 +259,16 @@ const chooseNextAction = (
   const movementsToMinMax: Array<[
     Movement,
     number
-  ]> = gameTree.potentialMoves.map((potentialMove: PotentialMovement) => [
-    potentialMove.movement,
-    getMinMaxScore(
-      potentialMove.resultingGameTree(),
-      game.curPlayerIndex,
-      lookAheadTurnsDepth
-    ),
-  ]);
+  ]> = gameTree.potentialMoves.map(
+    (movementToResultingTree: MovementToResultingTree) => [
+      movementToResultingTree.movement,
+      getMinMaxScore(
+        movementToResultingTree.resultingGameTree(),
+        game.curPlayerIndex,
+        lookAheadTurnsDepth
+      ),
+    ]
+  );
 
   // Get the movements with the greatest scores.
   const maxMovements: Array<Movement> = maxArray<[Movement, number]>(

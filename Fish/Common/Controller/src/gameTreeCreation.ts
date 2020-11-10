@@ -3,13 +3,12 @@ import {
   GameTree,
   Movement,
   LazyGameTree,
-  PotentialMovement,
+  MovementToResultingTree,
 } from "../../game-tree";
 import { BoardPosition, PenguinColor } from "../../board";
 import { getReachablePositions } from "./movementChecking";
 import { movePenguin } from "./penguinPlacement";
 import { InvalidGameForTreeError } from "../types/errors";
-import { isError } from "./validation";
 import { skipToNextActivePlayer } from "./gameStateCreation";
 
 /**
@@ -68,9 +67,9 @@ const createGameTreeFromMovementGame = (game: MovementGame): GameTree => {
  */
 const generatePotentialMoveMapping = (
   game: MovementGame
-): Array<PotentialMovement> => {
+): Array<MovementToResultingTree> => {
   // From the given starting position, get all the possible Movements from it.
-  const startPositionToPotentialMovements = (
+  const startPositionToMovementToResultingTreess = (
     startPosition: BoardPosition
   ): Array<Movement> =>
     getReachablePositions(game, startPosition).map(
@@ -83,7 +82,7 @@ const generatePotentialMoveMapping = (
   // The player could make in the Game state.
   return game.penguinPositions
     .get(getCurrentPlayerColor(game))
-    .map(startPositionToPotentialMovements)
+    .map(startPositionToMovementToResultingTreess)
     .reduce((arr1, arr2) => [...arr1, ...arr2], []) // Flatten the array.
     .map((movement: Movement) => {
       return {

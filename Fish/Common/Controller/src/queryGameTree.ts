@@ -1,5 +1,5 @@
 import { Game, getCurrentPlayer, MovementGame, Player } from "../../state";
-import { GameTree, Movement, PotentialMovement } from "../../game-tree";
+import { GameTree, Movement, MovementToResultingTree } from "../../game-tree";
 import { movePenguin, positionsAreEqual } from "./penguinPlacement";
 import { IllegalMovementError } from "../types/errors";
 
@@ -20,14 +20,14 @@ const isMovementLegal = (
   // movements within the GameTree's potential moves and seeing if it
   // exists there.
   const isLegalMove = gameTree.potentialMoves.some(
-    (potentialMove: PotentialMovement) =>
+    (movementToResultingTree: MovementToResultingTree) =>
       positionsAreEqual(
         movement.startPosition,
-        potentialMove.movement.startPosition
+        movementToResultingTree.movement.startPosition
       ) &&
       positionsAreEqual(
         movement.endPosition,
-        potentialMove.movement.endPosition
+        movementToResultingTree.movement.endPosition
       )
   );
 
@@ -57,8 +57,9 @@ const mapOverReachableStates = <T = unknown>(
   gameTree: GameTree,
   fn: (game: Game) => T
 ): Array<T> => {
-  const getGameTreeFromPotentialMove = (potentialMove: PotentialMovement) =>
-    potentialMove.resultingGameTree();
+  const getGameTreeFromPotentialMove = (
+    movementToResultingTree: MovementToResultingTree
+  ) => movementToResultingTree.resultingGameTree();
 
   return Array.from(gameTree.potentialMoves)
     .map(getGameTreeFromPotentialMove)

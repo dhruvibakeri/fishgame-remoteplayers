@@ -1,6 +1,6 @@
 import { tieBreakMovements } from "../../../Player/strategy";
 import { BoardPosition } from "../../board";
-import { GameTree, Movement, PotentialMovement } from "../../game-tree";
+import { GameTree, Movement, MovementToResultingTree } from "../../game-tree";
 import { Game } from "../../state";
 import { createGameTree } from "./gameTreeCreation";
 import { getNextPosition } from "./movementChecking";
@@ -9,7 +9,7 @@ import {
   inputPositionToBoardPosition,
   movementToAction,
   performMoveResponseQuery,
-  printFalse
+  printFalse,
 } from "./testHarnessConversion";
 import { Action, MoveResponseQuery, readStdin } from "./testHarnessInput";
 import { SillyStrategyDirections } from "./testHarnessStrategy";
@@ -28,15 +28,15 @@ const movementLandsOnTarget = (
 
 /**
  * Given a target BoardPosition, create a function that takes a
- * PotentialMovement and determines if that movement lands on a neighbor of the
+ * MovementToResultingTree and determines if that movement lands on a neighbor of the
  * target i.e. an adjacent tile.
  *
  * @param target the target to check neighbors of
- * @return a function determining if a given PotentialMove lands on one of the
+ * @return a function determining if a given movementToResultingTree lands on one of the
  * target's neighbors.
  */
 const movementLandsOnNeighborOfTarget = (target: BoardPosition) => (
-  potentialMove: PotentialMovement
+  movementToResultingTree: MovementToResultingTree
 ): Movement | false => {
   // Check directions in the same order as the silly strategy's order of
   // movement directions.
@@ -48,8 +48,10 @@ const movementLandsOnNeighborOfTarget = (target: BoardPosition) => (
     );
 
     // If the movement lands on this neighboring position, return the Movement.
-    if (movementLandsOnTarget(neighborPosition, potentialMove.movement)) {
-      return potentialMove.movement;
+    if (
+      movementLandsOnTarget(neighborPosition, movementToResultingTree.movement)
+    ) {
+      return movementToResultingTree.movement;
     }
   }
 

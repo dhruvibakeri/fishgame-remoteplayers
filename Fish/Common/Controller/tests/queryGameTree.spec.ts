@@ -3,7 +3,7 @@ import { createGameState } from "../src/gameStateCreation";
 import { Board, BoardPosition, PenguinColor } from "../../board";
 import { Game, Player } from "../../state";
 import { isMovementLegal, mapOverReachableStates } from "../src/queryGameTree";
-import { GameTree, Movement, PotentialMovement } from "../../game-tree";
+import { GameTree, Movement, MovementToResultingTree } from "../../game-tree";
 import { IllegalMovementError } from "../types/errors";
 import { createGameTree } from "../src/gameTreeCreation";
 import { placeAllPenguinsZigZag } from "../../../Player/strategy";
@@ -17,7 +17,12 @@ describe("queryGameTree", () => {
   const validStartPosition: BoardPosition = { col: 0, row: 0 };
   const validEndPosition: BoardPosition = { col: 0, row: 1 };
   const board: Board = createHoledOneFishBoard(2, 2, holePositions, 1) as Board;
-  const placeableBoard: Board = createHoledOneFishBoard(4, 4, holePositions, 1) as Board;
+  const placeableBoard: Board = createHoledOneFishBoard(
+    4,
+    4,
+    holePositions,
+    1
+  ) as Board;
   const penguinPositions: Map<PenguinColor, Array<BoardPosition>> = new Map([
     [player1.color, [validStartPosition]],
   ]);
@@ -108,32 +113,43 @@ describe("queryGameTree", () => {
         endPosition: { row: 2, col: 3 },
       };
       const penguinsAfterMovement = new Map([
-        [player1.color, [
+        [
+          player1.color,
+          [
             { row: 0, col: 0 },
             { row: 1, col: 1 },
             { row: 1, col: 3 },
             { row: 2, col: 3 },
-        ]],
-        [player2.color, [
+          ],
+        ],
+        [
+          player2.color,
+          [
             { row: 0, col: 2 },
             { row: 1, col: 0 },
             { row: 1, col: 2 },
-            { row: 2, col: 0 }
-          ]],
+            { row: 2, col: 0 },
+          ],
+        ],
       ]);
       const scoresAfterMovement = new Map([
         [player1.color, 1],
-        [player2.color, 0]
+        [player2.color, 0],
       ]);
-      const boardAfterMovement = setTileToHole(placeableBoard, { row: 0, col: 3 }) as Board;
+      const boardAfterMovement = setTileToHole(placeableBoard, {
+        row: 0,
+        col: 3,
+      }) as Board;
       const gameAfterMovement = {
         ...allPlacedGame,
         penguinPositions: penguinsAfterMovement,
         scores: scoresAfterMovement,
         board: boardAfterMovement,
         curPlayerIndex: 1,
-      }
-      expect(isMovementLegal(allPlacedGameTree, movement)).toEqual(gameAfterMovement);
+      };
+      expect(isMovementLegal(allPlacedGameTree, movement)).toEqual(
+        gameAfterMovement
+      );
     });
   });
 
@@ -188,14 +204,18 @@ describe("queryGameTree", () => {
         JSON.stringify(game) +
         JSON.stringify(Array.from(game.penguinPositions)) +
         JSON.stringify(Array.from(game.scores));
-      
+
       const expected: Array<string> = [];
-      allPlacedGameTree.potentialMoves.forEach((potentialMovement: PotentialMovement) => {
-        const curTree = potentialMovement.resultingGameTree();
-        const stringified = jsonStringifyGame(curTree.gameState);
-        expected.push(stringified);
-      })
-      expect(mapOverReachableStates(allPlacedGameTree, jsonStringifyGame)).toEqual(expected);
+      allPlacedGameTree.potentialMoves.forEach(
+        (MovementToResultingTree: MovementToResultingTree) => {
+          const curTree = MovementToResultingTree.resultingGameTree();
+          const stringified = jsonStringifyGame(curTree.gameState);
+          expected.push(stringified);
+        }
+      );
+      expect(
+        mapOverReachableStates(allPlacedGameTree, jsonStringifyGame)
+      ).toEqual(expected);
     });
   });
 });

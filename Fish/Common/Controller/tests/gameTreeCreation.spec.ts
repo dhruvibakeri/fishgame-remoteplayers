@@ -7,7 +7,7 @@ import {
   gameIsMovementGame,
   generatePotentialMoveMapping,
 } from "../src/gameTreeCreation";
-import { GameTree, Movement, PotentialMovement } from "../../game-tree";
+import { GameTree, Movement, MovementToResultingTree } from "../../game-tree";
 import { InvalidGameForTreeError } from "../types/errors";
 
 describe("gameTreeCreation", () => {
@@ -148,19 +148,20 @@ describe("gameTreeCreation", () => {
   describe("createGameTree", () => {
     const actual = createGameTree(game) as GameTree;
     const actualPotentialStates = actual.potentialMoves.map(
-      (potentialMove: PotentialMovement) => {
+      (movementToResultingTree: MovementToResultingTree) => {
         return {
-          movement: potentialMove.movement,
-          game: potentialMove.resultingGameTree().gameState,
+          movement: movementToResultingTree.movement,
+          game: movementToResultingTree.resultingGameTree().gameState,
         };
       }
     );
     const actualPotentialLengths = actual.potentialMoves.map(
-      (potentialMove: PotentialMovement) => {
+      (movementToResultingTree: MovementToResultingTree) => {
         return {
-          movement: potentialMove.movement,
-          length: potentialMove.resultingGameTree().potentialMoves.length,
-          curPlayerIndex: potentialMove.resultingGameTree().gameState
+          movement: movementToResultingTree.movement,
+          length: movementToResultingTree.resultingGameTree().potentialMoves
+            .length,
+          curPlayerIndex: movementToResultingTree.resultingGameTree().gameState
             .curPlayerIndex,
         };
       }
@@ -188,19 +189,20 @@ describe("gameTreeCreation", () => {
   describe("createGameTreeFromMovementGame", () => {
     const actual = createGameTreeFromMovementGame(game) as GameTree;
     const actualPotentialStates = actual.potentialMoves.map(
-      (potentialMove: PotentialMovement) => {
+      (movementToResultingTree: MovementToResultingTree) => {
         return {
-          movement: potentialMove.movement,
-          game: potentialMove.resultingGameTree().gameState,
+          movement: movementToResultingTree.movement,
+          game: movementToResultingTree.resultingGameTree().gameState,
         };
       }
     );
     const actualPotentialLengths = actual.potentialMoves.map(
-      (potentialMove: PotentialMovement) => {
+      (movementToResultingTree: MovementToResultingTree) => {
         return {
-          movement: potentialMove.movement,
-          length: potentialMove.resultingGameTree().potentialMoves.length,
-          curPlayerIndex: potentialMove.resultingGameTree().gameState
+          movement: movementToResultingTree.movement,
+          length: movementToResultingTree.resultingGameTree().potentialMoves
+            .length,
+          curPlayerIndex: movementToResultingTree.resultingGameTree().gameState
             .curPlayerIndex,
         };
       }
@@ -231,18 +233,21 @@ describe("gameTreeCreation", () => {
 
   describe("generatePotentialMoveMapping", () => {
     const actual = generatePotentialMoveMapping(game);
-    const actualGameStates = actual.map((potentialMove: PotentialMovement) => {
-      return {
-        movement: potentialMove.movement,
-        game: potentialMove.resultingGameTree().gameState,
-      };
-    });
-    const actualPotentialMoveLengths = actual.map(
-      (potentialMove: PotentialMovement) => {
+    const actualGameStates = actual.map(
+      (movementToResultingTree: MovementToResultingTree) => {
         return {
-          movement: potentialMove.movement,
-          length: potentialMove.resultingGameTree().potentialMoves.length,
-          curPlayerIndex: potentialMove.resultingGameTree().gameState
+          movement: movementToResultingTree.movement,
+          game: movementToResultingTree.resultingGameTree().gameState,
+        };
+      }
+    );
+    const actualPotentialMoveLengths = actual.map(
+      (movementToResultingTree: MovementToResultingTree) => {
+        return {
+          movement: movementToResultingTree.movement,
+          length: movementToResultingTree.resultingGameTree().potentialMoves
+            .length,
+          curPlayerIndex: movementToResultingTree.resultingGameTree().gameState
             .curPlayerIndex,
         };
       }
