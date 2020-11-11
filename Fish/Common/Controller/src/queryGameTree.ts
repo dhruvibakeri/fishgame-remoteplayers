@@ -2,6 +2,8 @@ import { Game, getCurrentPlayer, MovementGame, Player } from "../../state";
 import { GameTree, Movement, MovementToResultingTree } from "../../game-tree";
 import { movePenguin, positionsAreEqual } from "./penguinPlacement";
 import { IllegalMovementError } from "../types/errors";
+import { Result } from "true-myth";
+const { ok, err } = Result;
 
 /**
  * Checks if given movement can be made with the given GameTree node. If it can,
@@ -12,10 +14,10 @@ import { IllegalMovementError } from "../types/errors";
  * @param movement Movement to check if legal or not
  * @returns Game state if movement is legal, returns IllegalMovementError if not legal
  */
-const isMovementLegal = (
+const checkMovementLegal = (
   gameTree: GameTree,
   movement: Movement
-): MovementGame | IllegalMovementError => {
+): Result<MovementGame, IllegalMovementError> => {
   // Determine if the movement is legal by comparing it to the possible
   // movements within the GameTree's potential moves and seeing if it
   // exists there.
@@ -32,17 +34,33 @@ const isMovementLegal = (
   );
 
   if (!isLegalMove) {
-    return new IllegalMovementError(gameTree, movement);
+    return err(
+      new IllegalMovementError(
+        gameTree.gameState,
+        getCurrentPlayer(gameTree.gameState),
+        movement.startPosition,
+        movement.endPosition,
+        "Movement is not specified by the game tree."
+      )
+    );
   }
 
-  const newGameState = movePenguin(
+  return movePenguin(
     gameTree.gameState,
     getCurrentPlayer(gameTree.gameState),
     movement.startPosition,
     movement.endPosition
-  ) as MovementGame;
-
-  return newGameState;
+  ).orElse(() =>
+    err(
+      new IllegalMovementError(
+        gameTree.gameState,
+        getCurrentPlayer(gameTree.gameState),
+        movement.startPosition,
+        movement.endPosition,
+        "Movement is not specified by the game tree."
+      )
+    )
+  );
 };
 
 /**
@@ -67,4 +85,4 @@ const mapOverReachableStates = <T = unknown>(
     .map(fn);
 };
 
-export { isMovementLegal, mapOverReachableStates };
+export { checkMovementLegal, mapOverReachableStates };

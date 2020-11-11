@@ -1,6 +1,6 @@
 import { BoardPosition } from "../Common/board";
 import { Game, MovementGame } from "../Common/state";
-import { getNextPenguinPlacementPosition, chooseNextAction } from "./strategy";
+import { getNextPenguinPlacementPosition, chooseNextAction } from "../Common/Controller/src/strategy";
 import { Movement } from "../Common/game-tree";
 import { GameDebrief, TournamentPlayer } from "../Common/player-interface";
 
@@ -32,7 +32,7 @@ const makePlacement = (game: Game): BoardPosition => {
   // valid in that it contains enough positions for all of each player's
   // placements, in which case this strategy must be able to find an
   // available BoardPosition.
-  return getNextPenguinPlacementPosition(game) as BoardPosition;
+  return getNextPenguinPlacementPosition(game).unwrapOrElse(null);
 };
 
 /**
@@ -46,7 +46,7 @@ const makeMovement = (game: Game): Movement => {
   // The player assumes the given game is a valid MovementGame, as it's being
   // handed to the player directly from the Referee. Since the given game is a
   // valid MovementGame the function will return a valid Movement.
-  return chooseNextAction(game as MovementGame, LOOKAHEAD_DEPTH) as Movement;
+  return chooseNextAction(game as MovementGame, LOOKAHEAD_DEPTH).unwrapOrElse(null);
 };
 
 /**

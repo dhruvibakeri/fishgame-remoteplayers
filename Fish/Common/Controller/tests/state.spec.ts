@@ -10,13 +10,13 @@ import { createBlankBoard } from "../src/boardCreation";
 import { Board, PenguinColor } from "../../board";
 
 describe("state.ts", () => {
-  const board: Board = createBlankBoard(3, 3, 1) as Board;
+  const board: Board = createBlankBoard(3, 3, 1).unsafelyUnwrap();
   const scores: Map<PenguinColor, number> = new Map([
     [PenguinColor.Black, 1],
     [PenguinColor.Brown, 0],
   ]);
   const game: Game = {
-    ...(createTestGameState(board) as Game),
+    ...createTestGameState(board).unsafelyUnwrap(),
     scores,
   };
   const gameSecondTurn = { ...game, curPlayerIndex: 1 };

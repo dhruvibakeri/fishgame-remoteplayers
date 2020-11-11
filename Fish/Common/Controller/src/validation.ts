@@ -1,10 +1,5 @@
 // Helper functions for validating logic
-import {
-  InvalidGameStateError,
-  InvalidPositionError,
-  IllegalPenguinPositionError,
-  UnreachablePositionError,
-} from "../types/errors";
+import { IllegalMovementError } from "../types/errors";
 import { Player, Game, getCurrentPlayerColor, MovementGame } from "../../state";
 import { Board, BoardPosition, PenguinColor } from "../../board";
 import { getReachablePositions } from "./movementChecking";
@@ -14,6 +9,8 @@ import {
   MIN_NUMBER_OF_PLAYERS,
   MAX_NUMBER_OF_PLAYERS,
 } from "./gameStateCreation";
+import { Result } from "true-myth";
+const { ok, err } = Result;
 
 const MAX_TEST_HARNESS_BOARD_TILES = 25;
 
@@ -176,18 +173,17 @@ const validatePenguinMove = (
   player: Player,
   startPosition: BoardPosition,
   endPosition: BoardPosition
-):
-  | MovementGame
-  | InvalidGameStateError
-  | InvalidPositionError
-  | IllegalPenguinPositionError => {
+): Result<MovementGame, IllegalMovementError> => {
   // Verify that startPosition and endPosition are connected by a straight, uninterrupted line
   if (!pathIsPlayable(game, startPosition, endPosition)) {
-    return new UnreachablePositionError(
-      game,
-      player,
-      startPosition,
-      endPosition
+    return err(
+      new IllegalMovementError(
+        game,
+        player,
+        startPosition,
+        endPosition,
+        "Start and end positions do not form a straight, uninterrupted path."
+      )
     );
   }
 
@@ -199,20 +195,31 @@ const validatePenguinMove = (
   );
 
   if (!playerHasPenguinAtStartPosition) {
-    return new IllegalPenguinPositionError(
-      game,
-      player,
-      startPosition,
-      endPosition
+    return err(
+      new IllegalMovementError(
+        game,
+        player,
+        startPosition,
+        endPosition,
+        "Player does not have a penguin placed at start position."
+      )
     );
   }
 
   // Verify that the player trying to move is the current player
   if (player.color !== getCurrentPlayerColor(game)) {
-    return new InvalidGameStateError(game);
+    return err(
+      new IllegalMovementError(
+        game,
+        player,
+        startPosition,
+        endPosition,
+        "Player attempting to play out of turn."
+      )
+    );
   }
 
-  return game;
+  return ok(game);
 };
 
 /**

@@ -19,13 +19,11 @@ import {
 import { Board, BoardPosition, Penguin, PenguinColor } from "../../board";
 import { Game, MovementGame, Player } from "../../state";
 import { createGameState } from "../src/gameStateCreation";
-import {
-  IllegalPenguinPositionError,
-  UnreachablePositionError,
-  InvalidNumberOfPlayersError,
-} from "../types/errors";
+import { IllegalMovementError } from "../types/errors";
 import { InputPlayer, InputState, InputBoard } from "../src/testHarnessInput";
-import { placeAllPenguinsZigZag } from "../../../Player/strategy";
+import { placeAllPenguinsZigZag } from "../src/strategy";
+import { Result } from "true-myth";
+const { ok, err } = Result;
 
 describe("validation", () => {
   const player1: Player = { name: "foo", color: PenguinColor.Black };
@@ -50,7 +48,7 @@ describe("validation", () => {
     [player2.color, 0],
   ]);
   const game: MovementGame = {
-    ...(createGameState(players, board) as Game),
+    ...createGameState(players, board).unsafelyUnwrap(),
     penguinPositions,
     remainingUnplacedPenguins: noRemainingUnplacedPenguins,
   };
@@ -216,7 +214,7 @@ describe("validation", () => {
     });
 
     it("accepts an Error", () => {
-      expect(isError(new InvalidNumberOfPlayersError(3))).toEqual(true);
+      expect(isError(new Error("blah"))).toEqual(true);
     });
   });
 
@@ -297,11 +295,12 @@ describe("validation", () => {
   describe("validatePenguinMove", () => {
     it("rejects a start position outside of the board", () => {
       const invalidStartPosition: BoardPosition = { col: 2, row: 2 };
-      const expectedError = new IllegalPenguinPositionError(
+      const expectedError = new IllegalMovementError(
         game,
         player1,
         invalidStartPosition,
-        validEndPosition
+        validEndPosition,
+          "Start and end positions do not form a straight, uninterrupted path."
       );
       expect(
         validatePenguinMove(
@@ -310,16 +309,17 @@ describe("validation", () => {
           invalidStartPosition,
           validEndPosition
         )
-      ).toEqual(expectedError);
+      ).toEqual(err(expectedError));
     });
 
     it("rejects an end position outside of the board", () => {
       const invalidEndPosition: BoardPosition = { col: 3, row: 3 };
-      const expectedError = new IllegalPenguinPositionError(
+      const expectedError = new IllegalMovementError(
         game,
         player1,
         validStartPosition,
-        invalidEndPosition
+        invalidEndPosition,
+          "Start and end positions do not form a straight, uninterrupted path."
       );
       expect(
         validatePenguinMove(
@@ -328,16 +328,17 @@ describe("validation", () => {
           validStartPosition,
           invalidEndPosition
         )
-      ).toEqual(expectedError);
+      ).toEqual(err(expectedError));
     });
 
     it("rejects a player trying to move from a starting position not containing one of their penguins", () => {
       const invalidStartPosition: BoardPosition = { col: 1, row: 1 };
-      const expectedError = new IllegalPenguinPositionError(
+      const expectedError = new IllegalMovementError(
         game,
         player1,
         invalidStartPosition,
-        validEndPosition
+        validEndPosition,
+          "Start and end positions do not form a straight, uninterrupted path."
       );
       expect(
         validatePenguinMove(
@@ -346,16 +347,17 @@ describe("validation", () => {
           invalidStartPosition,
           validEndPosition
         )
-      ).toEqual(expectedError);
+      ).toEqual(err(expectedError));
     });
 
     it("rejects a player trying to move to a position not reachable from the start", () => {
       const invalidEndPosition: BoardPosition = { col: 1, row: 1 };
-      const expectedError = new UnreachablePositionError(
+      const expectedError = new IllegalMovementError(
         game,
         player1,
         validStartPosition,
-        invalidEndPosition
+        invalidEndPosition,
+          "Start and end positions do not form a straight, uninterrupted path."
       );
       expect(
         validatePenguinMove(
@@ -364,27 +366,29 @@ describe("validation", () => {
           validStartPosition,
           invalidEndPosition
         )
-      ).toEqual(expectedError);
+      ).toEqual(err(expectedError));
     });
 
     it("rejects a player trying to move to a hole", () => {
-      const expectedError = new IllegalPenguinPositionError(
+      const expectedError = new IllegalMovementError(
         game,
         player1,
         validEndPosition,
-        holePosition
+        holePosition,
+          "Start and end positions do not form a straight, uninterrupted path."
       );
       expect(
         validatePenguinMove(game, player1, validEndPosition, holePosition)
-      ).toEqual(expectedError);
+      ).toEqual(err(expectedError));
     });
 
     it("rejects a player trying to move to a position with another penguin present", () => {
-      const expectedError = new IllegalPenguinPositionError(
+      const expectedError = new IllegalMovementError(
         game,
         player1,
         validStartPosition,
-        validEndPosition
+        validEndPosition,
+          "Start and end positions do not form a straight, uninterrupted path."
       );
       expect(
         validatePenguinMove(
@@ -393,13 +397,13 @@ describe("validation", () => {
           validStartPosition,
           validEndPosition
         )
-      ).toEqual(expectedError);
+      ).toEqual(err(expectedError));
     });
 
     it("accepts a valid move", () => {
       expect(
         validatePenguinMove(game, player1, validStartPosition, validEndPosition)
-      ).toEqual(game);
+      ).toEqual(ok(game));
     });
   });
 
@@ -506,10 +510,10 @@ describe("validation", () => {
       ],
       1
     ).unsafelyUnwrap();
-    const game: Game = createGameState(players, board) as Game;
+    const game: Game = createGameState(players, board).unsafelyUnwrap();
     const movementGame: MovementGame = placeAllPenguinsZigZag(
       game
-    ) as MovementGame;
+    ).unsafelyUnwrap();
     const movementGameNoMoves: MovementGame = {
       ...movementGame,
       board: boardNoMoves,

@@ -6,7 +6,7 @@ import {
   MovementGame,
 } from "../../state";
 import { InputState, readStdin } from "./testHarnessInput";
-import { isError, isValidInputState } from "./validation";
+import { isValidInputState } from "./validation";
 import { movePenguin } from "./penguinPlacement";
 import { getNextPosition } from "./movementChecking";
 import {
@@ -49,19 +49,17 @@ const tryToMakeMove = (
   );
 
   // Attempt to make the move.
-  const makeMoveOrError: Game | Error = movePenguin(
+  const makeMoveOrError = movePenguin(
     game,
     getCurrentPlayer(game),
     firstPenguinStartPosition,
     endPosition
   );
 
-  if (isError(makeMoveOrError)) {
-    // If the move could not be made, return false.
-    return false;
+  if (makeMoveOrError.isOk()) {
+    return makeMoveOrError.unsafelyUnwrap();
   } else {
-    // Otherwise return the resulting state of the move.
-    return makeMoveOrError;
+    return false;
   }
 };
 
@@ -101,10 +99,10 @@ readStdin()
     // a move as part of the silly strategy and store the result.
     if (
       isValidInputState(parsed) &&
-      !isError(gameStateOrError) &&
-      gameIsMovementGame(gameStateOrError)
+      !gameStateOrError.isErr() &&
+      gameIsMovementGame(gameStateOrError.unsafelyUnwrap())
     ) {
-      result = makeSillyMove(gameStateOrError) as Game;
+      result = makeSillyMove(gameStateOrError.unsafelyUnwrap() as MovementGame);
     }
 
     if (result) {

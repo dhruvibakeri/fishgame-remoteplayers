@@ -8,8 +8,11 @@ import {
 import { BoardPosition, PenguinColor } from "../../board";
 import { getReachablePositions } from "./movementChecking";
 import { movePenguin } from "./penguinPlacement";
-import { InvalidGameForTreeError } from "../types/errors";
+import { IllegalGameTreeError } from "../types/errors";
 import { skipToNextActivePlayer } from "./gameStateCreation";
+import { Result } from "true-myth";
+
+const { ok, err } = Result;
 
 /**
  * Given a Game state, determine if the Game is a MovementGame i.e. all players
@@ -31,11 +34,11 @@ const gameIsMovementGame = (game: Game): game is MovementGame =>
  * @return the state's corresponding GameTree or an Error if it cannot be
  * created.
  */
-const createGameTree = (game: Game): GameTree | InvalidGameForTreeError => {
+const createGameTree = (game: Game): Result<GameTree, IllegalGameTreeError> => {
   if (gameIsMovementGame(game)) {
-    return createGameTreeFromMovementGame(game);
+    return ok(createGameTreeFromMovementGame(game));
   } else {
-    return new InvalidGameForTreeError(game);
+    return err(new IllegalGameTreeError(game));
   }
 };
 
@@ -113,7 +116,7 @@ const createLazyGameTree = (
     game.players[game.curPlayerIndex],
     movement.startPosition,
     movement.endPosition
-  ) as MovementGame;
+  ).unsafelyUnwrap();
 
   return () => createGameTreeFromMovementGame(newGameState);
 };

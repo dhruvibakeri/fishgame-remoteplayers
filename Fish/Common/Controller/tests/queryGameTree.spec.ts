@@ -2,11 +2,13 @@ import { createHoledOneFishBoard, setTileToHole } from "../src/boardCreation";
 import { createGameState } from "../src/gameStateCreation";
 import { Board, BoardPosition, PenguinColor } from "../../board";
 import { Game, Player } from "../../state";
-import { isMovementLegal, mapOverReachableStates } from "../src/queryGameTree";
+import { checkMovementLegal, mapOverReachableStates } from "../src/queryGameTree";
 import { GameTree, Movement, MovementToResultingTree } from "../../game-tree";
 import { IllegalMovementError } from "../types/errors";
 import { createGameTree } from "../src/gameTreeCreation";
-import { placeAllPenguinsZigZag } from "../../../Player/strategy";
+import { placeAllPenguinsZigZag } from "../src/strategy";
+import { Result } from "true-myth";
+const { ok, err } = Result;
 
 describe("queryGameTree", () => {
   const player1: Player = { name: "foo", color: PenguinColor.Black };
@@ -16,18 +18,23 @@ describe("queryGameTree", () => {
   const holePositions: Array<BoardPosition> = [holePosition];
   const validStartPosition: BoardPosition = { col: 0, row: 0 };
   const validEndPosition: BoardPosition = { col: 0, row: 1 };
-  const board: Board = createHoledOneFishBoard(2, 2, holePositions, 1) as Board;
+  const board: Board = createHoledOneFishBoard(
+    2,
+    2,
+    holePositions,
+    1
+  ).unsafelyUnwrap();
   const placeableBoard: Board = createHoledOneFishBoard(
     4,
     4,
     holePositions,
     1
-  ) as Board;
+  ).unsafelyUnwrap();
   const penguinPositions: Map<PenguinColor, Array<BoardPosition>> = new Map([
     [player1.color, [validStartPosition]],
   ]);
   const game: Game = {
-    ...(createGameState(players, board) as Game),
+    ...createGameState(players, board).unsafelyUnwrap(),
     penguinPositions,
   };
   const twoPenguinPositions: Map<PenguinColor, Array<BoardPosition>> = new Map(
@@ -37,10 +44,10 @@ describe("queryGameTree", () => {
   const scoresAfterMovement = new Map(game.scores);
   scoresAfterMovement.set(player1.color, 1);
   const placeableGame: Game = {
-    ...(createGameState(players, placeableBoard) as Game),
+    ...createGameState(players, placeableBoard).unsafelyUnwrap(),
   };
-  const allPlacedGame = placeAllPenguinsZigZag(placeableGame) as Game;
-  const allPlacedGameTree = createGameTree(allPlacedGame) as GameTree;
+  const allPlacedGame = placeAllPenguinsZigZag(placeableGame).unsafelyUnwrap();
+  const allPlacedGameTree = createGameTree(allPlacedGame).unsafelyUnwrap();
 
   describe("isMovementLegal", () => {
     it("rejects a start position outside of the board", () => {
@@ -49,8 +56,8 @@ describe("queryGameTree", () => {
         startPosition: invalidStartPosition,
         endPosition: validEndPosition,
       };
-      expect(isMovementLegal(allPlacedGameTree, movement)).toEqual(
-        new IllegalMovementError(allPlacedGameTree, movement)
+      expect(checkMovementLegal(allPlacedGameTree, movement)).toEqual(
+        err(new IllegalMovementError(allPlacedGame, player1, movement.startPosition, movement.endPosition, "Movement is not specified by the game tree."))
       );
     });
 
@@ -60,8 +67,8 @@ describe("queryGameTree", () => {
         startPosition: validStartPosition,
         endPosition: invalidEndPosition,
       };
-      expect(isMovementLegal(allPlacedGameTree, movement)).toEqual(
-        new IllegalMovementError(allPlacedGameTree, movement)
+      expect(checkMovementLegal(allPlacedGameTree, movement)).toEqual(
+        err(new IllegalMovementError(allPlacedGame, player1, movement.startPosition, movement.endPosition, "Movement is not specified by the game tree."))
       );
     });
 
@@ -71,8 +78,8 @@ describe("queryGameTree", () => {
         startPosition: invalidStartPosition,
         endPosition: validEndPosition,
       };
-      expect(isMovementLegal(allPlacedGameTree, movement)).toEqual(
-        new IllegalMovementError(allPlacedGameTree, movement)
+      expect(checkMovementLegal(allPlacedGameTree, movement)).toEqual(
+        err(new IllegalMovementError(allPlacedGame, player1, movement.startPosition, movement.endPosition, "Movement is not specified by the game tree."))
       );
     });
 
@@ -82,8 +89,8 @@ describe("queryGameTree", () => {
         startPosition: validStartPosition,
         endPosition: invalidEndPosition,
       };
-      expect(isMovementLegal(allPlacedGameTree, movement)).toEqual(
-        new IllegalMovementError(allPlacedGameTree, movement)
+      expect(checkMovementLegal(allPlacedGameTree, movement)).toEqual(
+        err(new IllegalMovementError(allPlacedGame, player1, movement.startPosition, movement.endPosition, "Movement is not specified by the game tree."))
       );
     });
 
@@ -92,8 +99,8 @@ describe("queryGameTree", () => {
         startPosition: { row: 1, col: 1 },
         endPosition: holePosition,
       };
-      expect(isMovementLegal(allPlacedGameTree, movement)).toEqual(
-        new IllegalMovementError(allPlacedGameTree, movement)
+      expect(checkMovementLegal(allPlacedGameTree, movement)).toEqual(
+        err(new IllegalMovementError(allPlacedGame, player1, movement.startPosition, movement.endPosition, "Movement is not specified by the game tree."))
       );
     });
 
@@ -102,8 +109,8 @@ describe("queryGameTree", () => {
         startPosition: validStartPosition,
         endPosition: validEndPosition,
       };
-      expect(isMovementLegal(allPlacedGameTree, movement)).toEqual(
-        new IllegalMovementError(allPlacedGameTree, movement)
+      expect(checkMovementLegal(allPlacedGameTree, movement)).toEqual(
+        err(new IllegalMovementError(allPlacedGame, player1, movement.startPosition, movement.endPosition, "Movement is not specified by the game tree."))
       );
     });
 
@@ -139,7 +146,7 @@ describe("queryGameTree", () => {
       const boardAfterMovement = setTileToHole(placeableBoard, {
         row: 0,
         col: 3,
-      }) as Board;
+      }).unsafelyUnwrap();
       const gameAfterMovement = {
         ...allPlacedGame,
         penguinPositions: penguinsAfterMovement,
@@ -147,8 +154,8 @@ describe("queryGameTree", () => {
         board: boardAfterMovement,
         curPlayerIndex: 1,
       };
-      expect(isMovementLegal(allPlacedGameTree, movement)).toEqual(
-        gameAfterMovement
+      expect(checkMovementLegal(allPlacedGameTree, movement)).toEqual(
+        ok(gameAfterMovement)
       );
     });
   });
@@ -162,7 +169,7 @@ describe("queryGameTree", () => {
       3,
       [holePosition],
       1
-    ) as Board;
+    ).unsafelyUnwrap();
     const penguinPositions = new Map([
       [player1.color, [player1Position1]],
       [player2.color, [player2Position1]],
@@ -176,13 +183,13 @@ describe("queryGameTree", () => {
       [player2.color, [player2Position1]],
     ]);
     const game: Game = {
-      ...(createGameState(players, board) as Game),
+      ...createGameState(players, board).unsafelyUnwrap(),
       penguinPositions,
     };
     const boardAfterMovement: Board = setTileToHole(
       board,
       player1Position1
-    ) as Board;
+    ).unsafelyUnwrap();
     const gameAfterMovement1: Game = {
       ...game,
       curPlayerIndex: 1,

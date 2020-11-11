@@ -1,4 +1,3 @@
-import { InvalidGameStateError } from "../types/errors";
 import { PenguinColor, BoardPosition, Board, Tile } from "../../board";
 import { Movement } from "../../game-tree";
 import { Player, Game, getCurrentPlayer, MovementGame } from "../../state";
@@ -14,7 +13,8 @@ import {
   Action,
   MoveResponseQuery,
 } from "./testHarnessInput";
-import { isError } from "./validation";
+import { Result } from "true-myth";
+const { ok, err } = Result;
 
 /**
  * Utility function for outputting false to signify errors that occurred in the
@@ -130,21 +130,25 @@ const inputPlayersToScores = (
  */
 const inputPlayersToRemainingUnplacedPenguins = (
   players: Array<InputPlayer>
-): Map<PenguinColor, number> | InvalidGameStateError => {
+): Result<Map<PenguinColor, number>, Error> => {
   const penguinsToPlace = PENGUIN_AMOUNT_N - players.length;
   const somePlayerHasTooManyPlacements = players.some(
     (player: InputPlayer) => player.places.length > penguinsToPlace
   );
 
   if (somePlayerHasTooManyPlacements) {
-    return new InvalidGameStateError();
+    return err(
+      new Error("A player has more than the allowed nhumber of placements.")
+    );
   }
 
-  return new Map(
-    players.map((player: InputPlayer) => [
-      player.color,
-      penguinsToPlace - player.places.length,
-    ])
+  return ok(
+    new Map(
+      players.map((player: InputPlayer) => [
+        player.color,
+        penguinsToPlace - player.places.length,
+      ])
+    )
   );
 };
 
@@ -156,33 +160,30 @@ const inputPlayersToRemainingUnplacedPenguins = (
  * @param inputState the InputState to transform
  * @return the successfully transformed Game state or an error
  */
-const inputStateToGameState = (inputState: InputState): Game | Error => {
+const inputStateToGameState = (inputState: InputState): Result<Game, Error> => {
   // Derive information from the InputState necessary to create a Game.
-  const board = createNumberedBoard(inputState.board);
+  const board: Result<Board, Error> = createNumberedBoard(inputState.board);
   const players = inputState.players.map(inputPlayerToPlayer);
   const penguinPositions = inputPlayersToPenguinPositions(inputState.players);
   const scores = inputPlayersToScores(inputState.players);
-  const remainingUnplacedPenguins = inputPlayersToRemainingUnplacedPenguins(
-    inputState.players
+  const remainingUnplacedPenguins: Result<
+    Map<PenguinColor, number>,
+    Error
+  > = inputPlayersToRemainingUnplacedPenguins(inputState.players);
+
+  return board.andThen((board: Board) =>
+    remainingUnplacedPenguins.andThen(
+      (remainingUnplacedPenguins: Map<PenguinColor, number>) =>
+        createGameState(players, board).andThen((game: Game) => {
+          return ok({
+            ...game,
+            penguinPositions,
+            scores,
+            remainingUnplacedPenguins,
+          });
+        })
+    )
   );
-
-  // If an error occurred, short circuit and return the error.
-  if (isError(board)) {
-    return board;
-  }
-
-  // If an error occurred, short circuit and return the error.
-  if (isError(remainingUnplacedPenguins)) {
-    return remainingUnplacedPenguins;
-  }
-
-  // Create the Game.
-  return {
-    ...createGameState(players, board),
-    penguinPositions,
-    scores,
-    remainingUnplacedPenguins,
-  };
 };
 
 /**
@@ -195,17 +196,12 @@ const inputStateToGameState = (inputState: InputState): Game | Error => {
  */
 const inputStateToMovementGame = (
   inputState: InputState
-): MovementGame | Error => {
-  const gameOrError: Game | Error = inputStateToGameState(inputState);
-
-  if (isError(gameOrError)) {
-    // Return as an Error.
-    return gameOrError;
-  } else if (gameIsMovementGame(gameOrError)) {
-    // Return as a MovementGame.
-    return gameOrError;
-  }
-};
+): Result<MovementGame, Error> =>
+  inputStateToGameState(inputState).andThen((game: Game) =>
+    gameIsMovementGame(game)
+      ? ok(game)
+      : err(new Error("Game state is not a MovementGame"))
+  );
 
 /**
  * Transform the given BoardPosition into an InputPosition.
@@ -308,30 +304,25 @@ const gameToInputState = (game: Game): InputState => {
  */
 const performMoveResponseQuery = (
   moveResponseQuery: MoveResponseQuery
-): MovementGame | false => {
+): Result<MovementGame, Error> => {
   // Convert the state within the query into a Game state, assuming the
   // Game is valid as specified in the xtree harness assumptions.
-  const gameState: MovementGame | Error = inputStateToMovementGame(
-    moveResponseQuery.state
-  );
-
   // Create a Movement from the from and to positions within the query.
   const movement: Movement = inputPositionsToMovement(
     moveResponseQuery.from,
     moveResponseQuery.to
   );
 
-  // The movement is assumed to be valid.
-  if (isError(gameState)) {
-    return false;
-  } else {
-    return movePenguin(
-      gameState,
-      getCurrentPlayer(gameState),
+  return inputStateToMovementGame(
+    moveResponseQuery.state
+  ).andThen((game: MovementGame) =>
+    movePenguin(
+      game,
+      getCurrentPlayer(game),
       movement.startPosition,
       movement.endPosition
-    ) as MovementGame;
-  }
+    )
+  );
 };
 
 /**

@@ -2,9 +2,22 @@ import {
   BoardPosition,
   VerticalDirection,
   HorizontalDirection,
+  DIRECTIONS,
 } from "../../board";
 import { Game, Player } from "../../state";
 import { positionIsPlayable } from "./validation";
+
+const DIRECTIONS_NEXTPOS: Map<
+  string,
+  (pos: BoardPosition) => BoardPosition
+> = new Map([
+  ["NORTH", (pos: BoardPosition) => getNextPosUpNeutral(pos)],
+  ["NORTHEAST", (pos: BoardPosition) => getNextPosUpRight(pos)],
+  ["SOUTHEAST", (pos: BoardPosition) => getNextPosDownRight(pos)],
+  ["SOUTH", (pos: BoardPosition) => getNextPosDownNeutral(pos)],
+  ["SOUTHWEST", (pos: BoardPosition) => getNextPosDownLeft(pos)],
+  ["NORTHWEST", (pos: BoardPosition) => getNextPosUpLeft(pos)],
+]);
 
 /**
  * From a given a position, get the next position moving in the down left
@@ -114,39 +127,16 @@ const getNextPosition = (
   verticalDirection: VerticalDirection,
   horizontalDirection: HorizontalDirection
 ): BoardPosition => {
-  if (
-    verticalDirection === VerticalDirection.Up &&
-    horizontalDirection === HorizontalDirection.Neutral
-  ) {
-    return getNextPosUpNeutral(position);
-  } else if (
-    verticalDirection === VerticalDirection.Up &&
-    horizontalDirection === HorizontalDirection.Right
-  ) {
-    return getNextPosUpRight(position);
-  } else if (
-    verticalDirection === VerticalDirection.Up &&
-    horizontalDirection === HorizontalDirection.Left
-  ) {
-    return getNextPosUpLeft(position);
-  } else if (
-    verticalDirection === VerticalDirection.Down &&
-    horizontalDirection === HorizontalDirection.Neutral
-  ) {
-    return getNextPosDownNeutral(position);
-  } else if (
-    verticalDirection === VerticalDirection.Down &&
-    horizontalDirection === HorizontalDirection.Right
-  ) {
-    return getNextPosDownRight(position);
-  } else if (
-    verticalDirection === VerticalDirection.Down &&
-    horizontalDirection === HorizontalDirection.Left
-  ) {
-    return getNextPosDownLeft(position);
-  } else {
-    return position;
-  }
+  const [dir, value]: [string, any] = Object.entries(DIRECTIONS).find(
+    ([key, value]) => {
+      return (
+        value.verticalDirection === verticalDirection &&
+        value.horizontalDirection === horizontalDirection
+      );
+    }
+  );
+
+  return DIRECTIONS_NEXTPOS.get(dir)(position);
 };
 
 /**
