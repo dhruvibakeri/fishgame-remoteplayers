@@ -22,6 +22,9 @@ import { shiftPlayers, skipToNextActivePlayer } from "./gameStateCreation";
 import { Result } from "true-myth";
 const { ok, err } = Result;
 
+import { Result } from "true-myth";
+const { ok, err } = Result;
+
 /**
  * Adds score to current player based on the number of fish at the given tile that
  * the penguin is leaving. This means a player's score doesn't update when they land

@@ -19,6 +19,7 @@ import {
   getCurrentPlayer,
 } from "../../state";
 import { createHoledOneFishBoard, getTileOnBoard } from "./boardCreation";
+import { isError } from "./validation";
 import {
   createGameTreeFromMovementGame,
   gameIsMovementGame,
@@ -34,6 +35,7 @@ import { TournamentPlayer } from "../../player-interface";
 import { checkMovementLegal } from "./queryGameTree";
 import { Result } from "true-myth";
 const { err } = Result;
+
 
 const PLAYER_REQUEST_TIMEOUT = 5000;
 

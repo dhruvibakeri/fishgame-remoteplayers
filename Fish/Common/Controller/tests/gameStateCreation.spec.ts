@@ -333,7 +333,9 @@ describe("gameStateCreation", () => {
     const expectedGameState = createGameState(samplePlayers, board);
 
     it("creates test game state", () => {
-      expect(createTestGameState(board)).toEqual(expectedGameState);
+      expect(createTestGameState(board)).toEqual(
+        expectedGameState
+      );
     });
   });
 });
