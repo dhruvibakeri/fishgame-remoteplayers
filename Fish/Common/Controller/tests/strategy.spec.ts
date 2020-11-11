@@ -16,7 +16,7 @@ import {
   maxArray,
   tieBreakMovements,
 } from "../../../Player/strategy";
-import { NoMoreMovementsError, NoMorePlacementsError } from "../types/errors";
+import { IllegalMovementError, IllegalPlacementError } from "../types/errors";
 import { inputStateToGameState } from "../src/testHarnessConversion";
 import { InputPlayer } from "../src/testHarnessInput";
 import { createGameTree } from "../src/gameTreeCreation";
@@ -34,12 +34,18 @@ describe("strategy", () => {
   };
   const players: Array<Player> = [player1, player2];
   const holePosition: BoardPosition = { col: 1, row: 0 };
-  const board: Board = createBlankBoard(3, 3, 1) as Board;
-  const smallBoard: Board = createBlankBoard(2, 3, 1) as Board;
-  const boardWithHole: Board = setTileToHole(board, holePosition) as Board;
-  const game: Game = createGameState(players, board) as Game;
-  const gameWithHole: Game = createGameState(players, boardWithHole) as Game;
-  const smallGame: Game = createGameState(players, smallBoard) as Game;
+  const board: Board = createBlankBoard(3, 3, 1).unsafelyUnwrap();
+  const smallBoard: Board = createBlankBoard(2, 3, 1).unsafelyUnwrap();
+  const boardWithHole: Board = setTileToHole(
+    board,
+    holePosition
+  ).unsafelyUnwrap();
+  const game: Game = createGameState(players, board).unsafelyUnwrap();
+  const gameWithHole: Game = createGameState(
+    players,
+    boardWithHole
+  ).unsafelyUnwrap();
+  const smallGame: Game = createGameState(players, smallBoard).unsafelyUnwrap();
 
   const placement1Position: BoardPosition = { col: 0, row: 0 };
   const penguinPositionsAfterPlacement1: Map<
@@ -191,9 +197,13 @@ describe("strategy", () => {
     player1,
     { row: 1, col: 1 },
     { row: 2, col: 2 }
-  ) as MovementGame;
-  const gameTreeNoMoves: GameTree = createGameTree(gameNoMoves) as GameTree;
-  const gameTree: GameTree = createGameTree(gameAfterAllPlacement) as GameTree;
+  ).unsafelyUnwrap();
+  const gameTreeNoMoves: GameTree = createGameTree(
+    gameNoMoves
+  ).unsafelyUnwrap();
+  const gameTree: GameTree = createGameTree(
+    gameAfterAllPlacement
+  ).unsafelyUnwrap();
 
   describe("getNextPenguinPlacementPosition", () => {
     it("returns next open position in the zig zag ordering", () => {
@@ -246,7 +256,11 @@ describe("strategy", () => {
         remainingUnplacedPenguins: noMorePenguinsRemaining,
       };
       expect(placeNextPenguin(gameWithNoMorePenguinsRemaining)).toEqual(
-        new NoMorePlacementsError(gameWithNoMorePenguinsRemaining)
+        new IllegalPlacementError(
+          gameWithNoMorePenguinsRemaining,
+          player1,
+          placement1Position
+        )
       );
     });
   });
@@ -254,7 +268,7 @@ describe("strategy", () => {
   describe("placeAllPenguinsZigZag", () => {
     it("returns error if there aren't enough spaces to place penguins", () => {
       expect(placeAllPenguinsZigZag(smallGame)).toEqual(
-        new NoMorePlacementsError(smallGame)
+        new IllegalPlacementError(smallGame, player1)
       );
     });
 
@@ -295,30 +309,33 @@ describe("strategy", () => {
     const startingGame = inputStateToGameState({
       board: inputBoard,
       players: inputPlayers,
-    }) as MovementGame;
+    }).unsafelyUnwrap() as MovementGame;
     const numberedBoard = createNumberedBoard([
       [1, 3, 5, 4],
       [3, 2, 4, 1],
       [2, 3, 5, 1],
       [4, 1, 1, 2],
-    ]) as Board;
-    const numberedGame = createGameState(players, numberedBoard) as Game;
+    ]).unsafelyUnwrap();
+    const numberedGame = createGameState(
+      players,
+      numberedBoard
+    ).unsafelyUnwrap();
     const gameAfterPlacement = placeAllPenguinsZigZag(
       numberedGame
-    ) as MovementGame;
+    ).unsafelyUnwrap();
     const numberedBoardWithHoles = createNumberedBoard([
       [1, 0, 5],
       [3, 0, 4, 1],
       [2, 3, 5],
       [0, 1, 0, 2],
-    ]) as Board;
+    ]).unsafelyUnwrap();
     const numberedGameWithHoles = createGameState(
       players,
       numberedBoardWithHoles
-    ) as Game;
+    ).unsafelyUnwrap();
     const gameAfterPlacementWithHoles = placeAllPenguinsZigZag(
       numberedGameWithHoles
-    ) as Game;
+    ).unsafelyUnwrap();
 
     it("Returns best movement for game state", () => {
       const expectedMove1: Movement = {
@@ -358,7 +375,9 @@ describe("strategy", () => {
         ...gameAfterAllPlacement,
         curPlayerIndex: 1,
       };
-      const opponentTurnGameTree = createGameTree(opponentTurnGame) as GameTree;
+      const opponentTurnGameTree = createGameTree(
+        opponentTurnGame
+      ).unsafelyUnwrap();
       expect(getMinMaxScore(opponentTurnGameTree, 0, 0)).toEqual(0);
       expect(getMinMaxScore(opponentTurnGameTree, 0, 1)).toEqual(0);
       expect(getMinMaxScore(opponentTurnGameTree, 0, 2)).toEqual(0);

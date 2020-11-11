@@ -119,7 +119,7 @@ describe("referee", () => {
   const numberedGame = createGameState(
     [player1, player2],
     numberedBoard
-  ) as Game;
+  ).unsafelyUnwrap();
 
   const player1TwoGamePosition1: BoardPosition = {
     col: 0,
@@ -379,7 +379,10 @@ describe("referee", () => {
       [1, 1, 1, 1],
       [1, 1, 1, 1],
     ]).unsafelyUnwrap();
-    const expectedGameState: Game = createGameState(players, board) as Game;
+    const expectedGameState: Game = createGameState(
+      players,
+      board
+    ).unsafelyUnwrap();
 
     it("successfully creates an initial Game state", () => {
       expect(

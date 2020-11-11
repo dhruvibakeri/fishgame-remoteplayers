@@ -1,10 +1,7 @@
 import { BoardPosition } from "../Common/board";
 import { Game, getCurrentPlayer, MovementGame, Player } from "../Common/state";
 import { placePenguin } from "../Common/Controller/src/penguinPlacement";
-import {
-  positionIsPlayable,
-  isError,
-} from "../Common/Controller/src/validation";
+import { positionIsPlayable } from "../Common/Controller/src/validation";
 import {
   IllegalPenguinPositionError,
   InvalidGameStateError,
@@ -20,6 +17,7 @@ import {
   createGameTreeFromMovementGame,
   gameIsMovementGame,
 } from "../Common/Controller/src/gameTreeCreation";
+import { Result, ok, err, isErr } from "true-myth/result";
 
 /**
  * Using the zig-zag strategy as outlined in Milestone 5, finds the next
@@ -32,15 +30,15 @@ import {
  */
 const getNextPenguinPlacementPosition = (
   game: Game
-): BoardPosition | NoMorePlacementsError => {
+): Result<BoardPosition, NoMorePlacementsError> => {
   for (let row = 0; row < game.board.tiles.length; row++) {
     for (let col = 0; col < game.board.tiles[row].length; col++) {
       if (positionIsPlayable(game, { row, col })) {
-        return { row, col };
+        return ok({ row, col });
       }
     }
   }
-  return new NoMorePlacementsError(game);
+  return err(new NoMorePlacementsError(game));
 };
 
 /**
@@ -54,23 +52,16 @@ const getNextPenguinPlacementPosition = (
  */
 const placeNextPenguin = (
   game: Game
-):
-  | Game
-  | NoMorePlacementsError
-  | InvalidGameStateError
-  | IllegalPenguinPositionError => {
-  // Get next available space in zig zag pattern.
-  const placementPosition:
-    | BoardPosition
-    | NoMorePlacementsError = getNextPenguinPlacementPosition(game);
-
-  if (isError(placementPosition)) {
-    return new NoMorePlacementsError(game);
-  }
-
-  // Attempt to place the penguin and return the result.
-  return placePenguin(getCurrentPlayer(game), game, placementPosition);
-};
+): Result<
+  Game,
+  NoMorePlacementsError | InvalidGameStateError | IllegalPenguinPositionError
+> =>
+  (getNextPenguinPlacementPosition(game) as Result<
+    BoardPosition,
+    NoMorePlacementsError | InvalidGameStateError | IllegalPenguinPositionError
+  >).andThen((position: BoardPosition) =>
+    placePenguin(getCurrentPlayer(game), game, position)
+  );
 
 /**
  * Places all remaining unplaced penguins in given Game in the zig-zag pattern
@@ -81,34 +72,36 @@ const placeNextPenguin = (
  */
 const placeAllPenguinsZigZag = (
   game: Game
-):
-  | MovementGame
-  | NoMorePlacementsError
-  | InvalidGameStateError
-  | IllegalPenguinPositionError => {
-  let curPlayer: Player = getCurrentPlayer(game);
-  let placedPenguinGame:
-    | Game
-    | NoMorePlacementsError
-    | InvalidGameStateError
-    | IllegalPenguinPositionError = game;
-  while (
-    !isError(placedPenguinGame) &&
-    placedPenguinGame.remainingUnplacedPenguins.get(curPlayer.color) > 0
-  ) {
-    placedPenguinGame = placeNextPenguin(placedPenguinGame);
-    if (!isError(placedPenguinGame)) {
-      curPlayer = getCurrentPlayer(placedPenguinGame);
-    }
+): Result<
+  MovementGame,
+  NoMorePlacementsError | InvalidGameStateError | IllegalPenguinPositionError
+> => {
+  const resultGameHasPlacements = (gameOrError: Result<Game, Error>): boolean =>
+    gameOrError
+      .map((game: Game) => !gameIsMovementGame(game))
+      .mapErr(() => false)
+      .unsafelyUnwrap();
+
+  let placedPenguinGame: Result<
+    Game,
+    NoMorePlacementsError | InvalidGameStateError | IllegalPenguinPositionError
+  > = ok(game);
+
+  while (resultGameHasPlacements(placedPenguinGame)) {
+    placedPenguinGame = placedPenguinGame.andThen((game: Game) =>
+      placeNextPenguin(game)
+    );
   }
 
-  if (isError(placedPenguinGame)) {
-    return placedPenguinGame;
-  } else if (gameIsMovementGame(placedPenguinGame)) {
-    return placedPenguinGame;
-  } else {
-    return new InvalidGameStateError(game, "Unable to make all placements.");
-  }
+  return placedPenguinGame.andThen((game: Game) => {
+    if (gameIsMovementGame(game)) {
+      return ok(game);
+    } else {
+      return err(
+        new InvalidGameStateError(game, "Unable to make all placements.")
+      );
+    }
+  });
 };
 
 /**

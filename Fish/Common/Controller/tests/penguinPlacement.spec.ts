@@ -1,9 +1,6 @@
 import { Board, BoardPosition, PenguinColor } from "../../board";
-import { Player, Game, MovementGame } from "../../state";
-import {
-  IllegalPenguinPositionError,
-  InvalidGameStateError,
-} from "../types/errors";
+import { Player, Game, MovementGame, getCurrentPlayer } from "../../state";
+import { IllegalMovementError, IllegalPlacementError } from "../types/errors";
 import {
   movePenguinInPenguinPositions,
   movePenguin,
@@ -24,7 +21,12 @@ describe("penguinMovement", () => {
   const holePositions: Array<BoardPosition> = [holePosition];
   const validStartPosition: BoardPosition = { col: 0, row: 0 };
   const validEndPosition: BoardPosition = { col: 0, row: 1 };
-  const board: Board = createHoledOneFishBoard(2, 2, holePositions, 1) as Board;
+  const board: Board = createHoledOneFishBoard(
+    2,
+    2,
+    holePositions,
+    1
+  ).unsafelyUnwrap();
   const penguinPositions: Map<PenguinColor, Array<BoardPosition>> = new Map([
     [player1.color, [validStartPosition]],
     [player2.color, []],
@@ -34,12 +36,12 @@ describe("penguinMovement", () => {
     [player2.color, 0],
   ]);
   const game: Game = {
-    ...(createGameState(players, board) as Game),
+    ...createGameState(players, board).unsafelyUnwrap(),
     penguinPositions,
   };
 
   const movementGame: MovementGame = {
-    ...(createGameState(players, board) as Game),
+    ...createGameState(players, board).unsafelyUnwrap(),
     penguinPositions,
     remainingUnplacedPenguins,
   };
@@ -159,19 +161,19 @@ describe("penguinMovement", () => {
 
     it("rejects placement position that is not on board", () => {
       expect(placePenguin(player1, game, outOfBoundsPosition)).toEqual(
-        new IllegalPenguinPositionError(game, player1, outOfBoundsPosition)
+        new IllegalPlacementError(game, player1, outOfBoundsPosition)
       );
     });
 
     it("rejects placement position that is a hole", () => {
       expect(placePenguin(player1, game, holePosition)).toEqual(
-        new IllegalPenguinPositionError(game, player1, holePosition)
+        new IllegalPlacementError(game, player1, holePosition)
       );
     });
 
     it("rejects placement position that already has a penguin", () => {
       expect(placePenguin(player1, game, validStartPosition)).toEqual(
-        new IllegalPenguinPositionError(game, player1, validStartPosition)
+        new IllegalPlacementError(game, player1, validStartPosition)
       );
     });
 
@@ -187,9 +189,10 @@ describe("penguinMovement", () => {
       expect(
         placePenguin(player1, noUnplacedPenguinsGame, placePosition)
       ).toEqual(
-        new InvalidGameStateError(
+        new IllegalPlacementError(
           noUnplacedPenguinsGame,
-          "There are no available placements for Player foo"
+          getCurrentPlayer(noUnplacedPenguinsGame),
+          placePosition
         )
       );
     });
@@ -204,7 +207,7 @@ describe("penguinMovement", () => {
   describe("movePenguin", () => {
     it("rejects a start position not on the board", () => {
       const invalidStartPosition: BoardPosition = { col: 2, row: 2 };
-      const expectedError = new IllegalPenguinPositionError(
+      const expectedError = new IllegalMovementError(
         game,
         player1,
         invalidStartPosition,
@@ -222,7 +225,7 @@ describe("penguinMovement", () => {
 
     it("rejects an end position not on the board", () => {
       const invalidEndPosition: BoardPosition = { col: 3, row: 3 };
-      const expectedError = new IllegalPenguinPositionError(
+      const expectedError = new IllegalMovementError(
         game,
         player1,
         validStartPosition,
@@ -240,7 +243,7 @@ describe("penguinMovement", () => {
 
     it("rejects a player trying to move from from a starting position not containing one of their penguins", () => {
       const invalidStartPosition: BoardPosition = { col: 1, row: 1 };
-      const expectedError = new IllegalPenguinPositionError(
+      const expectedError = new IllegalPlacementError(
         game,
         player1,
         invalidStartPosition,
@@ -258,7 +261,7 @@ describe("penguinMovement", () => {
 
     it("rejects a player trying to move to a position not reachable from the start", () => {
       const invalidEndPosition: BoardPosition = { col: 1, row: 1 };
-      const expectedError = new IllegalPenguinPositionError(
+      const expectedError = new IllegalPlacementError(
         game,
         player1,
         validStartPosition,
@@ -275,7 +278,7 @@ describe("penguinMovement", () => {
     });
 
     it("rejects a player trying to move to a hole", () => {
-      const expectedError = new IllegalPenguinPositionError(
+      const expectedError = new IllegalPlacementError(
         game,
         player1,
         validEndPosition,
@@ -296,7 +299,7 @@ describe("penguinMovement", () => {
         ...movementGame,
         penguinPositions: twoPenguinPositions,
       };
-      const expectedError = new IllegalPenguinPositionError(
+      const expectedError = new IllegalPlacementError(
         game,
         player1,
         validStartPosition,
@@ -320,7 +323,10 @@ describe("penguinMovement", () => {
         [player1.color, [validEndPosition]],
         [player2.color, []],
       ]);
-      const newBoard = setTileToHole(game.board, validStartPosition) as Board;
+      const newBoard = setTileToHole(
+        game.board,
+        validStartPosition
+      ).unsafelyUnwrap();
       const expectedScores: Map<PenguinColor, number> = new Map(game.scores);
       expectedScores.set(player1.color, 1);
       const expectedGameState: Game = {

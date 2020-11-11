@@ -26,7 +26,7 @@ class InvalidPositionError extends Error {
 /**
  * Error used to represent invalid constraints used to specify a board.
  */
-class InvalidBoardConstraintsError extends Error {
+class IllegalBoardError extends Error {
   columns: number;
   rows: number;
   holes?: number;
@@ -59,166 +59,10 @@ class InvalidBoardConstraintsError extends Error {
 }
 
 /**
- * Error used to represent an out-of-bounds number of players used to create a
- * game state, that is a number less than 2 or greater than 4.
- */
-class InvalidNumberOfPlayersError extends Error {
-  numOfPlayers: number;
-  message: string;
-
-  constructor(numOfPlayers: number, message?: string) {
-    super();
-    this.numOfPlayers = numOfPlayers;
-    if (message) {
-      this.message = message;
-    } else {
-      this.message = "Invalid number of players specified for game.";
-    }
-    this.stack = new Error().stack;
-  }
-}
-
-/**
- * Error used to represent the placement or movement of an avatar to an illegal
- * position within a game state.
- */
-class IllegalPenguinPositionError extends Error {
-  game: Game;
-  player: Player;
-  position1: BoardPosition;
-  position2?: BoardPosition;
-  message: string;
-
-  constructor(
-    game: Game,
-    player: Player,
-    position1: BoardPosition,
-    position2?: BoardPosition,
-    message?: string
-  ) {
-    super();
-    this.game = game;
-    this.player = player;
-    this.position1 = position1;
-    if (position2) {
-      this.position2 = position2;
-    }
-    if (message) {
-      this.message = message;
-    } else {
-      this.message = "Illegal Penguin position specified by Player.";
-    }
-    this.stack = new Error().stack;
-  }
-}
-
-/**
- * Error used to represent the movement of an avatar to an unreachable position.
- */
-class UnreachablePositionError extends IllegalPenguinPositionError {
-  constructor(
-    game: Game,
-    player: Player,
-    startPosition: BoardPosition,
-    endPosition: BoardPosition,
-    message?: string
-  ) {
-    super(game, player, startPosition, endPosition, message);
-  }
-}
-
-/**
- * Error used to represent an invalid existing game state.
- */
-class InvalidGameStateError extends Error {
-  game?: Game;
-  message: string;
-
-  constructor(game?: Game, message?: string) {
-    super();
-    if (game) {
-      this.game = game;
-    }
-    if (message) {
-      this.message = message;
-    } else {
-      this.message = "Invalid game state detected.";
-    }
-    this.stack = new Error().stack;
-  }
-}
-
-/**
- * Error used to represent an invalid existing game state.
- */
-class IllegalMovementError extends Error {
-  gameTree: GameTree;
-  movement: Movement;
-  message: string;
-
-  constructor(gameTree: GameTree, movement: Movement, message?: string) {
-    super();
-    this.gameTree = gameTree;
-    this.movement = movement;
-    if (message) {
-      this.message = message;
-    } else {
-      this.message = `Illegal movement movement from (${movement.startPosition.col},${movement.startPosition.row}) to (${movement.endPosition.col},${movement.endPosition.row}).`;
-    }
-    this.stack = new Error().stack;
-  }
-}
-
-/**
- * Error used to represent a player attempting to place a penguin when they
- * have no more placements available or there are no more available placements
- * on the game's board.
- */
-class NoMorePlacementsError extends Error {
-  game: Game;
-  message: string;
-
-  constructor(game: Game, message?: string) {
-    super();
-    this.game = game;
-    if (message) {
-      this.message = message;
-    } else {
-      this.message = `There are no available placements for Player ${
-        getCurrentPlayer(game).name
-      }`;
-    }
-    this.stack = new Error().stack;
-  }
-}
-
-/**
- * Error used to represent a player trying to find an action to make when they
- * have no more possible movements they can make.
- */
-class NoMoreMovementsError extends Error {
-  game: Game;
-  message: string;
-
-  constructor(game: Game, message?: string) {
-    super();
-    this.game = game;
-    if (message) {
-      this.message = message;
-    } else {
-      this.message = `Player ${
-        getCurrentPlayer(game).name
-      } has no more movements available.`;
-    }
-    this.stack = new Error().stack;
-  }
-}
-
-/**
  * Error used when trying to create a game tree from an invalid game state,
  * meaning a game state in which not all penguins have been placed.
  */
-class InvalidGameForTreeError extends Error {
+class IllegalGameTreeError extends Error {
   game: Game;
   message: string;
 
@@ -235,15 +79,114 @@ class InvalidGameForTreeError extends Error {
   }
 }
 
+/**
+ * Error to indicate invalid constraints for constructing a game state
+ */
+class IllegalGameStateError extends Error {
+  players: Array<Player>;
+  board: Board;
+
+  constructor(players: Array<Player>, board: Board, message?: string) {
+    super();
+    this.board = board;
+    if (message) {
+      this.message = message;
+    } else {
+      this.message = "Invalid board and players for state";
+    }
+    this.stack = new Error().stack;
+  }
+}
+
+/**
+ * Error to indicate that a movement is not possible, whether that
+ * has to do with acting out of turn, invalid coordinates, or simply not possible.
+ */
+class IllegalMovementError extends Error {
+  game: Game;
+  player: Player;
+  position1: BoardPosition;
+  position2: BoardPosition;
+  message: string;
+
+  constructor(
+    game: Game,
+    player: Player,
+    position1: BoardPosition,
+    position2: BoardPosition,
+    message?: string
+  ) {
+    super();
+    this.game = game;
+    this.player = player;
+    this.position1 = position1;
+    this.position2 = position2;
+
+    if (message) {
+      this.message = message;
+    } else {
+      this.message =
+        "Illegal movement specified by player for the current game state.";
+    }
+    this.stack = new Error().stack;
+  }
+}
+
+/**
+ * Error to indicate that a placement is not possible, whether that has
+ * to do with acting out of turn, invalid coordinates, or simply not possible.
+ */
+class IllegalPlacementError extends Error {
+  game: Game;
+  player: Player;
+  position: BoardPosition;
+  message: string;
+
+  constructor(
+    game: Game,
+    player: Player,
+    position: BoardPosition,
+    message?: string
+  ) {
+    super();
+    this.game = game;
+    this.player = player;
+    this.position = position;
+    if (message) {
+      this.message = message;
+    } else {
+      this.message =
+        "Illegal placement specified by player for the current game state.";
+    }
+    this.stack = new Error().stack;
+  }
+}
+/**
+ * Error to indicate an out-of-bounds position on a board.
+ */
+class IllegalPositionError extends Error {
+  board: Board;
+  position: BoardPosition;
+  message: string;
+
+  constructor(board: Board, position: BoardPosition, message?: string) {
+    super();
+    this.board = board;
+    this.position = position;
+    if (message) {
+      this.message = message;
+    } else {
+      this.message = "Invalid position.";
+    }
+    this.stack = new Error().stack;
+  }
+}
+
 export {
-  InvalidPositionError,
-  InvalidBoardConstraintsError,
-  InvalidNumberOfPlayersError,
-  IllegalPenguinPositionError,
-  UnreachablePositionError,
-  InvalidGameStateError,
+  IllegalGameStateError,
+  IllegalBoardError,
+  IllegalGameTreeError,
   IllegalMovementError,
-  NoMorePlacementsError,
-  NoMoreMovementsError,
-  InvalidGameForTreeError,
+  IllegalPlacementError,
+  IllegalPositionError,
 };

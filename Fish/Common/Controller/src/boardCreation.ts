@@ -3,12 +3,8 @@ import {
   isValidBoardSize,
   positionIsOnBoard,
   isValidMinimumOneFishTiles,
-  isError,
 } from "./validation";
-import {
-  InvalidBoardConstraintsError,
-  InvalidPositionError,
-} from "../types/errors";
+import { IllegalBoardError, IllegalPositionError } from "../types/errors";
 import { InputBoard } from "./testHarnessInput";
 import { Result, ok, err } from "true-myth/result";
 
@@ -37,9 +33,9 @@ const createTile = (numOfFish: number = DEFAULT_FISH_PER_TILE): Tile => {
 const getTileOnBoard = (
   board: Board,
   position: BoardPosition
-): Result<Tile, InvalidPositionError> => {
+): Result<Tile, IllegalPositionError> => {
   if (!positionIsOnBoard(board, position)) {
-    return err(new InvalidPositionError(board, position));
+    return err(new IllegalPositionError(board, position));
   } else {
     return ok(board.tiles[position.row][position.col]);
   }
@@ -60,15 +56,11 @@ const setTileOnBoard = (
   board: Board,
   position: BoardPosition,
   numOfFish: number
-): Result<Board, InvalidPositionError> =>
+): Result<Board, IllegalPositionError> =>
   getTileOnBoard(board, position).map(() => {
-    return {
-      tiles: Object.assign([], board.tiles, {
-        [position.row]: Object.assign([], board.tiles[position.row], {
-          [position.col]: createTile(numOfFish),
-        }),
-      }),
-    };
+    const tiles = board.tiles;
+    tiles[position.row][position.col] = createTile(numOfFish);
+    return { tiles };
   });
 
 /**
@@ -83,7 +75,7 @@ const setTileOnBoard = (
 const setTileToHole = (
   board: Board,
   position: BoardPosition
-): Result<Board, InvalidPositionError> => setTileOnBoard(board, position, 0);
+): Result<Board, IllegalPositionError> => setTileOnBoard(board, position, 0);
 
 /**
  * Deactivate tiles on the given board according to the given array of
@@ -97,13 +89,12 @@ const setTileToHole = (
 const addHolesToBoard = (
   board: Board,
   holePositions: Array<BoardPosition>
-): Result<Board, InvalidPositionError> => {
-  return holePositions.reduce<Result<Board, InvalidPositionError>>(
-    (acc: Result<Board, InvalidPositionError>, holePosition: BoardPosition) =>
+): Result<Board, IllegalPositionError> =>
+  holePositions.reduce<Result<Board, IllegalPositionError>>(
+    (acc: Result<Board, IllegalPositionError>, holePosition: BoardPosition) =>
       acc.andThen((board) => setTileToHole(board, holePosition)),
     ok(board)
   );
-};
 
 /**
  * Create a board of the given size, with all tiles active and containing the
@@ -119,9 +110,9 @@ const createBlankBoard = (
   rows: number,
   columns: number,
   fishPerTile: number
-): Result<Board, InvalidBoardConstraintsError> => {
+): Result<Board, IllegalBoardError> => {
   if (!isValidBoardSize(columns, rows) || rows * columns > 25) {
-    return err(new InvalidBoardConstraintsError(columns, rows));
+    return err(new IllegalBoardError(columns, rows));
   }
 
   const tiles: Array<Array<Tile>> = [];
@@ -156,7 +147,7 @@ const createHoledOneFishBoard = (
   rows: number,
   holePositions: Array<BoardPosition>,
   minimumOneFishTiles: number
-): Result<Board, InvalidBoardConstraintsError | InvalidPositionError> => {
+): Result<Board, IllegalBoardError | IllegalPositionError> => {
   if (
     !isValidMinimumOneFishTiles(
       columns,
@@ -166,7 +157,7 @@ const createHoledOneFishBoard = (
     )
   ) {
     return err(
-      new InvalidBoardConstraintsError(
+      new IllegalBoardError(
         columns,
         rows,
         holePositions.length,
@@ -179,7 +170,7 @@ const createHoledOneFishBoard = (
   // number of 1-fish tiles.
   return (createBlankBoard(rows, columns, DEFAULT_FISH_PER_TILE) as Result<
     Board,
-    InvalidBoardConstraintsError | InvalidPositionError
+    IllegalBoardError | IllegalPositionError
   >).flatMap((board: Board) => addHolesToBoard(board, holePositions));
 };
 
@@ -192,10 +183,10 @@ const createHoledOneFishBoard = (
  */
 const createNumberedBoard = (
   tileFish: InputBoard
-): Result<Board, InvalidBoardConstraintsError | InvalidPositionError> => {
+): Result<Board, IllegalBoardError | IllegalPositionError> => {
   // Return an error of the board is empty.
   if (tileFish.length <= 0) {
-    return err(new InvalidBoardConstraintsError(0, 0));
+    return err(new IllegalBoardError(0, 0));
   }
 
   // Find length of longest array of tiles, in case extra 0 tiles need to be added

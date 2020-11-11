@@ -19,11 +19,7 @@ import {
 import { Board, BoardPosition, Penguin, PenguinColor } from "../../board";
 import { Game, MovementGame, Player } from "../../state";
 import { createGameState } from "../src/gameStateCreation";
-import {
-  IllegalPenguinPositionError,
-  UnreachablePositionError,
-  InvalidNumberOfPlayersError,
-} from "../types/errors";
+import { IllegalMovementError } from "../types/errors";
 import { InputPlayer, InputState, InputBoard } from "../src/testHarnessInput";
 import { placeAllPenguinsZigZag } from "../../../Player/strategy";
 
@@ -50,7 +46,7 @@ describe("validation", () => {
     [player2.color, 0],
   ]);
   const game: MovementGame = {
-    ...(createGameState(players, board) as Game),
+    ...createGameState(players, board).unsafelyUnwrap(),
     penguinPositions,
     remainingUnplacedPenguins: noRemainingUnplacedPenguins,
   };
@@ -216,7 +212,7 @@ describe("validation", () => {
     });
 
     it("accepts an Error", () => {
-      expect(isError(new InvalidNumberOfPlayersError(3))).toEqual(true);
+      expect(isError(new Error("blah"))).toEqual(true);
     });
   });
 
@@ -297,7 +293,7 @@ describe("validation", () => {
   describe("validatePenguinMove", () => {
     it("rejects a start position outside of the board", () => {
       const invalidStartPosition: BoardPosition = { col: 2, row: 2 };
-      const expectedError = new IllegalPenguinPositionError(
+      const expectedError = new IllegalMovementError(
         game,
         player1,
         invalidStartPosition,
@@ -315,7 +311,7 @@ describe("validation", () => {
 
     it("rejects an end position outside of the board", () => {
       const invalidEndPosition: BoardPosition = { col: 3, row: 3 };
-      const expectedError = new IllegalPenguinPositionError(
+      const expectedError = new IllegalMovementError(
         game,
         player1,
         validStartPosition,
@@ -333,7 +329,7 @@ describe("validation", () => {
 
     it("rejects a player trying to move from a starting position not containing one of their penguins", () => {
       const invalidStartPosition: BoardPosition = { col: 1, row: 1 };
-      const expectedError = new IllegalPenguinPositionError(
+      const expectedError = new IllegalMovementError(
         game,
         player1,
         invalidStartPosition,
@@ -351,7 +347,7 @@ describe("validation", () => {
 
     it("rejects a player trying to move to a position not reachable from the start", () => {
       const invalidEndPosition: BoardPosition = { col: 1, row: 1 };
-      const expectedError = new UnreachablePositionError(
+      const expectedError = new IllegalMovementError(
         game,
         player1,
         validStartPosition,
@@ -368,7 +364,7 @@ describe("validation", () => {
     });
 
     it("rejects a player trying to move to a hole", () => {
-      const expectedError = new IllegalPenguinPositionError(
+      const expectedError = new IllegalMovementError(
         game,
         player1,
         validEndPosition,
@@ -380,7 +376,7 @@ describe("validation", () => {
     });
 
     it("rejects a player trying to move to a position with another penguin present", () => {
-      const expectedError = new IllegalPenguinPositionError(
+      const expectedError = new IllegalMovementError(
         game,
         player1,
         validStartPosition,
@@ -506,10 +502,10 @@ describe("validation", () => {
       ],
       1
     ).unsafelyUnwrap();
-    const game: Game = createGameState(players, board) as Game;
+    const game: Game = createGameState(players, board).unsafelyUnwrap();
     const movementGame: MovementGame = placeAllPenguinsZigZag(
       game
-    ) as MovementGame;
+    ).unsafelyUnwrap();
     const movementGameNoMoves: MovementGame = {
       ...movementGame,
       board: boardNoMoves,

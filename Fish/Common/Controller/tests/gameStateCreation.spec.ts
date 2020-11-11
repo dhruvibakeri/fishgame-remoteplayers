@@ -1,9 +1,6 @@
 import { Board, BoardPosition, PenguinColor } from "../../board";
 import { Player, Game, MovementGame } from "../../state";
-import {
-  InvalidGameStateError,
-  InvalidNumberOfPlayersError,
-} from "../types/errors";
+import { IllegalGameStateError } from "../types/errors";
 import {
   buildUnplacedPenguinMap,
   createEmptyPenguinPositions,
@@ -29,11 +26,11 @@ describe("gameStateCreation", () => {
   const player4: Player = { name: "bat", color: PenguinColor.White };
   const players: Array<Player> = [player1, player2, player3, player4];
 
-  const board: Board = createBlankBoard(2, 2, 1) as Board;
+  const board: Board = createBlankBoard(2, 2, 1).unsafelyUnwrap();
 
   describe("getNextPlayerIndex", () => {
-    const board: Board = createBlankBoard(3, 3, 1) as Board;
-    const game: Game = createTestGameState(board) as Game;
+    const board: Board = createBlankBoard(3, 3, 1).unsafelyUnwrap();
+    const game: Game = createTestGameState(board).unsafelyUnwrap();
 
     it("gets the next player index", () => {
       expect(getNextPlayerIndex(game)).toEqual(1);
@@ -49,7 +46,7 @@ describe("gameStateCreation", () => {
   });
 
   describe("skipToNextActivePlayer", () => {
-    const board: Board = createBlankBoard(4, 4, 1) as Board;
+    const board: Board = createBlankBoard(4, 4, 1).unsafelyUnwrap();
     const boardNoMoves: Board = createHoledOneFishBoard(
       4,
       4,
@@ -64,11 +61,14 @@ describe("gameStateCreation", () => {
         { col: 3, row: 3 },
       ],
       1
-    ) as Board;
-    const game: Game = createGameState([player1, player2], board) as Game;
+    ).unsafelyUnwrap();
+    const game: Game = createGameState(
+      [player1, player2],
+      board
+    ).unsafelyUnwrap();
     const movementGame: MovementGame = placeAllPenguinsZigZag(
       game
-    ) as MovementGame;
+    ).unsafelyUnwrap();
     const penguinPositionsSkipPlayer: Map<
       PenguinColor,
       Array<BoardPosition>
@@ -173,14 +173,14 @@ describe("gameStateCreation", () => {
     it("rejects an empty list of players", () => {
       const players: Array<Player> = [];
       expect(createGameState(players, board)).toEqual(
-        new InvalidNumberOfPlayersError(players.length)
+        new IllegalGameStateError(players, board)
       );
     });
 
     it("rejects a single player", () => {
       const players: Array<Player> = [player1];
       expect(createGameState(players, board)).toEqual(
-        new InvalidNumberOfPlayersError(players.length)
+        new IllegalGameStateError(players, board)
       );
     });
 
@@ -193,14 +193,14 @@ describe("gameStateCreation", () => {
         player3,
       ];
       expect(createGameState(players, board)).toEqual(
-        new InvalidNumberOfPlayersError(players.length)
+        new IllegalGameStateError(players, board)
       );
     });
 
     it("rejects an array of players with non-unique colors", () => {
       const players: Array<Player> = [player1, player2, player4, player2];
       expect(createGameState(players, board)).toEqual(
-        new InvalidGameStateError()
+        new IllegalGameStateError(players, board)
       );
     });
 
@@ -301,7 +301,9 @@ describe("gameStateCreation", () => {
     const expectedGameState = createGameState(samplePlayers, board);
 
     it("creates test game state", () => {
-      expect(createTestGameState(board)).toEqual(expectedGameState);
+      expect(createTestGameState(board).unsafelyUnwrap()).toEqual(
+        expectedGameState
+      );
     });
   });
 });

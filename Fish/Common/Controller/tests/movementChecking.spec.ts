@@ -25,11 +25,6 @@ import {
   anyPlayersCanMove,
 } from "../src/movementChecking";
 import { createGameState } from "../src/gameStateCreation";
-import {
-  InvalidGameStateError,
-  InvalidNumberOfPlayersError,
-} from "../types/errors";
-import { isError } from "../src/validation";
 import { placePenguin } from "../src/penguinPlacement";
 
 describe("movementChecking", () => {
@@ -47,7 +42,7 @@ describe("movementChecking", () => {
   const player2: Player = { name: "bar", color: PenguinColor.Brown };
   const player3: Player = { name: "baz", color: PenguinColor.Red };
   const players: Array<Player> = [player3, player2, player1];
-  const game: Game = createGameState(players, board) as Game;
+  const game: Game = createGameState(players, board).unsafelyUnwrap();
   const player1TurnGame: Game = {
     ...game,
     curPlayerIndex: 2,
@@ -176,13 +171,11 @@ describe("movementChecking", () => {
         row: 1,
         col: 1,
       }).unsafelyUnwrap();
-      const gameWithHoleOrError:
-        | Game
-        | InvalidNumberOfPlayersError
-        | InvalidGameStateError = createGameState(players, boardWithHole);
-      const gameWithHole: Game =
-        !isError(gameWithHoleOrError) && gameWithHoleOrError;
       const expectedReachablePositions: Array<BoardPosition> = [center];
+      const gameWithHole = createGameState(
+        players,
+        boardWithHole
+      ).unsafelyUnwrap();
       expect(
         getReachablePositionsInDirection(
           gameWithHole,
@@ -222,7 +215,7 @@ describe("movementChecking", () => {
         player1,
         player1TurnGame,
         center
-      ) as Game;
+      ).unsafelyUnwrap();
       expect(playerCanMove(player2, gameWithPenguinPlaced)).toEqual(false);
     });
 
@@ -240,7 +233,7 @@ describe("movementChecking", () => {
       const holeGameWithPenguinPlaced = placePenguin(player1, holeGame, {
         col: 2,
         row: 1,
-      }) as Game;
+      }).unsafelyUnwrap();
       expect(playerCanMove(player1, holeGameWithPenguinPlaced)).toEqual(false);
     });
 
@@ -256,17 +249,17 @@ describe("movementChecking", () => {
         board: holeBoard,
       };
       const holeGameWithPenguinPlaced = {
-        ...(placePenguin(player1, holeGame, {
+        ...placePenguin(player1, holeGame, {
           col: 2,
           row: 1,
-        }) as Game),
+        }).unsafelyUnwrap(),
         curPlayerIndex: 1,
       };
       const holeGameWithPenguinsPlaced = placePenguin(
         player2,
         holeGameWithPenguinPlaced,
         { col: 2, row: 0 }
-      ) as Game;
+      ).unsafelyUnwrap();
       expect(playerCanMove(player1, holeGameWithPenguinsPlaced)).toEqual(false);
     });
 
@@ -275,7 +268,7 @@ describe("movementChecking", () => {
         player1,
         player1TurnGame,
         center
-      ) as Game;
+      ).unsafelyUnwrap();
       expect(playerCanMove(player1, gameWithPenguinPlaced)).toEqual(true);
     });
   });
@@ -297,10 +290,10 @@ describe("movementChecking", () => {
         board: holeBoard,
       };
       const holeGameWithPenguinPlaced = {
-        ...(placePenguin(player2, holeGame, {
+        ...placePenguin(player2, holeGame, {
           col: 2,
           row: 1,
-        }) as Game),
+        }).unsafelyUnwrap(),
         curPlayerIndex: 1,
       };
       expect(anyPlayersCanMove(holeGameWithPenguinPlaced)).toEqual(false);
@@ -318,17 +311,17 @@ describe("movementChecking", () => {
         board: holeBoard,
       };
       const holeGameWithPenguinPlaced = {
-        ...(placePenguin(player1, holeGame, {
+        ...placePenguin(player1, holeGame, {
           col: 2,
           row: 1,
-        }) as Game),
+        }).unsafelyUnwrap(),
         curPlayerIndex: 1,
       };
       const holeGameWithPenguinsPlaced = placePenguin(
         player2,
         holeGameWithPenguinPlaced,
         { col: 2, row: 0 }
-      ) as Game;
+      ).unsafelyUnwrap();
       expect(anyPlayersCanMove(holeGameWithPenguinsPlaced)).toEqual(false);
     });
 
@@ -337,7 +330,7 @@ describe("movementChecking", () => {
         player1,
         player1TurnGame,
         center
-      ) as Game;
+      ).unsafelyUnwrap();
       expect(anyPlayersCanMove(gameWithPenguinPlaced)).toEqual(true);
     });
   });

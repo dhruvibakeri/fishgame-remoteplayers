@@ -455,7 +455,8 @@ const addScoresOfPlacedPenguins = (game: Game): Game => {
     const penguinColor: PenguinColor = positionsPerColor[0];
     const scoreOfPlacedPenguins = positionsPerColor[1].reduce<number>(
       (sum: number, boardPosition: BoardPosition) =>
-        sum + (getTileOnBoard(game.board, boardPosition) as Tile).numOfFish,
+        sum +
+        getTileOnBoard(game.board, boardPosition).unsafelyUnwrap().numOfFish,
       0
     );
 

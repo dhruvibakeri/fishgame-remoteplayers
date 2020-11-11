@@ -1,4 +1,3 @@
-import { err, ok } from "true-myth/result";
 import { Board, BoardPosition, Tile } from "../../board";
 import {
   addHolesToBoard,
@@ -10,10 +9,8 @@ import {
   setTileOnBoard,
   setTileToHole,
 } from "../src/boardCreation";
-import {
-  InvalidBoardConstraintsError,
-  InvalidPositionError,
-} from "../types/errors";
+import { ok, err } from "true-myth/result";
+import { IllegalBoardError, IllegalPositionError } from "../types/errors";
 
 describe("boardCreation", () => {
   const invalidPosition: BoardPosition = { row: 2, col: 2 };
@@ -95,7 +92,7 @@ describe("boardCreation", () => {
   describe("getTileOnBoard", () => {
     it("rejects an invalid tile position", () => {
       expect(getTileOnBoard(board, invalidPosition)).toEqual(
-        err(new InvalidPositionError(board, invalidPosition))
+        err(new IllegalPositionError(board, invalidPosition))
       );
     });
 
@@ -107,7 +104,7 @@ describe("boardCreation", () => {
   describe("setTileOnBoard", () => {
     it("rejects an invalid tile position", () => {
       expect(setTileOnBoard(board, invalidPosition, 1)).toEqual(
-        err(new InvalidPositionError(board, invalidPosition))
+        err(new IllegalPositionError(board, invalidPosition))
       );
     });
 
@@ -141,7 +138,7 @@ describe("boardCreation", () => {
   describe("setTileToHole", () => {
     it("rejects an invalid tile position", () => {
       expect(setTileToHole(board, invalidPosition)).toEqual(
-        err(new InvalidPositionError(board, invalidPosition))
+        err(new IllegalPositionError(board, invalidPosition))
       );
     });
 
@@ -157,7 +154,7 @@ describe("boardCreation", () => {
   describe("addHolesToBoard", () => {
     it("rejects a hole position not on the board", () => {
       expect(addHolesToBoard(board, invalidHolePositions)).toEqual(
-        err(new InvalidPositionError(board, invalidHolePositions[0]))
+        err(new IllegalPositionError(board, invalidHolePositions[0]))
       );
     });
 
@@ -173,13 +170,13 @@ describe("boardCreation", () => {
   describe("createBlankBoard", () => {
     it("rejects invalid dimensions", () => {
       expect(createBlankBoard(0, 0, 1)).toEqual(
-        err(new InvalidBoardConstraintsError(0, 0))
+        err(new IllegalBoardError(0, 0))
       );
     });
 
     it("rejects board with more than 25 tiles", () => {
       expect(createBlankBoard(6, 5, 1)).toEqual(
-        err(new InvalidBoardConstraintsError(6, 5))
+        err(new IllegalBoardError(6, 5))
       );
     });
 
@@ -192,29 +189,25 @@ describe("boardCreation", () => {
   describe("createHoledOneFishBoard", () => {
     it("rejects invalid dimensions", () => {
       expect(createHoledOneFishBoard(-1, -3, [], 1)).toEqual(
-        err(new InvalidBoardConstraintsError(-1, 0))
+        err(new IllegalBoardError(-1, 0))
       );
     });
 
     it("rejects invalid hole positions", () => {
       expect(createHoledOneFishBoard(2, 2, invalidHolePositions, 1)).toEqual(
-        err(new InvalidPositionError(board, invalidHolePositions[0]))
+        err(new IllegalPositionError(board, invalidHolePositions[0]))
       );
     });
 
     it("rejects a number of tiles after adding holes that is lower than the minimum one fish tiles", () => {
       expect(createHoledOneFishBoard(2, 2, validHolePositions, 4)).toEqual(
-        err(
-          new InvalidBoardConstraintsError(2, 2, validHolePositions.length, 4)
-        )
+        err(new IllegalBoardError(2, 2, validHolePositions.length, 4))
       );
     });
 
     it("rejects a negative number of minimum 1-fish tiles", () => {
       expect(createHoledOneFishBoard(2, 2, validHolePositions, -1)).toEqual(
-        err(
-          new InvalidBoardConstraintsError(2, 2, validHolePositions.length, -1)
-        )
+        err(new IllegalBoardError(2, 2, validHolePositions.length, -1))
       );
     });
 

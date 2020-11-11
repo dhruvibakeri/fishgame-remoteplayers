@@ -2,6 +2,7 @@ import { Game, getCurrentPlayer, MovementGame, Player } from "../../state";
 import { GameTree, Movement, MovementToResultingTree } from "../../game-tree";
 import { movePenguin, positionsAreEqual } from "./penguinPlacement";
 import { IllegalMovementError } from "../types/errors";
+import { Result, ok, err } from "true-myth/result";
 
 /**
  * Checks if given movement can be made with the given GameTree node. If it can,
@@ -15,7 +16,7 @@ import { IllegalMovementError } from "../types/errors";
 const isMovementLegal = (
   gameTree: GameTree,
   movement: Movement
-): MovementGame | IllegalMovementError => {
+): Result<MovementGame, IllegalMovementError> => {
   // Determine if the movement is legal by comparing it to the possible
   // movements within the GameTree's potential moves and seeing if it
   // exists there.
@@ -32,17 +33,33 @@ const isMovementLegal = (
   );
 
   if (!isLegalMove) {
-    return new IllegalMovementError(gameTree, movement);
+    return err(
+      new IllegalMovementError(
+        gameTree.gameState,
+        getCurrentPlayer(gameTree.gameState),
+        movement.startPosition,
+        movement.endPosition,
+        "Movement is not specified by the game tree."
+      )
+    );
   }
 
-  const newGameState = movePenguin(
+  return movePenguin(
     gameTree.gameState,
     getCurrentPlayer(gameTree.gameState),
     movement.startPosition,
     movement.endPosition
-  ) as MovementGame;
-
-  return newGameState;
+  ).orElse(() =>
+    err(
+      new IllegalMovementError(
+        gameTree.gameState,
+        getCurrentPlayer(gameTree.gameState),
+        movement.startPosition,
+        movement.endPosition,
+        "Movement is not specified by the game tree."
+      )
+    )
+  );
 };
 
 /**

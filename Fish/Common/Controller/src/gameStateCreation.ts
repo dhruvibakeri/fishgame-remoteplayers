@@ -1,10 +1,8 @@
 import { Player, Game, MovementGame } from "../../state";
 import { Board, BoardPosition, PenguinColor } from "../../board";
-import {
-  InvalidGameStateError,
-  InvalidNumberOfPlayersError,
-} from "../types/errors";
+import { IllegalGameStateError } from "../types/errors";
 import { currentPlayerHasMoves } from "./validation";
+import { Result, err, ok } from "true-myth/result";
 
 const MAX_NUMBER_OF_PLAYERS = 4;
 const MIN_NUMBER_OF_PLAYERS = 2;
@@ -144,25 +142,37 @@ const isValidNumberOfPlayers = (numOfPlayers: number): boolean =>
 const createGameState = (
   players: Array<Player>,
   board: Board
-): Game | InvalidNumberOfPlayersError | InvalidGameStateError => {
+): Result<Game, IllegalGameStateError> => {
   // Error check whether the number of players given is valid.
   if (!isValidNumberOfPlayers(players.length)) {
-    return new InvalidNumberOfPlayersError(players.length);
+    err(
+      new IllegalGameStateError(
+        players,
+        board,
+        `Invalid number of players specified for game: ${players.length}`
+      )
+    );
   }
 
   // Error check that all player colors are unique
   if (new Set(players.map((player) => player.color)).size !== players.length) {
-    return new InvalidGameStateError();
+    err(
+      new IllegalGameStateError(
+        players,
+        board,
+        `Not all player colors are unique`
+      )
+    );
   }
 
-  return {
+  return ok({
     players,
     board,
     curPlayerIndex: 0,
     penguinPositions: createEmptyPenguinPositions(players),
     remainingUnplacedPenguins: buildUnplacedPenguinMap(players),
     scores: createEmptyScoreSheet(players),
-  };
+  });
 };
 
 /**
@@ -172,15 +182,11 @@ const createGameState = (
  */
 const createTestGameState = (
   board: Board
-): Game | InvalidNumberOfPlayersError | InvalidGameStateError => {
+): Result<Game, IllegalGameStateError> => {
   const samplePlayer1: Player = { name: "foo", color: PenguinColor.Black };
   const samplePlayer2: Player = { name: "bar", color: PenguinColor.Brown };
   const samplePlayers: Array<Player> = [samplePlayer1, samplePlayer2];
-  const game:
-    | Game
-    | InvalidNumberOfPlayersError
-    | InvalidGameStateError = createGameState(samplePlayers, board);
-  return game;
+  return createGameState(samplePlayers, board);
 };
 
 export {

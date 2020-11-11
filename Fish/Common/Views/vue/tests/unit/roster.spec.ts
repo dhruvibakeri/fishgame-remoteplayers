@@ -12,13 +12,18 @@ describe("Router.vue", () => {
   const players: Array<Player> = [player1, player2, player3];
   const holePosition: BoardPosition = { col: 1, row: 0 };
   const holePositions: Array<BoardPosition> = [holePosition];
-  const board: Board = createHoledOneFishBoard(2, 2, holePositions, 1) as Board;
+  const board: Board = createHoledOneFishBoard(
+    2,
+    2,
+    holePositions,
+    1
+  ).unsafelyUnwrap();
   const penguinPositions: Map<PenguinColor, Array<BoardPosition>> = new Map([
     [player1.color, [{ col: 0, row: 0 }]],
     [player2.color, [{ col: 1, row: 1 }]],
   ]);
   const game: GameState = {
-    ...(createGameState(players, board) as GameState),
+    ...createGameState(players, board).unsafelyUnwrap(),
     penguinPositions,
   };
 
