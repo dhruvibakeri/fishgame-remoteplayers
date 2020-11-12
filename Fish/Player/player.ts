@@ -27,12 +27,14 @@ const gameIsStarting = (game: Game): void => {
  *
  * @param game current state of the game for the player to make a placement on
  */
-const makePlacement = (game: Game): BoardPosition => {
+const makePlacement = (game: Game): Promise<BoardPosition> => {
   // The player assumes that the game given to them by the referee is
   // valid in that it contains enough positions for all of each player's
   // placements, in which case this strategy must be able to find an
   // available BoardPosition.
-  return getNextPenguinPlacementPosition(game).unwrapOrElse(null);
+  return Promise.resolve(
+    getNextPenguinPlacementPosition(game).unsafelyUnwrap()
+  );
 };
 
 /**
@@ -42,11 +44,13 @@ const makePlacement = (game: Game): BoardPosition => {
  *
  * @param game current state of the game for the player to make a move on
  */
-const makeMovement = (game: Game): Movement => {
+const makeMovement = (game: Game): Promise<Movement> => {
   // The player assumes the given game is a valid MovementGame, as it's being
   // handed to the player directly from the Referee. Since the given game is a
   // valid MovementGame the function will return a valid Movement.
-  return chooseNextAction(game as MovementGame, LOOKAHEAD_DEPTH).unwrapOrElse(null);
+  return Promise.resolve(
+    chooseNextAction(game as MovementGame, LOOKAHEAD_DEPTH).unsafelyUnwrap()
+  );
 };
 
 /**

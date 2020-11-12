@@ -24,7 +24,10 @@ import { GameDebrief, TournamentPlayer } from "../../player-interface";
 import { createSamplePlayer } from "../../../Player/player";
 import { Game, MovementGame, Player } from "../../state";
 import { Board, BoardPosition, PenguinColor } from "../../board";
-import { createHoledOneFishBoard, createNumberedBoard } from "../src/boardCreation";
+import {
+  createHoledOneFishBoard,
+  createNumberedBoard,
+} from "../src/boardCreation";
 import { createGameState } from "../src/gameStateCreation";
 import { Movement } from "../../game-tree";
 import { IllegalBoardError, IllegalGameStateError } from "../types/errors";
@@ -35,6 +38,11 @@ interface IteratorResponse<T> {
   readonly value?: T;
   readonly done: boolean;
 }
+
+const delay = async <T>(ret: T, timeout: number): Promise<T> => {
+  await new Promise((resolve) => setTimeout(resolve, timeout));
+  return ret;
+};
 
 const actionIterator = <T>(actions: Array<T>) => {
   let nextIndex = 0;
@@ -55,10 +63,15 @@ const actionIterator = <T>(actions: Array<T>) => {
   return iterator;
 };
 
+afterAll((done) => {
+  done();
+});
+
 const createDummyPlayer = (
   name: string,
   placements: Array<BoardPosition>,
-  moves: Array<Movement>
+  moves: Array<Movement>,
+  timeout: number = 0
 ): TournamentPlayer => {
   const placementIterator = actionIterator<BoardPosition>(placements);
   const movesIterator = actionIterator<Movement>(moves);
@@ -66,8 +79,8 @@ const createDummyPlayer = (
   return {
     name,
     gameIsStarting: jest.fn(),
-    makePlacement: () => placementIterator.next().value,
-    makeMovement: () => movesIterator.next().value,
+    makePlacement: () => delay(placementIterator.next().value, timeout),
+    makeMovement: () => delay(movesIterator.next().value, timeout),
     gameHasEnded: jest.fn(),
     disqualifyMe: jest.fn(),
   };
@@ -407,7 +420,15 @@ describe("referee", () => {
           cols: 4,
           rows: 4,
         })
-      ).toEqual(err(new IllegalGameStateError([], createHoledOneFishBoard(4, 4, [], 1).unsafelyUnwrap(), "Invalid number of players specified for game: 0")));
+      ).toEqual(
+        err(
+          new IllegalGameStateError(
+            [],
+            createHoledOneFishBoard(4, 4, [], 1).unsafelyUnwrap(),
+            "Invalid number of players specified for game: 0"
+          )
+        )
+      );
     });
   });
 
@@ -499,7 +520,7 @@ describe("referee", () => {
         game: twoGameAfterPlacements,
       };
 
-      expect(runPlacementRounds(initialRefereeState)).toEqual(
+      return expect(runPlacementRounds(initialRefereeState)).resolves.toEqual(
         expectedRefereeState
       );
     });
@@ -528,9 +549,33 @@ describe("referee", () => {
         cheatingPlayers: [player2],
       };
 
-      expect(runPlacementRounds(initialRefereeState)).toEqual(
+      return expect(runPlacementRounds(initialRefereeState)).resolves.toEqual(
         expectedRefereeState
       );
+    });
+
+    it("detects failing players who timed out", () => {
+      const tournamentPlayer1: TournamentPlayer = createSamplePlayer(
+        player1Name
+      );
+      const tournamentPlayer2: TournamentPlayer = createDummyPlayer(
+        player2Name,
+        player2TwoGamePlacementsDuplicate,
+        player2TwoGameMovements,
+        10000
+      );
+      const initialRefereeState: RefereeState = {
+        game: numberedGame,
+        tournamentPlayers: [tournamentPlayer1, tournamentPlayer2],
+        cheatingPlayers: [],
+        failingPlayers: [],
+      };
+
+      return runPlacementRounds(initialRefereeState, 1000).then((result) => {
+        expect(result.failingPlayers).toEqual([player2]);
+        expect(result.cheatingPlayers).toEqual([]);
+        expect(result.game.players).toEqual([player1]);
+      });
     });
   });
 
@@ -647,7 +692,7 @@ describe("referee", () => {
         game: twoGameFinalGame,
       };
 
-      expect(runMovementRounds(initialRefereeState)).toEqual(
+      return expect(runMovementRounds(initialRefereeState)).resolves.toEqual(
         expectedRefereeState
       );
     });
@@ -731,9 +776,33 @@ describe("referee", () => {
         cheatingPlayers: [player2],
       };
 
-      expect(runMovementRounds(initialRefereeState)).toEqual(
+      return expect(runMovementRounds(initialRefereeState)).resolves.toEqual(
         expectedRefereeState
       );
+    });
+
+    it("detects failing players who timed out", () => {
+      const tournamentPlayer1: TournamentPlayer = createSamplePlayer(
+        player1Name
+      );
+      const tournamentPlayer2: TournamentPlayer = createDummyPlayer(
+        player2Name,
+        player2TwoGamePlacementsDuplicate,
+        player2TwoGameMovements,
+        10000
+      );
+      const initialRefereeState: RefereeStateWithMovementGame = {
+        tournamentPlayers: [tournamentPlayer1, tournamentPlayer2],
+        game: twoGameAfterPlacements,
+        failingPlayers: [],
+        cheatingPlayers: [],
+      };
+
+      return runMovementRounds(initialRefereeState, 1000).then((result) => {
+        expect(result.failingPlayers).toEqual([player2]);
+        expect(result.cheatingPlayers).toEqual([]);
+        expect(result.game.players).toEqual([player1]);
+      });
     });
   });
 
@@ -811,9 +880,7 @@ describe("referee", () => {
     });
 
     it("rejects not enough positions for the number of placements", () => {
-      expect(boardIsBigEnough(2, { rows: 2, cols: 2 })).toEqual(
-        false
-      );
+      expect(boardIsBigEnough(2, { rows: 2, cols: 2 })).toEqual(false);
     });
   });
 
@@ -829,7 +896,7 @@ describe("referee", () => {
 
     it("runs an entire game", () => {
       expect(runGame(players, { cols: 4, rows: 4 })).toEqual(
-        ok(expectedGameDebrief)
+        ok(Promise.resolve(expectedGameDebrief))
       );
     });
 
@@ -841,10 +908,13 @@ describe("referee", () => {
 
     it("rejects an invalid number of players", () => {
       expect(runGame([], { cols: 4, rows: 3 })).toEqual(
-        err(new IllegalGameStateError(
+        err(
+          new IllegalGameStateError(
             [],
             createHoledOneFishBoard(4, 3, [], 1).unsafelyUnwrap(),
-            "Invalid number of players specified for game: 0"))
+            "Invalid number of players specified for game: 0"
+          )
+        )
       );
     });
   });

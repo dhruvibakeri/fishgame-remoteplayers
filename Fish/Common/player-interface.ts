@@ -73,7 +73,7 @@ type GameIsStarting = (game: Game) => void;
  * @return the BoardPosition which represents where the player wishes to place
  * their penguin.
  */
-type MakePlacement = (game: Game) => BoardPosition;
+type MakePlacement = (game: Game) => Promise<BoardPosition>;
 
 /**
  * A MakeMovement call is meant to expose to the referee how to take its
@@ -89,7 +89,7 @@ type MakePlacement = (game: Game) => BoardPosition;
  * @return the Movement which represents the starting and ending positions on
  * the board of the player's turn.
  */
-type MakeMovement = (game: Game) => Movement;
+type MakeMovement = (game: Game) => Promise<Movement>;
 
 /**
  * The GameHasEnded call allows the referee to send the player a debrief
