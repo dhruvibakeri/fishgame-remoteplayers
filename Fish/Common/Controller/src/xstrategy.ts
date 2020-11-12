@@ -7,7 +7,7 @@ import {
 import { Game, MovementGame } from "../../state";
 import { isValidInputState, isError } from "./validation";
 import { gameIsMovementGame } from "./gameTreeCreation";
-import { chooseNextAction } from "../../../Player/strategy";
+import { chooseNextAction } from "./strategy";
 import { Movement } from "../../game-tree";
 
 readStdin<InputDepthState>()

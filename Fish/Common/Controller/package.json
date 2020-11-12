@@ -33,13 +33,7 @@
     "preset": "ts-jest",
     "testEnvironment": "node",
     "maxWorkers": "1",
-    "verbose": true,
-    "modulePaths": [
-      "<rootDir>/src"
-    ],
-    "moduleDirectories": [
-      "<rootDir>/node_modules"
-    ]
+    "verbose": true
   },
   "license": "ISC"
 }

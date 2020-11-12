@@ -19,7 +19,7 @@ import {
   addScoresOfPlacedPenguins,
   numberOfPenguinPlacements,
   runGame,
-} from "../../../Admin/referee";
+} from "../src/referee";
 import { GameDebrief, TournamentPlayer } from "../../player-interface";
 import { createSamplePlayer } from "../../../Player/player";
 import { Game, MovementGame, Player } from "../../state";
@@ -28,6 +28,8 @@ import { createHoledOneFishBoard, createNumberedBoard } from "../src/boardCreati
 import { createGameState } from "../src/gameStateCreation";
 import { Movement } from "../../game-tree";
 import { IllegalBoardError, IllegalGameStateError } from "../types/errors";
+import { Result } from "true-myth";
+const { ok, err } = Result;
 
 interface IteratorResponse<T> {
   readonly value?: T;
@@ -387,7 +389,7 @@ describe("referee", () => {
           cols: 4,
           rows: 4,
         })
-      ).toEqual(expectedGameState);
+      ).toEqual(ok(expectedGameState));
     });
 
     it("rejects invalid boardDimensions", () => {
@@ -396,7 +398,7 @@ describe("referee", () => {
           cols: 0,
           rows: 2,
         })
-      ).toEqual(new IllegalBoardError(0, 2));
+      ).toEqual(err(new IllegalBoardError(0, 2)));
     });
 
     it("rejects an invalid number of players", () => {
@@ -405,7 +407,7 @@ describe("referee", () => {
           cols: 4,
           rows: 4,
         })
-      ).toEqual(new IllegalGameStateError([], createHoledOneFishBoard(4, 4, [], 1).unsafelyUnwrap()));
+      ).toEqual(err(new IllegalGameStateError([], createHoledOneFishBoard(4, 4, [], 1).unsafelyUnwrap(), "Invalid number of players specified for game: 0")));
     });
   });
 
@@ -810,7 +812,7 @@ describe("referee", () => {
 
     it("rejects not enough positions for the number of placements", () => {
       expect(boardIsBigEnough(2, { rows: 2, cols: 2 })).toEqual(
-        new IllegalBoardError(2, 2)
+        false
       );
     });
   });
@@ -827,19 +829,22 @@ describe("referee", () => {
 
     it("runs an entire game", () => {
       expect(runGame(players, { cols: 4, rows: 4 })).toEqual(
-        expectedGameDebrief
+        ok(expectedGameDebrief)
       );
     });
 
     it("rejects not enough positions for the number of placements", () => {
       expect(runGame(players, { cols: 2, rows: 2 })).toEqual(
-        new IllegalBoardError(2, 2)
+        err(new IllegalBoardError(2, 2))
       );
     });
 
     it("rejects an invalid number of players", () => {
       expect(runGame([], { cols: 4, rows: 3 })).toEqual(
-        new IllegalGameStateError([], createHoledOneFishBoard(4, 3, [], 1).unsafelyUnwrap())
+        err(new IllegalGameStateError(
+            [],
+            createHoledOneFishBoard(4, 3, [], 1).unsafelyUnwrap(),
+            "Invalid number of players specified for game: 0"))
       );
     });
   });

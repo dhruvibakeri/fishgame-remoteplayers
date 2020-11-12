@@ -1,6 +1,6 @@
 import { BoardPosition } from "../Common/board";
 import { Game, MovementGame } from "../Common/state";
-import { getNextPenguinPlacementPosition, chooseNextAction } from "./strategy";
+import { getNextPenguinPlacementPosition, chooseNextAction } from "../Common/Controller/src/strategy";
 import { Movement } from "../Common/game-tree";
 import { GameDebrief, TournamentPlayer } from "../Common/player-interface";
 

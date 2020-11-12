@@ -15,13 +15,16 @@ import {
   minArray,
   maxArray,
   tieBreakMovements,
-} from "../../../Player/strategy";
-import { IllegalMovementError, IllegalPlacementError } from "../types/errors";
+} from "../src/strategy";
+import { IllegalPlacementError } from "../types/errors";
 import { inputStateToGameState } from "../src/testHarnessConversion";
 import { InputPlayer } from "../src/testHarnessInput";
 import { createGameTree } from "../src/gameTreeCreation";
 import { GameTree, Movement } from "../../game-tree";
 import { movePenguin } from "../src/penguinPlacement";
+import { Result, Maybe } from "true-myth";
+const { ok, err } = Result;
+const { just } = Maybe;
 
 describe("strategy", () => {
   const player1: Player = {
@@ -207,42 +210,42 @@ describe("strategy", () => {
 
   describe("getNextPenguinPlacementPosition", () => {
     it("returns next open position in the zig zag ordering", () => {
-      expect(getNextPenguinPlacementPosition(game)).toEqual(placement1Position);
+      expect(getNextPenguinPlacementPosition(game)).toEqual(just(placement1Position));
       expect(getNextPenguinPlacementPosition(gameAfterPlacement1)).toEqual(
-        placement2Position
+        just(placement2Position)
       );
     });
 
     it("skips over holes", () => {
       expect(
         getNextPenguinPlacementPosition(gameAfterPlacement1WithHole)
-      ).toEqual(placement2PositionWithHole);
+      ).toEqual(just(placement2PositionWithHole));
     });
 
     it("zig zags back to the first position of the next row", () => {
       expect(
         getNextPenguinPlacementPosition(gameAfterPlacement2WithHole)
-      ).toEqual(placement3PositionWithHole);
+      ).toEqual(just(placement3PositionWithHole));
     });
   });
 
   describe("placeNextPenguin", () => {
     it("places at the next open position in the zig zag ordering", () => {
-      expect(placeNextPenguin(game)).toEqual(gameAfterPlacement1);
+      expect(placeNextPenguin(game)).toEqual(ok(gameAfterPlacement1));
       expect(placeNextPenguin(gameAfterPlacement1)).toEqual(
-        gameAfterPlacement2
+        ok(gameAfterPlacement2)
       );
     });
 
     it("skips over holes", () => {
       expect(placeNextPenguin(gameAfterPlacement1WithHole)).toEqual(
-        gameAfterPlacement2WithHole
+        ok(gameAfterPlacement2WithHole)
       );
     });
 
     it("zig zags back to the first position of the next row", () => {
       expect(placeNextPenguin(gameAfterPlacement2WithHole)).toEqual(
-        gameAfterPlacement3WithHole
+        ok(gameAfterPlacement3WithHole)
       );
     });
 
@@ -256,11 +259,12 @@ describe("strategy", () => {
         remainingUnplacedPenguins: noMorePenguinsRemaining,
       };
       expect(placeNextPenguin(gameWithNoMorePenguinsRemaining)).toEqual(
-        new IllegalPlacementError(
+        err(new IllegalPlacementError(
           gameWithNoMorePenguinsRemaining,
           player1,
-          placement1Position
-        )
+          placement1Position,
+            "Player has no more penguins to place."
+        ))
       );
     });
   });
@@ -268,12 +272,12 @@ describe("strategy", () => {
   describe("placeAllPenguinsZigZag", () => {
     it("returns error if there aren't enough spaces to place penguins", () => {
       expect(placeAllPenguinsZigZag(smallGame)).toEqual(
-        new IllegalPlacementError(smallGame, player1, null)
+        err(new IllegalPlacementError(smallGame, player1, null, "No more placements available"))
       );
     });
 
     it("places all penguins in the zig zag pattern", () => {
-      expect(placeAllPenguinsZigZag(game)).toEqual(gameAfterAllPlacement);
+      expect(placeAllPenguinsZigZag(game)).toEqual(ok(gameAfterAllPlacement));
     });
   });
 

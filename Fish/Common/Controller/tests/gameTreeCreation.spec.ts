@@ -9,6 +9,8 @@ import {
 } from "../src/gameTreeCreation";
 import { GameTree, Movement, MovementToResultingTree } from "../../game-tree";
 import { IllegalGameTreeError } from "../types/errors";
+import { Result } from "true-myth";
+const { err } = Result;
 
 describe("gameTreeCreation", () => {
   const player1: Player = { name: "foo", color: PenguinColor.Black };
@@ -181,7 +183,7 @@ describe("gameTreeCreation", () => {
 
     it("rejects a non MovementGame", () => {
       expect(createGameTree(gameWithUnlacedPenguins)).toEqual(
-        new IllegalGameTreeError(gameWithUnlacedPenguins)
+        err(new IllegalGameTreeError(gameWithUnlacedPenguins, "Invalid game for tree generation. Not all penguins have been placed"))
       );
     });
   });

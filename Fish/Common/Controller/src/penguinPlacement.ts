@@ -22,8 +22,8 @@ import {
   skipToNextActivePlayer,
 } from "./gameStateCreation";
 
-import { Result, ok, err } from "true-myth/result";
-import { start } from "repl";
+import { Result } from "true-myth";
+const { ok, err } = Result;
 
 /**
  * Adds score to current player based on the number of fish at the given tile that

@@ -10,7 +10,9 @@ import { getReachablePositions } from "./movementChecking";
 import { movePenguin } from "./penguinPlacement";
 import { IllegalGameTreeError } from "../types/errors";
 import { skipToNextActivePlayer } from "./gameStateCreation";
-import { Result, ok, err } from "true-myth/result";
+import { Result } from "true-myth";
+
+const { ok, err } = Result;
 
 /**
  * Given a Game state, determine if the Game is a MovementGame i.e. all players

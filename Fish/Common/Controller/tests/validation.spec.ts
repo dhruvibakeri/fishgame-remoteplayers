@@ -21,7 +21,9 @@ import { Game, MovementGame, Player } from "../../state";
 import { createGameState } from "../src/gameStateCreation";
 import { IllegalMovementError } from "../types/errors";
 import { InputPlayer, InputState, InputBoard } from "../src/testHarnessInput";
-import { placeAllPenguinsZigZag } from "../../../Player/strategy";
+import { placeAllPenguinsZigZag } from "../src/strategy";
+import { Result } from "true-myth";
+const { ok, err } = Result;
 
 describe("validation", () => {
   const player1: Player = { name: "foo", color: PenguinColor.Black };
@@ -297,7 +299,8 @@ describe("validation", () => {
         game,
         player1,
         invalidStartPosition,
-        validEndPosition
+        validEndPosition,
+          "Start and end positions do not form a straight, uninterrupted path."
       );
       expect(
         validatePenguinMove(
@@ -306,7 +309,7 @@ describe("validation", () => {
           invalidStartPosition,
           validEndPosition
         )
-      ).toEqual(expectedError);
+      ).toEqual(err(expectedError));
     });
 
     it("rejects an end position outside of the board", () => {
@@ -315,7 +318,8 @@ describe("validation", () => {
         game,
         player1,
         validStartPosition,
-        invalidEndPosition
+        invalidEndPosition,
+          "Start and end positions do not form a straight, uninterrupted path."
       );
       expect(
         validatePenguinMove(
@@ -324,7 +328,7 @@ describe("validation", () => {
           validStartPosition,
           invalidEndPosition
         )
-      ).toEqual(expectedError);
+      ).toEqual(err(expectedError));
     });
 
     it("rejects a player trying to move from a starting position not containing one of their penguins", () => {
@@ -333,7 +337,8 @@ describe("validation", () => {
         game,
         player1,
         invalidStartPosition,
-        validEndPosition
+        validEndPosition,
+          "Start and end positions do not form a straight, uninterrupted path."
       );
       expect(
         validatePenguinMove(
@@ -342,7 +347,7 @@ describe("validation", () => {
           invalidStartPosition,
           validEndPosition
         )
-      ).toEqual(expectedError);
+      ).toEqual(err(expectedError));
     });
 
     it("rejects a player trying to move to a position not reachable from the start", () => {
@@ -351,7 +356,8 @@ describe("validation", () => {
         game,
         player1,
         validStartPosition,
-        invalidEndPosition
+        invalidEndPosition,
+          "Start and end positions do not form a straight, uninterrupted path."
       );
       expect(
         validatePenguinMove(
@@ -360,7 +366,7 @@ describe("validation", () => {
           validStartPosition,
           invalidEndPosition
         )
-      ).toEqual(expectedError);
+      ).toEqual(err(expectedError));
     });
 
     it("rejects a player trying to move to a hole", () => {
@@ -368,11 +374,12 @@ describe("validation", () => {
         game,
         player1,
         validEndPosition,
-        holePosition
+        holePosition,
+          "Start and end positions do not form a straight, uninterrupted path."
       );
       expect(
         validatePenguinMove(game, player1, validEndPosition, holePosition)
-      ).toEqual(expectedError);
+      ).toEqual(err(expectedError));
     });
 
     it("rejects a player trying to move to a position with another penguin present", () => {
@@ -380,7 +387,8 @@ describe("validation", () => {
         game,
         player1,
         validStartPosition,
-        validEndPosition
+        validEndPosition,
+          "Start and end positions do not form a straight, uninterrupted path."
       );
       expect(
         validatePenguinMove(
@@ -389,13 +397,13 @@ describe("validation", () => {
           validStartPosition,
           validEndPosition
         )
-      ).toEqual(expectedError);
+      ).toEqual(err(expectedError));
     });
 
     it("accepts a valid move", () => {
       expect(
         validatePenguinMove(game, player1, validStartPosition, validEndPosition)
-      ).toEqual(game);
+      ).toEqual(ok(game));
     });
   });
 

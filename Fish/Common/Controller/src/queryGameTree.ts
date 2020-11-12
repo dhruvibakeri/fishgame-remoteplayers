@@ -2,7 +2,8 @@ import { Game, getCurrentPlayer, MovementGame, Player } from "../../state";
 import { GameTree, Movement, MovementToResultingTree } from "../../game-tree";
 import { movePenguin, positionsAreEqual } from "./penguinPlacement";
 import { IllegalMovementError } from "../types/errors";
-import { Result, ok, err } from "true-myth/result";
+import { Result } from "true-myth";
+const { ok, err } = Result;
 
 /**
  * Checks if given movement can be made with the given GameTree node. If it can,
@@ -13,7 +14,7 @@ import { Result, ok, err } from "true-myth/result";
  * @param movement Movement to check if legal or not
  * @returns Game state if movement is legal, returns IllegalMovementError if not legal
  */
-const isMovementLegal = (
+const checkMovementLegal = (
   gameTree: GameTree,
   movement: Movement
 ): Result<MovementGame, IllegalMovementError> => {
@@ -84,4 +85,4 @@ const mapOverReachableStates = <T = unknown>(
     .map(fn);
 };
 
-export { isMovementLegal, mapOverReachableStates };
+export { checkMovementLegal, mapOverReachableStates };

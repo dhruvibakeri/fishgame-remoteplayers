@@ -2,7 +2,9 @@ import { Player, Game, MovementGame } from "../../state";
 import { Board, BoardPosition, PenguinColor } from "../../board";
 import { IllegalGameStateError } from "../types/errors";
 import { currentPlayerHasMoves } from "./validation";
-import { Result, err, ok } from "true-myth/result";
+import { Result } from "true-myth";
+
+const { ok, err } = Result;
 
 const MAX_NUMBER_OF_PLAYERS = 4;
 const MIN_NUMBER_OF_PLAYERS = 2;
@@ -145,7 +147,7 @@ const createGameState = (
 ): Result<Game, IllegalGameStateError> => {
   // Error check whether the number of players given is valid.
   if (!isValidNumberOfPlayers(players.length)) {
-    err(
+    return err(
       new IllegalGameStateError(
         players,
         board,
@@ -156,7 +158,7 @@ const createGameState = (
 
   // Error check that all player colors are unique
   if (new Set(players.map((player) => player.color)).size !== players.length) {
-    err(
+    return err(
       new IllegalGameStateError(
         players,
         board,

@@ -17,14 +17,16 @@ import {
   createBlankBoard,
   createHoledOneFishBoard,
 } from "../src/boardCreation";
-import { placeAllPenguinsZigZag } from "../../../Player/strategy";
+import { placeAllPenguinsZigZag } from "../src/strategy";
+import { Result } from "true-myth";
+const { ok, err } = Result;
 
 describe("gameStateCreation", () => {
   const player1: Player = { name: "foo", color: PenguinColor.Black };
   const player2: Player = { name: "bar", color: PenguinColor.Brown };
   const player3: Player = { name: "baz", color: PenguinColor.Red };
   const player4: Player = { name: "bat", color: PenguinColor.White };
-  const players: Array<Player> = [player1, player2, player3, player4];
+  const samplePlayers: Array<Player> = [player1, player2, player3, player4];
 
   const board: Board = createBlankBoard(2, 2, 1).unsafelyUnwrap();
 
@@ -173,14 +175,14 @@ describe("gameStateCreation", () => {
     it("rejects an empty list of players", () => {
       const players: Array<Player> = [];
       expect(createGameState(players, board)).toEqual(
-        new IllegalGameStateError(players, board)
+        err(new IllegalGameStateError(players, board, "Invalid number of players specified for game: 0"))
       );
     });
 
     it("rejects a single player", () => {
       const players: Array<Player> = [player1];
       expect(createGameState(players, board)).toEqual(
-        new IllegalGameStateError(players, board)
+        err(new IllegalGameStateError(players, board, "Invalid number of players specified for game: 1"))
       );
     });
 
@@ -193,14 +195,14 @@ describe("gameStateCreation", () => {
         player3,
       ];
       expect(createGameState(players, board)).toEqual(
-        new IllegalGameStateError(players, board)
+        err(new IllegalGameStateError(players, board, "Invalid number of players specified for game: 5"))
       );
     });
 
     it("rejects an array of players with non-unique colors", () => {
       const players: Array<Player> = [player1, player2, player4, player2];
       expect(createGameState(players, board)).toEqual(
-        new IllegalGameStateError(players, board)
+        err(new IllegalGameStateError(players, board, "Not all player colors are unique"))
       );
     });
 
@@ -215,7 +217,7 @@ describe("gameStateCreation", () => {
         scores: createEmptyScoreSheet(players),
       };
 
-      expect(createGameState(players, board)).toEqual(expectedGameState);
+      expect(createGameState(players, board)).toEqual(ok(expectedGameState));
     });
 
     it("successfully creates a Game state with a number of players less than the maximum", () => {
@@ -229,7 +231,7 @@ describe("gameStateCreation", () => {
         scores: createEmptyScoreSheet(players),
       };
 
-      expect(createGameState(players, board)).toEqual(expectedGameState);
+      expect(createGameState(players, board)).toEqual(ok(expectedGameState));
     });
   });
 
@@ -242,7 +244,7 @@ describe("gameStateCreation", () => {
         [player4.color, 0],
       ]);
 
-      expect(createEmptyScoreSheet(players)).toEqual(expectedScoreSheet);
+      expect(createEmptyScoreSheet(samplePlayers)).toEqual(expectedScoreSheet);
     });
 
     it("creates an empty map for an empty array of players", () => {
@@ -284,7 +286,7 @@ describe("gameStateCreation", () => {
         [player4.color, []],
       ]);
 
-      expect(createEmptyPenguinPositions(players)).toEqual(
+      expect(createEmptyPenguinPositions(samplePlayers)).toEqual(
         expectedPenguinPositions
       );
     });
@@ -301,7 +303,7 @@ describe("gameStateCreation", () => {
     const expectedGameState = createGameState(samplePlayers, board);
 
     it("creates test game state", () => {
-      expect(createTestGameState(board).unsafelyUnwrap()).toEqual(
+      expect(createTestGameState(board)).toEqual(
         expectedGameState
       );
     });

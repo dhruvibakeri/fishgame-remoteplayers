@@ -9,7 +9,8 @@ import {
   setTileOnBoard,
   setTileToHole,
 } from "../src/boardCreation";
-import { ok, err } from "true-myth/result";
+import { Result } from "true-myth";
+const { ok, err } = Result;
 import { IllegalBoardError, IllegalPositionError } from "../types/errors";
 
 describe("boardCreation", () => {

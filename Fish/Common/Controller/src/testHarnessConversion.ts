@@ -13,7 +13,8 @@ import {
   Action,
   MoveResponseQuery,
 } from "./testHarnessInput";
-import { ok, err, Result } from "true-myth/result";
+import { Result } from "true-myth";
+const { ok, err } = Result;
 
 /**
  * Utility function for outputting false to signify errors that occurred in the

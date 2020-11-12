@@ -1,4 +1,4 @@
-import { tieBreakMovements } from "../../../Player/strategy";
+import { tieBreakMovements } from "./strategy";
 import { BoardPosition } from "../../board";
 import { Movement, MovementToResultingTree } from "../../game-tree";
 import { createGameTree } from "./gameTreeCreation";

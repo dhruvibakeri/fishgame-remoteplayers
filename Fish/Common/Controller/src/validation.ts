@@ -9,7 +9,8 @@ import {
   MIN_NUMBER_OF_PLAYERS,
   MAX_NUMBER_OF_PLAYERS,
 } from "./gameStateCreation";
-import { Result, ok, err } from "true-myth/result";
+import { Result } from "true-myth";
+const { ok, err } = Result;
 
 const MAX_TEST_HARNESS_BOARD_TILES = 25;
 

@@ -6,7 +6,9 @@ import {
 } from "./validation";
 import { IllegalBoardError, IllegalPositionError } from "../types/errors";
 import { InputBoard } from "./testHarnessInput";
-import { Result, ok, err } from "true-myth/result";
+import { Result } from "true-myth";
+
+const { ok, err } = Result;
 
 const DEFAULT_FISH_PER_TILE = 1;
 
@@ -58,9 +60,13 @@ const setTileOnBoard = (
   numOfFish: number
 ): Result<Board, IllegalPositionError> =>
   getTileOnBoard(board, position).map(() => {
-    const tiles = board.tiles;
-    tiles[position.row][position.col] = createTile(numOfFish);
-    return { tiles };
+    return {
+      tiles: Object.assign([], board.tiles, {
+        [position.row]: Object.assign([], board.tiles[position.row], {
+          [position.col]: createTile(numOfFish),
+        }),
+      }),
+    };
   });
 
 /**
@@ -196,15 +202,10 @@ const createNumberedBoard = (
 
   // Create the 2D array of tiles from the given InputBoard, padding any rows
   // shorter than the longest row.
-  const tiles: Array<Array<Tile>> = tileFish.map((row: Array<number>) =>
-    row
-      .map((numOfFish: number) => {
-        return {
-          numOfFish,
-        };
-      })
-      .fill({ numOfFish: 0 }, row.length, maxRowLength)
-  );
+  const tiles: Array<Array<Tile>> = tileFish.map((row: Array<number>) => {
+    return row.map(numOfFish => ({ numOfFish }))
+              .concat(new Array(maxRowLength - row.length).fill({ numOfFish: 0 }));
+  });
 
   return ok({
     tiles,
