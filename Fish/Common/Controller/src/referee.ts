@@ -18,10 +18,7 @@ import {
   getCurrentPlayerColor,
   getCurrentPlayer,
 } from "../../state";
-import {
-  createHoledOneFishBoard,
-  getTileOnBoard,
-} from "./boardCreation";
+import { createHoledOneFishBoard, getTileOnBoard } from "./boardCreation";
 import { isError } from "./validation";
 import {
   createGameTreeFromMovementGame,
@@ -38,6 +35,8 @@ import { TournamentPlayer } from "../../player-interface";
 import { checkMovementLegal } from "./queryGameTree";
 import { Result } from "true-myth";
 const { err } = Result;
+
+const PLAYER_REQUEST_TIMEOUT = 5000;
 
 /**
  * A BoardDimension represents the size of a board within a Fish game. It
@@ -176,9 +175,32 @@ const runPlacementTurn = (
     Ok: (game: Game) => {
       return { ...currRefereeState, game };
     },
-    Err: (e: IllegalPlacementError) =>
-      disqualifyCurrentCheatingPlayer(currRefereeState, e.message),
+    Err: (e: IllegalPlacementError) => {
+      return disqualifyCurrentCheatingPlayer(currRefereeState, e.message);
+    },
   });
+
+/**
+ * Apply a timeout to the given player request which will reject the request
+ * after 5000ms if the request is not resolved.
+ *
+ * @param request the request to add a timeout to
+ * @param timeout the timeout duration
+ * @return a new Promise with an applied timeout
+ */
+const timeoutRequest = <T>(
+  request: Promise<T>,
+  timeout: number
+): Promise<T> => {
+  const timeoutPromise = new Promise<T>((resolve, reject) => {
+    setTimeout(
+      () => reject(`Player did not respond in ${timeout}ms.`),
+      timeout
+    );
+  });
+
+  return Promise.race([request, timeoutPromise]);
+};
 
 /**
  * Run the placement rounds of the Game within the given RefereeState, calling
@@ -189,19 +211,26 @@ const runPlacementTurn = (
  * @param refereeState the RefereeState from which to run the placement rounds
  * @return the resulting RefereeState after running all placements
  */
-const runPlacementRounds = (
-  refereeState: RefereeState
-): RefereeStateWithMovementGame => {
+const runPlacementRounds = async (
+  refereeState: RefereeState,
+  timeout: number = PLAYER_REQUEST_TIMEOUT
+): Promise<RefereeStateWithMovementGame> => {
   let currRefereeState: RefereeState = refereeState;
 
   while (!gameIsMovementGame(currRefereeState.game)) {
     const currentTournamentPlayer: TournamentPlayer =
       currRefereeState.tournamentPlayers[currRefereeState.game.curPlayerIndex];
-    const placementPosition: BoardPosition = currentTournamentPlayer.makePlacement(
-      currRefereeState.game
-    );
 
-    currRefereeState = runPlacementTurn(placementPosition, currRefereeState);
+    currRefereeState = await timeoutRequest(
+      currentTournamentPlayer.makePlacement(currRefereeState.game),
+      timeout
+    )
+      .then((position: BoardPosition) => {
+        return runPlacementTurn(position, currRefereeState);
+      })
+      .catch((err: string) => {
+        return disqualifyCurrentFailingPlayer(currRefereeState, err);
+      });
   }
 
   // With the invariant that the board made by the referee must contain enough
@@ -248,11 +277,12 @@ const runMovementTurn = (
         game,
       };
     },
-    Err: (e: IllegalMovementError) =>
-      disqualifyCurrentCheatingPlayer(
+    Err: (e: IllegalMovementError) => {
+      return disqualifyCurrentCheatingPlayer(
         currRefereeState,
         e.message
-      ) as RefereeStateWithMovementGame,
+      ) as RefereeStateWithMovementGame;
+    },
   });
 };
 
@@ -265,17 +295,29 @@ const runMovementTurn = (
  * @param refereeState the RefereeState from which to run the placement rounds
  * @return the resulting RefereeState after finishing the game
  */
-const runMovementRounds = (refereeState: RefereeStateWithMovementGame) => {
+const runMovementRounds = async (
+  refereeState: RefereeStateWithMovementGame,
+  timeout: number = PLAYER_REQUEST_TIMEOUT
+): Promise<RefereeStateWithMovementGame> => {
   let currRefereeState: RefereeStateWithMovementGame = refereeState;
 
   while (!gameIsFinished(currRefereeState.game as MovementGame)) {
     const currentTournamentPlayer: TournamentPlayer =
       currRefereeState.tournamentPlayers[currRefereeState.game.curPlayerIndex];
-    const movement: Movement = currentTournamentPlayer.makeMovement(
-      currRefereeState.game
-    );
 
-    currRefereeState = runMovementTurn(movement, currRefereeState);
+    currRefereeState = await timeoutRequest(
+      currentTournamentPlayer.makeMovement(currRefereeState.game),
+      timeout
+    )
+      .then((movement: Movement) => {
+        return runMovementTurn(movement, currRefereeState);
+      })
+      .catch((err: string) => {
+        return disqualifyCurrentFailingPlayer(
+          currRefereeState,
+          err
+        ) as RefereeStateWithMovementGame;
+      });
   }
 
   return currRefereeState;
@@ -568,7 +610,7 @@ const boardIsBigEnough = (
 const runGame = (
   tournamentPlayers: Array<TournamentPlayer>,
   boardDimensions: BoardDimension
-): Result<GameDebrief, Error> => {
+): Result<Promise<GameDebrief>, Error> => {
   if (!boardIsBigEnough(tournamentPlayers.length, boardDimensions)) {
     return err(
       new IllegalBoardError(boardDimensions.cols, boardDimensions.rows)
@@ -576,7 +618,7 @@ const runGame = (
   }
 
   return createInitialGameState(tournamentPlayers, boardDimensions).map(
-    (game: Game) => {
+    async (game: Game) => {
       // Create the initial RefereeState.
       const initialRefereeState: RefereeState = {
         game,
@@ -589,12 +631,12 @@ const runGame = (
       notifyPlayersGameStarting(tournamentPlayers, game);
 
       // Run placement rounds.
-      const refereeStateAfterPlacements = runPlacementRounds(
+      const refereeStateAfterPlacements = await runPlacementRounds(
         initialRefereeState
       );
 
       // Run movement rounds.
-      const refereeStateAfterMovements = runMovementRounds(
+      const refereeStateAfterMovements = await runMovementRounds(
         refereeStateAfterPlacements
       );
 
