@@ -10,14 +10,19 @@ const MAX_NUMBER_OF_PLAYERS = 4;
 const MIN_NUMBER_OF_PLAYERS = 2;
 const PENGUIN_AMOUNT_N = 6;
 
+// TODO test
 /**
- * Get the next player's index for the given game.
+ * Shift the given array of players such that the first player becomes the last.
+ * For example, an array like [p1, p2, p3, p4] will be shifted to [p2, p3, p4, p1].
  *
- * @param game the game to get the next player's index from
- * @return the next player's index
+ * @param players the array of Players to shift.
+ * @return the shifted array of players.
  */
-const getNextPlayerIndex = (game: Game): number =>
-  (game.curPlayerIndex + 1) % game.players.length;
+const shiftPlayers = (players: Array<Player>): Array<Player> => {
+  const nextPlayers = [...players];
+  nextPlayers.push(nextPlayers.shift());
+  return nextPlayers;
+};
 
 /**
  * Update the current player index of the given MovementGame to the that of the
@@ -54,7 +59,7 @@ const skipToNextActivePlayer = (game: MovementGame): MovementGame => {
     } else {
       const nextPlayerGame: MovementGame = {
         ...movementGame,
-        curPlayerIndex: getNextPlayerIndex(movementGame),
+        players: shiftPlayers(movementGame.players),
       };
       return skipToNextActivePlayerRecursive(nextPlayerGame, playersSeen + 1);
     }
@@ -195,7 +200,6 @@ export {
   MAX_NUMBER_OF_PLAYERS,
   MIN_NUMBER_OF_PLAYERS,
   PENGUIN_AMOUNT_N,
-  getNextPlayerIndex,
   createGameState,
   createTestGameState,
   createEmptyScoreSheet,
@@ -204,4 +208,5 @@ export {
   skipToNextActivePlayer,
   isValidNumberOfPlayers,
   numOfPenguinsPerPlayer,
+  shiftPlayers,
 };

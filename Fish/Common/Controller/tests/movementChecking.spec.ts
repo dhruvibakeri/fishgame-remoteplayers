@@ -24,7 +24,7 @@ import {
   playerCanMove,
   anyPlayersCanMove,
 } from "../src/movementChecking";
-import { createGameState } from "../src/gameStateCreation";
+import { createGameState, shiftPlayers } from "../src/gameStateCreation";
 import { placePenguin } from "../src/penguinPlacement";
 
 describe("movementChecking", () => {
@@ -45,7 +45,7 @@ describe("movementChecking", () => {
   const game: Game = createGameState(players, board).unsafelyUnwrap();
   const player1TurnGame: Game = {
     ...game,
-    curPlayerIndex: 2,
+    players: shiftPlayers(shiftPlayers(players)),
   };
 
   describe("getNextPosDownLeft", () => {
@@ -227,7 +227,7 @@ describe("movementChecking", () => {
       ]).unsafelyUnwrap();
       const holeGame: Game = {
         ...game,
-        curPlayerIndex: 2,
+        players: shiftPlayers(shiftPlayers(players)),
         board: holeBoard,
       };
       const holeGameWithPenguinPlaced = placePenguin(player1, holeGame, {
@@ -245,7 +245,7 @@ describe("movementChecking", () => {
       ]).unsafelyUnwrap();
       const holeGame: Game = {
         ...game,
-        curPlayerIndex: 2,
+        players: shiftPlayers(shiftPlayers(players)),
         board: holeBoard,
       };
       const holeGameWithPenguinPlaced = {
@@ -286,7 +286,7 @@ describe("movementChecking", () => {
       ]).unsafelyUnwrap();
       const holeGame: Game = {
         ...game,
-        curPlayerIndex: 1,
+        players: shiftPlayers(players),
         board: holeBoard,
       };
       const holeGameWithPenguinPlaced = {
@@ -307,7 +307,7 @@ describe("movementChecking", () => {
       ]).unsafelyUnwrap();
       const holeGame: Game = {
         ...game,
-        curPlayerIndex: 2,
+        players: shiftPlayers(shiftPlayers(players)),
         board: holeBoard,
       };
       const holeGameWithPenguinPlaced = {
@@ -315,7 +315,7 @@ describe("movementChecking", () => {
           col: 2,
           row: 1,
         }).unsafelyUnwrap(),
-        curPlayerIndex: 1,
+        players: shiftPlayers(players),
       };
       const holeGameWithPenguinsPlaced = placePenguin(
         player2,

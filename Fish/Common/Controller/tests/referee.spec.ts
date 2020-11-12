@@ -28,7 +28,7 @@ import {
   createHoledOneFishBoard,
   createNumberedBoard,
 } from "../src/boardCreation";
-import { createGameState } from "../src/gameStateCreation";
+import { createGameState, shiftPlayers } from "../src/gameStateCreation";
 import { Movement } from "../../game-tree";
 import { IllegalBoardError, IllegalGameStateError } from "../types/errors";
 import { Result } from "true-myth";
@@ -435,7 +435,10 @@ describe("referee", () => {
   describe("runPlacementTurn", () => {
     const initialRefereeState: RefereeState = {
       game: numberedGame,
-      tournamentPlayers: [tournamentPlayer1, tournamentPlayer2],
+      tournamentPlayers: new Map([
+        [tournamentPlayer1.name, tournamentPlayer1],
+        [tournamentPlayer2.name, tournamentPlayer2],
+      ]),
       failingPlayers: [],
       cheatingPlayers: [],
     };
@@ -450,7 +453,7 @@ describe("referee", () => {
     > = new Map(numberedGame.remainingUnplacedPenguins).set(player1.color, 3);
     const gameStateAfterPlacement1: Game = {
       ...numberedGame,
-      curPlayerIndex: 1,
+      players: shiftPlayers(numberedGame.players),
       penguinPositions: penguinPositionsAfterPlacement1,
       remainingUnplacedPenguins: remainingUnplacedPenguinsAfterPlacement1,
     };
@@ -471,7 +474,6 @@ describe("referee", () => {
     ]);
     const gameAfterBadPlacement2: Game = {
       ...gameStateAfterPlacement1,
-      curPlayerIndex: 0,
       players: [player1],
       penguinPositions: penguinPositionsAfterBadPlacement2,
       remainingUnplacedPenguins: remainingUnplacedPenguinsAfterBadPlacement2,
@@ -479,7 +481,7 @@ describe("referee", () => {
     };
     const refereeStateAfterBadPlacement2: RefereeState = {
       ...refereeStateAfterPlacement1,
-      tournamentPlayers: [tournamentPlayer1],
+      tournamentPlayers: new Map([[tournamentPlayer1.name, tournamentPlayer1]]),
       cheatingPlayers: [player2],
       game: gameAfterBadPlacement2,
     };
@@ -511,7 +513,10 @@ describe("referee", () => {
       );
       const initialRefereeState: RefereeState = {
         game: numberedGame,
-        tournamentPlayers: [player1, player2],
+        tournamentPlayers: new Map([
+          [player1.name, player1],
+          [player2.name, player2],
+        ]),
         cheatingPlayers: [],
         failingPlayers: [],
       };
@@ -538,13 +543,18 @@ describe("referee", () => {
       );
       const initialRefereeState: RefereeState = {
         game: numberedGame,
-        tournamentPlayers: [tournamentPlayer1, tournamentPlayer2],
+        tournamentPlayers: new Map([
+          [tournamentPlayer1.name, tournamentPlayer1],
+          [tournamentPlayer2.name, tournamentPlayer2],
+        ]),
         cheatingPlayers: [],
         failingPlayers: [],
       };
       const expectedRefereeState: RefereeState = {
         ...initialRefereeState,
-        tournamentPlayers: [tournamentPlayer1],
+        tournamentPlayers: new Map([
+          [tournamentPlayer1.name, tournamentPlayer1],
+        ]),
         game: twoGameAfterPlacementsKickPlayer2,
         cheatingPlayers: [player2],
       };
@@ -566,7 +576,10 @@ describe("referee", () => {
       );
       const initialRefereeState: RefereeState = {
         game: numberedGame,
-        tournamentPlayers: [tournamentPlayer1, tournamentPlayer2],
+        tournamentPlayers: new Map([
+          [tournamentPlayer1.name, tournamentPlayer1],
+          [tournamentPlayer2.name, tournamentPlayer2],
+        ]),
         cheatingPlayers: [],
         failingPlayers: [],
       };
@@ -611,12 +624,15 @@ describe("referee", () => {
     const gameAfterMovement1: MovementGame = {
       ...twoGameAfterPlacements,
       board: boardAfterMovement1,
-      curPlayerIndex: 1,
+      players: shiftPlayers(twoGameAfterPlacements.players),
       penguinPositions: penguinPositionsAfterMovement1,
       scores: scoresAfterMovement1,
     };
     const initialRefereeState: RefereeStateWithMovementGame = {
-      tournamentPlayers: [tournamentPlayer1, tournamentPlayer2],
+      tournamentPlayers: new Map([
+        [tournamentPlayer1.name, tournamentPlayer1],
+        [tournamentPlayer2.name, tournamentPlayer2],
+      ]),
       game: twoGameAfterPlacements,
       failingPlayers: [],
       cheatingPlayers: [],
@@ -642,14 +658,13 @@ describe("referee", () => {
     const gameAfterBadMovement2: MovementGame = {
       ...gameAfterMovement1,
       players: [player1],
-      curPlayerIndex: 0,
       penguinPositions: penguinPositionsAfterBadMovement2,
       remainingUnplacedPenguins: unplacedPenguinsAfterBadMovement2,
       scores: scoresAfterBadMovement2,
     };
     const refereeStateAfterBadMovement2: RefereeStateWithMovementGame = {
       ...refereeStateAfterMovement1,
-      tournamentPlayers: [tournamentPlayer1],
+      tournamentPlayers: new Map([[tournamentPlayer1.name, tournamentPlayer1]]),
       game: gameAfterBadMovement2,
       cheatingPlayers: [player2],
       failingPlayers: [],
@@ -682,7 +697,10 @@ describe("referee", () => {
       );
 
       const initialRefereeState: RefereeStateWithMovementGame = {
-        tournamentPlayers: [player1, player2],
+        tournamentPlayers: new Map([
+          [player1.name, player1],
+          [player2.name, player2],
+        ]),
         game: twoGameAfterPlacements,
         failingPlayers: [],
         cheatingPlayers: [],
@@ -730,7 +748,10 @@ describe("referee", () => {
       );
 
       const initialRefereeState: RefereeStateWithMovementGame = {
-        tournamentPlayers: [tournamentPlayer1, tournamentPlayer2],
+        tournamentPlayers: new Map([
+          [tournamentPlayer1.name, tournamentPlayer1],
+          [tournamentPlayer2.name, tournamentPlayer2],
+        ]),
         game: twoGameAfterPlacements,
         failingPlayers: [],
         cheatingPlayers: [],
@@ -771,7 +792,9 @@ describe("referee", () => {
 
       const expectedRefereeState: RefereeStateWithMovementGame = {
         ...initialRefereeState,
-        tournamentPlayers: [tournamentPlayer1],
+        tournamentPlayers: new Map([
+          [tournamentPlayer1.name, tournamentPlayer1],
+        ]),
         game: expectedGame,
         cheatingPlayers: [player2],
       };
@@ -792,7 +815,10 @@ describe("referee", () => {
         10000
       );
       const initialRefereeState: RefereeStateWithMovementGame = {
-        tournamentPlayers: [tournamentPlayer1, tournamentPlayer2],
+        tournamentPlayers: new Map([
+          [tournamentPlayer1.name, tournamentPlayer1],
+          [tournamentPlayer2.name, tournamentPlayer2],
+        ]),
         game: twoGameAfterPlacements,
         failingPlayers: [],
         cheatingPlayers: [],
@@ -823,7 +849,10 @@ describe("referee", () => {
   describe("createGameDebrief", () => {
     it("creates a game debrief", () => {
       const refereeState: RefereeStateWithMovementGame = {
-        tournamentPlayers: [tournamentPlayer1, tournamentPlayer2],
+        tournamentPlayers: new Map([
+          [tournamentPlayer1.name, tournamentPlayer1],
+          [tournamentPlayer2.name, tournamentPlayer2],
+        ]),
         game: twoGameFinalGame,
         cheatingPlayers: [player3],
         failingPlayers: [player4],
@@ -942,13 +971,18 @@ describe("referee", () => {
       };
       const initialRefereeState: RefereeState = {
         game: numberedGame,
-        tournamentPlayers: [tournamentPlayer1, tournamentPlayer2],
+        tournamentPlayers: new Map([
+          [tournamentPlayer1.name, tournamentPlayer1],
+          [tournamentPlayer2.name, tournamentPlayer2],
+        ]),
         cheatingPlayers: [],
         failingPlayers: [],
       };
       const expectedRefereeState: RefereeState = {
         game: expectedGame,
-        tournamentPlayers: [tournamentPlayer2],
+        tournamentPlayers: new Map([
+          [tournamentPlayer2.name, tournamentPlayer2],
+        ]),
         cheatingPlayers: [player1],
         failingPlayers: [],
       };
@@ -986,13 +1020,18 @@ describe("referee", () => {
       };
       const initialRefereeState: RefereeState = {
         game: numberedGame,
-        tournamentPlayers: [tournamentPlayer1, tournamentPlayer2],
+        tournamentPlayers: new Map([
+          [tournamentPlayer1.name, tournamentPlayer1],
+          [tournamentPlayer2.name, tournamentPlayer2],
+        ]),
         cheatingPlayers: [],
         failingPlayers: [],
       };
       const expectedRefereeState: RefereeState = {
         game: expectedGame,
-        tournamentPlayers: [tournamentPlayer2],
+        tournamentPlayers: new Map([
+          [tournamentPlayer2.name, tournamentPlayer2],
+        ]),
         cheatingPlayers: [],
         failingPlayers: [player1],
       };
@@ -1030,13 +1069,18 @@ describe("referee", () => {
       };
       const initialRefereeState: RefereeState = {
         game: numberedGame,
-        tournamentPlayers: [tournamentPlayer1, tournamentPlayer2],
+        tournamentPlayers: new Map([
+          [tournamentPlayer1.name, tournamentPlayer1],
+          [tournamentPlayer2.name, tournamentPlayer2],
+        ]),
         cheatingPlayers: [],
         failingPlayers: [],
       };
       const expectedRefereeState: RefereeState = {
         game: expectedGame,
-        tournamentPlayers: [tournamentPlayer2],
+        tournamentPlayers: new Map([
+          [tournamentPlayer2.name, tournamentPlayer2],
+        ]),
         cheatingPlayers: [],
         failingPlayers: [],
       };
