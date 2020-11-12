@@ -243,7 +243,7 @@ describe("penguinMovement", () => {
 
     it("rejects a player trying to move from from a starting position not containing one of their penguins", () => {
       const invalidStartPosition: BoardPosition = { col: 1, row: 1 };
-      const expectedError = new IllegalPlacementError(
+      const expectedError = new IllegalMovementError(
         game,
         player1,
         invalidStartPosition,
@@ -261,7 +261,7 @@ describe("penguinMovement", () => {
 
     it("rejects a player trying to move to a position not reachable from the start", () => {
       const invalidEndPosition: BoardPosition = { col: 1, row: 1 };
-      const expectedError = new IllegalPlacementError(
+      const expectedError = new IllegalMovementError(
         game,
         player1,
         validStartPosition,
@@ -278,7 +278,7 @@ describe("penguinMovement", () => {
     });
 
     it("rejects a player trying to move to a hole", () => {
-      const expectedError = new IllegalPlacementError(
+      const expectedError = new IllegalMovementError(
         game,
         player1,
         validEndPosition,
@@ -299,7 +299,7 @@ describe("penguinMovement", () => {
         ...movementGame,
         penguinPositions: twoPenguinPositions,
       };
-      const expectedError = new IllegalPlacementError(
+      const expectedError = new IllegalMovementError(
         game,
         player1,
         validStartPosition,

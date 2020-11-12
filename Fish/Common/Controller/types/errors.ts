@@ -1,27 +1,5 @@
 import { Board, BoardPosition } from "../../board";
-import { Game, getCurrentPlayer, Player } from "../../state";
-import { GameTree, Movement } from "../../game-tree";
-
-/**
- * Error used to represent the use of out-of-bounds positions for a given board.
- */
-class InvalidPositionError extends Error {
-  board: Board;
-  position: BoardPosition;
-  message: string;
-
-  constructor(board: Board, position: BoardPosition, message?: string) {
-    super();
-    this.board = board;
-    this.position = position;
-    if (message) {
-      this.message = message;
-    } else {
-      this.message = "Invalid position.";
-    }
-    this.stack = new Error().stack;
-  }
-}
+import { Game, Player } from "../../state";
 
 /**
  * Error used to represent invalid constraints used to specify a board.
@@ -182,6 +160,22 @@ class IllegalPositionError extends Error {
   }
 }
 
+class NotMovementGameError extends Error {
+  game: Game;
+  message: string;
+
+  constructor(game: Game, message?: string) {
+    super();
+    this.game = game;
+    if (message) {
+      this.message = message;
+    } else {
+      this.message = "Not all penguins have been placed."
+    }
+    this.stack = new Error().stack;
+  }
+}
+
 export {
   IllegalGameStateError,
   IllegalBoardError,
@@ -189,4 +183,5 @@ export {
   IllegalMovementError,
   IllegalPlacementError,
   IllegalPositionError,
+  NotMovementGameError,
 };

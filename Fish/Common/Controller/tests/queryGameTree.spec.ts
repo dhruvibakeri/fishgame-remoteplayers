@@ -55,7 +55,7 @@ describe("queryGameTree", () => {
         endPosition: validEndPosition,
       };
       expect(isMovementLegal(allPlacedGameTree, movement)).toEqual(
-        new IllegalMovementError(allPlacedGameTree, movement)
+        new IllegalMovementError(allPlacedGame, player1, movement.startPosition, movement.endPosition, "Movement is not specified by the game tree.")
       );
     });
 
@@ -66,7 +66,7 @@ describe("queryGameTree", () => {
         endPosition: invalidEndPosition,
       };
       expect(isMovementLegal(allPlacedGameTree, movement)).toEqual(
-        new IllegalMovementError(allPlacedGameTree, movement)
+        new IllegalMovementError(allPlacedGame, player1, movement.startPosition, movement.endPosition, "Movement is not specified by the game tree.")
       );
     });
 
@@ -77,7 +77,7 @@ describe("queryGameTree", () => {
         endPosition: validEndPosition,
       };
       expect(isMovementLegal(allPlacedGameTree, movement)).toEqual(
-        new IllegalMovementError(allPlacedGameTree, movement)
+        new IllegalMovementError(allPlacedGame, player1, movement.startPosition, movement.endPosition, "Movement is not specified by the game tree.")
       );
     });
 
@@ -88,7 +88,7 @@ describe("queryGameTree", () => {
         endPosition: invalidEndPosition,
       };
       expect(isMovementLegal(allPlacedGameTree, movement)).toEqual(
-        new IllegalMovementError(allPlacedGameTree, movement)
+        new IllegalMovementError(allPlacedGame, player1, movement.startPosition, movement.endPosition, "Movement is not specified by the game tree.")
       );
     });
 
@@ -98,7 +98,7 @@ describe("queryGameTree", () => {
         endPosition: holePosition,
       };
       expect(isMovementLegal(allPlacedGameTree, movement)).toEqual(
-        new IllegalMovementError(allPlacedGameTree, movement)
+        new IllegalMovementError(allPlacedGame, player1, movement.startPosition, movement.endPosition, "Movement is not specified by the game tree.")
       );
     });
 
@@ -108,7 +108,7 @@ describe("queryGameTree", () => {
         endPosition: validEndPosition,
       };
       expect(isMovementLegal(allPlacedGameTree, movement)).toEqual(
-        new IllegalMovementError(allPlacedGameTree, movement)
+        new IllegalMovementError(allPlacedGame, player1, movement.startPosition, movement.endPosition, "Movement is not specified by the game tree.")
       );
     });
 

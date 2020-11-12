@@ -5,10 +5,11 @@ import {
   InactivePlayer,
 } from "../Common/player-interface";
 import {
-  InvalidBoardConstraintsError,
-  InvalidPositionError,
-  InvalidNumberOfPlayersError,
-  InvalidGameStateError,
+  IllegalBoardError,
+  IllegalGameStateError,
+  IllegalMovementError,
+  IllegalPlacementError,
+  IllegalPositionError,
 } from "../Common/Controller/types/errors";
 import {
   Game,
@@ -35,6 +36,7 @@ import { placePenguin } from "../Common/Controller/src/penguinPlacement";
 import { GameTree, Movement } from "../Common/game-tree";
 import { TournamentPlayer } from "../Common/player-interface";
 import { isMovementLegal } from "../Common/Controller/src/queryGameTree";
+import { Result, ok, err } from "true-myth/result";
 
 /**
  * A BoardDimension represents the size of a board within a Fish game. It
@@ -129,34 +131,24 @@ const notifyPlayersGameStarting = (
 const createInitialGameState = (
   tournamentPlayers: Array<TournamentPlayer>,
   boardDimensions: BoardDimension
-):
-  | Game
-  | InvalidBoardConstraintsError
-  | InvalidPositionError
-  | InvalidNumberOfPlayersError
-  | InvalidGameStateError => {
-  // Create the game board to the given dimensions.
-  const board:
-    | Board
-    | InvalidBoardConstraintsError
-    | InvalidPositionError = createHoledOneFishBoard(
-    boardDimensions.cols,
-    boardDimensions.rows,
-    [],
-    1
-  );
-
+): Result<
+  Game,
+  IllegalBoardError | IllegalPositionError | IllegalGameStateError
+> => {
   // Create the Game state's player roster.
   const players: Array<Player> = tournamentPlayersToGamePlayers(
     tournamentPlayers
   );
 
-  if (isError(board)) {
-    return board;
-  } else {
-    // Create the Game state.
-    return createGameState(players, board);
-  }
+  return (createHoledOneFishBoard(
+    boardDimensions.cols,
+    boardDimensions.rows,
+    [],
+    1
+  ) as Result<
+    Board,
+    IllegalBoardError | IllegalPositionError | IllegalGameStateError
+  >).andThen((board: Board) => createGameState(players, board));
 };
 
 /**
@@ -174,21 +166,18 @@ const createInitialGameState = (
 const runPlacementTurn = (
   placementPosition: BoardPosition,
   currRefereeState: RefereeState
-): RefereeState => {
-  const resultingGameOrError: Game | Error = placePenguin(
+): RefereeState =>
+  placePenguin(
     getCurrentPlayer(currRefereeState.game),
     currRefereeState.game,
     placementPosition
-  );
-
-  if (isError(resultingGameOrError)) {
-    // Make no placement and instead disqualify the cheating player.
-    return disqualifyCurrentCheatingPlayer(currRefereeState);
-  } else {
-    // Update the RefereeState's Game state with the Game updated with the placement.
-    return { ...currRefereeState, game: resultingGameOrError };
-  }
-};
+  ).match({
+    Ok: (game: Game) => {
+      return { ...currRefereeState, game };
+    },
+    Err: (e: IllegalPlacementError) =>
+      disqualifyCurrentCheatingPlayer(currRefereeState, e.message),
+  });
 
 /**
  * Run the placement rounds of the Game within the given RefereeState, calling
@@ -250,23 +239,20 @@ const runMovementTurn = (
   const gameTree: GameTree = createGameTreeFromMovementGame(
     currRefereeState.game
   );
-  const result: MovementGame | Error = isMovementLegal(gameTree, movement);
 
-  if (isError(result)) {
-    // Disqualifying a player only changes penguin positions by removing a player.
-    // This means that if the given RefereeState is a
-    // RefereeStateWithMovementGame, then the result must also be one.
-    return disqualifyCurrentCheatingPlayer(
-      currRefereeState,
-      result.message
-    ) as RefereeStateWithMovementGame;
-  } else {
-    // Update the RefereeState's Game state with the Game updated with the move.
-    return {
-      ...currRefereeState,
-      game: result,
-    };
-  }
+  return isMovementLegal(gameTree, movement).match({
+    Ok: (game: MovementGame) => {
+      return {
+        ...currRefereeState,
+        game,
+      };
+    },
+    Err: (e: IllegalMovementError) =>
+      disqualifyCurrentCheatingPlayer(
+        currRefereeState,
+        e.message
+      ) as RefereeStateWithMovementGame,
+  });
 };
 
 /**
@@ -545,19 +531,10 @@ const numberOfPenguinPlacements = (numOfPlayers: number) =>
 const boardIsBigEnough = (
   numOfPlayers: number,
   boardDimension: BoardDimension
-): true | InvalidBoardConstraintsError => {
+): boolean => {
   const numOfPlacements = numberOfPenguinPlacements(numOfPlayers);
   const numOfTilesOnBoard = boardDimension.cols * boardDimension.rows;
-  const enoughPlacements = numOfPlacements <= numOfTilesOnBoard;
-
-  if (!enoughPlacements) {
-    return new InvalidBoardConstraintsError(
-      boardDimension.cols,
-      boardDimension.rows
-    );
-  } else {
-    return true;
-  }
+  return numOfPlacements <= numOfTilesOnBoard;
 };
 
 /**
@@ -590,53 +567,45 @@ const boardIsBigEnough = (
 const runGame = (
   tournamentPlayers: Array<TournamentPlayer>,
   boardDimensions: BoardDimension
-): GameDebrief | Error => {
-  // Ensure that the board is big enough for all placements.
-  const isBoardBigEnoughOrError = boardIsBigEnough(
-    tournamentPlayers.length,
-    boardDimensions
-  );
-
-  if (isError(isBoardBigEnoughOrError)) {
-    return isBoardBigEnoughOrError;
+): Result<GameDebrief, Error> => {
+  if (!boardIsBigEnough(tournamentPlayers.length, boardDimensions)) {
+    return err(
+      new IllegalBoardError(boardDimensions.cols, boardDimensions.rows)
+    );
   }
 
-  // Create the initial state, return error if fails.
-  const initialGameOrError: Game | Error = createInitialGameState(
-    tournamentPlayers,
-    boardDimensions
+  return createInitialGameState(tournamentPlayers, boardDimensions).map(
+    (game: Game) => {
+      // Create the initial RefereeState.
+      const initialRefereeState: RefereeState = {
+        game,
+        tournamentPlayers,
+        cheatingPlayers: [],
+        failingPlayers: [],
+      };
+
+      // Notify all players the game is starting.
+      notifyPlayersGameStarting(tournamentPlayers, game);
+
+      // Run placement rounds.
+      const refereeStateAfterPlacements = runPlacementRounds(
+        initialRefereeState
+      );
+
+      // Run movement rounds.
+      const refereeStateAfterMovements = runMovementRounds(
+        refereeStateAfterPlacements
+      );
+
+      // Deliver the game outcome.
+      const gameDebrief: GameDebrief = createGameDebrief(
+        refereeStateAfterMovements
+      );
+      notifyPlayersOfOutcome(tournamentPlayers, gameDebrief);
+
+      return gameDebrief;
+    }
   );
-
-  if (isError(initialGameOrError)) {
-    return initialGameOrError;
-  }
-
-  // Create the initial RefereeState.
-  const initialRefereeState: RefereeState = {
-    game: initialGameOrError,
-    tournamentPlayers,
-    cheatingPlayers: [],
-    failingPlayers: [],
-  };
-
-  // Notify all players the game is starting.
-  notifyPlayersGameStarting(tournamentPlayers, initialGameOrError);
-
-  // Run placement rounds.
-  const refereeStateAfterPlacements = runPlacementRounds(initialRefereeState);
-
-  // Run movement rounds.
-  const refereeStateAfterMovements = runMovementRounds(
-    refereeStateAfterPlacements
-  );
-
-  // Deliver the game outcome.
-  const gameDebrief: GameDebrief = createGameDebrief(
-    refereeStateAfterMovements
-  );
-  notifyPlayersOfOutcome(tournamentPlayers, gameDebrief);
-
-  return gameDebrief;
 };
 
 export {

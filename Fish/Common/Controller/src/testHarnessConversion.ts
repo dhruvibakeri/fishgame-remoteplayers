@@ -14,7 +14,6 @@ import {
   MoveResponseQuery,
 } from "./testHarnessInput";
 import { ok, err, Result } from "true-myth/result";
-import { IllegalGameStateError } from "../types/errors";
 
 /**
  * Utility function for outputting false to signify errors that occurred in the

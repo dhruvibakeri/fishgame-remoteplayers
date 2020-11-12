@@ -24,13 +24,10 @@ import { GameDebrief, TournamentPlayer } from "../../player-interface";
 import { createSamplePlayer } from "../../../Player/player";
 import { Game, MovementGame, Player } from "../../state";
 import { Board, BoardPosition, PenguinColor } from "../../board";
-import { createNumberedBoard } from "../src/boardCreation";
+import { createHoledOneFishBoard, createNumberedBoard } from "../src/boardCreation";
 import { createGameState } from "../src/gameStateCreation";
 import { Movement } from "../../game-tree";
-import {
-  InvalidBoardConstraintsError,
-  InvalidNumberOfPlayersError,
-} from "../types/errors";
+import { IllegalBoardError, IllegalGameStateError } from "../types/errors";
 
 interface IteratorResponse<T> {
   readonly value?: T;
@@ -66,11 +63,11 @@ const createDummyPlayer = (
 
   return {
     name,
-    gameIsStarting: () => {},
-    makePlacement: (game: Game) => placementIterator.next().value,
-    makeMovement: (game: Game) => movesIterator.next().value,
-    gameHasEnded: () => {},
-    disqualifyMe: () => {},
+    gameIsStarting: jest.fn(),
+    makePlacement: () => placementIterator.next().value,
+    makeMovement: () => movesIterator.next().value,
+    gameHasEnded: jest.fn(),
+    disqualifyMe: jest.fn(),
   };
 };
 
@@ -361,7 +358,7 @@ describe("referee", () => {
         mockedTournamentPlayers.length
       );
 
-      for (var i = 0; i < mockedTournamentPlayers.length; i++) {
+      for (let i = 0; i < mockedTournamentPlayers.length; i++) {
         expect(mockGameIsStarting.mock.calls[i][0]).toEqual(numberedGame);
       }
     });
@@ -399,7 +396,7 @@ describe("referee", () => {
           cols: 0,
           rows: 2,
         })
-      ).toEqual(new InvalidBoardConstraintsError(0, 2));
+      ).toEqual(new IllegalBoardError(0, 2));
     });
 
     it("rejects an invalid number of players", () => {
@@ -408,7 +405,7 @@ describe("referee", () => {
           cols: 4,
           rows: 4,
         })
-      ).toEqual(new InvalidNumberOfPlayersError(0));
+      ).toEqual(new IllegalGameStateError([], createHoledOneFishBoard(4, 4, [], 1).unsafelyUnwrap()));
     });
   });
 
@@ -794,7 +791,7 @@ describe("referee", () => {
         mockedTournamentPlayers.length
       );
 
-      for (var i = 0; i < mockedTournamentPlayers.length; i++) {
+      for (let i = 0; i < mockedTournamentPlayers.length; i++) {
         expect(mockGameHasEnded.mock.calls[i][0]).toEqual(gameDebrief);
       }
     });
@@ -813,7 +810,7 @@ describe("referee", () => {
 
     it("rejects not enough positions for the number of placements", () => {
       expect(boardIsBigEnough(2, { rows: 2, cols: 2 })).toEqual(
-        new InvalidBoardConstraintsError(2, 2)
+        new IllegalBoardError(2, 2)
       );
     });
   });
@@ -836,13 +833,13 @@ describe("referee", () => {
 
     it("rejects not enough positions for the number of placements", () => {
       expect(runGame(players, { cols: 2, rows: 2 })).toEqual(
-        new InvalidBoardConstraintsError(2, 2)
+        new IllegalBoardError(2, 2)
       );
     });
 
     it("rejects an invalid number of players", () => {
       expect(runGame([], { cols: 4, rows: 3 })).toEqual(
-        new InvalidNumberOfPlayersError(0)
+        new IllegalGameStateError([], createHoledOneFishBoard(4, 3, [], 1).unsafelyUnwrap())
       );
     });
   });

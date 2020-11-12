@@ -6,3 +6,4 @@ package-lock.json
 !.eslintrc.js
 .DS_store
 .vscode/
+**/.idea/

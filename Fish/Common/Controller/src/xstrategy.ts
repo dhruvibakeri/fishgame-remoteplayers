@@ -4,7 +4,7 @@ import {
     printFalse,
     movementToAction,
   } from "./testHarnessConversion";
-import { Game } from "../../state";
+import { Game, MovementGame } from "../../state";
 import { isValidInputState, isError } from "./validation";
 import { gameIsMovementGame } from "./gameTreeCreation";
 import { chooseNextAction } from "../../../Player/strategy";
@@ -13,17 +13,17 @@ import { Movement } from "../../game-tree";
 readStdin<InputDepthState>()
   .then((parsed: InputDepthState) => {
     // Apply the Movement to the Game state.
-    const gameStateOrError = inputStateToGameState(parsed[1]) as Game;
+    const gameStateOrError = inputStateToGameState(parsed[1]);
     let action: false | Movement = false;
 
     if (
         isValidInputState(parsed[1]) &&
-        !isError(gameStateOrError) &&
-        gameIsMovementGame(gameStateOrError)
+        !gameStateOrError.isErr() &&
+        gameIsMovementGame(gameStateOrError.unsafelyUnwrap())
       ) {
-        const actionOrError = chooseNextAction(gameStateOrError, parsed[0]);
-        if (!isError(actionOrError)) {
-            action = actionOrError;
+        const maybeAction = chooseNextAction(gameStateOrError.unsafelyUnwrap() as MovementGame, parsed[0]);
+        if (!maybeAction.isNothing()) {
+            action = maybeAction.unsafelyUnwrap();
         }
       }
     

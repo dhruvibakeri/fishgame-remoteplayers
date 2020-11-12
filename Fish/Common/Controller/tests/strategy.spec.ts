@@ -268,7 +268,7 @@ describe("strategy", () => {
   describe("placeAllPenguinsZigZag", () => {
     it("returns error if there aren't enough spaces to place penguins", () => {
       expect(placeAllPenguinsZigZag(smallGame)).toEqual(
-        new IllegalPlacementError(smallGame, player1)
+        new IllegalPlacementError(smallGame, player1, null)
       );
     });
 
@@ -346,14 +346,12 @@ describe("strategy", () => {
         startPosition: { col: 2, row: 0 },
         endPosition: { col: 2, row: 2 },
       };
-      expect(chooseNextAction(startingGame, 2)).toEqual(expectedMove1);
-      expect(chooseNextAction(gameAfterPlacement, 1)).toEqual(expectedMove2);
+      expect(chooseNextAction(startingGame, 2).unsafelyUnwrap()).toEqual(expectedMove1);
+      expect(chooseNextAction(gameAfterPlacement, 1).unsafelyUnwrap()).toEqual(expectedMove2);
     });
 
     it("rejects a placement for a player with no more available moves", () => {
-      expect(chooseNextAction(gameNoMoves, 1)).toEqual(
-        new NoMoreMovementsError(gameNoMoves)
-      );
+      expect(chooseNextAction(gameNoMoves, 1).isNothing()).toEqual(true);
     });
   });
 

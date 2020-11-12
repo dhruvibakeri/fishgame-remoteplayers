@@ -3,10 +3,8 @@ import { Game, getCurrentPlayer, MovementGame, Player } from "../Common/state";
 import { placePenguin } from "../Common/Controller/src/penguinPlacement";
 import { positionIsPlayable } from "../Common/Controller/src/validation";
 import {
-  IllegalPenguinPositionError,
-  InvalidGameStateError,
-  NoMoreMovementsError,
-  NoMorePlacementsError,
+  IllegalPlacementError,
+  NotMovementGameError,
 } from "../Common/Controller/types/errors";
 import {
   Movement,
@@ -18,6 +16,7 @@ import {
   gameIsMovementGame,
 } from "../Common/Controller/src/gameTreeCreation";
 import { Result, ok, err, isErr } from "true-myth/result";
+import { Maybe, just, nothing } from "true-myth/maybe";
 
 /**
  * Using the zig-zag strategy as outlined in Milestone 5, finds the next
@@ -30,15 +29,15 @@ import { Result, ok, err, isErr } from "true-myth/result";
  */
 const getNextPenguinPlacementPosition = (
   game: Game
-): Result<BoardPosition, NoMorePlacementsError> => {
+): Maybe<BoardPosition> => {
   for (let row = 0; row < game.board.tiles.length; row++) {
     for (let col = 0; col < game.board.tiles[row].length; col++) {
       if (positionIsPlayable(game, { row, col })) {
-        return ok({ row, col });
+        return just({ row, col });
       }
     }
   }
-  return err(new NoMorePlacementsError(game));
+  return nothing();
 };
 
 /**
@@ -52,16 +51,15 @@ const getNextPenguinPlacementPosition = (
  */
 const placeNextPenguin = (
   game: Game
-): Result<
-  Game,
-  NoMorePlacementsError | InvalidGameStateError | IllegalPenguinPositionError
-> =>
-  (getNextPenguinPlacementPosition(game) as Result<
-    BoardPosition,
-    NoMorePlacementsError | InvalidGameStateError | IllegalPenguinPositionError
-  >).andThen((position: BoardPosition) =>
-    placePenguin(getCurrentPlayer(game), game, position)
-  );
+): Result<Game, IllegalPlacementError> => {
+  const maybePos = getNextPenguinPlacementPosition(game);
+
+  if (maybePos.isNothing()) {
+    return err(new IllegalPlacementError(game, getCurrentPlayer(game), null, "No more placements available"));
+  }
+
+  return placePenguin(getCurrentPlayer(game), game, maybePos.unsafelyUnwrap());
+}
 
 /**
  * Places all remaining unplaced penguins in given Game in the zig-zag pattern
@@ -72,20 +70,14 @@ const placeNextPenguin = (
  */
 const placeAllPenguinsZigZag = (
   game: Game
-): Result<
-  MovementGame,
-  NoMorePlacementsError | InvalidGameStateError | IllegalPenguinPositionError
-> => {
+): Result<MovementGame, IllegalPlacementError | NotMovementGameError> => {
   const resultGameHasPlacements = (gameOrError: Result<Game, Error>): boolean =>
     gameOrError
       .map((game: Game) => !gameIsMovementGame(game))
       .mapErr(() => false)
       .unsafelyUnwrap();
 
-  let placedPenguinGame: Result<
-    Game,
-    NoMorePlacementsError | InvalidGameStateError | IllegalPenguinPositionError
-  > = ok(game);
+  let placedPenguinGame: Result<Game, IllegalPlacementError | NotMovementGameError> = ok(game);
 
   while (resultGameHasPlacements(placedPenguinGame)) {
     placedPenguinGame = placedPenguinGame.andThen((game: Game) =>
@@ -95,10 +87,10 @@ const placeAllPenguinsZigZag = (
 
   return placedPenguinGame.andThen((game: Game) => {
     if (gameIsMovementGame(game)) {
-      return ok(game);
+      return ok(game as MovementGame);
     } else {
       return err(
-        new InvalidGameStateError(game, "Unable to make all placements.")
+        new NotMovementGameError(game, "Unable to make all placements.")
       );
     }
   });
@@ -239,13 +231,13 @@ const tieBreakMovements = (movements: Array<Movement>): Movement => {
 const chooseNextAction = (
   game: MovementGame,
   lookAheadTurnsDepth: number
-): Movement | NoMoreMovementsError => {
+): Maybe<Movement> => {
   // Create the GameTree for the given state.
   const gameTree: GameTree = createGameTreeFromMovementGame(game);
 
   // Return false if there are no next actions for the player to make.
   if (gameTree.potentialMoves.length < 1) {
-    return new NoMoreMovementsError(game);
+    return nothing();
   }
 
   // For each of the movements, find their min max.
@@ -273,7 +265,7 @@ const chooseNextAction = (
   const nextMovement: Movement | false = tieBreakMovements(maxMovements);
 
   // Return the next movement.
-  return nextMovement;
+  return just(nextMovement);
 };
 
 export {

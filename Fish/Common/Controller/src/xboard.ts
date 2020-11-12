@@ -1,15 +1,7 @@
 import { createNumberedBoard } from "./boardCreation";
 import { getReachablePositions } from "./movementChecking";
-import { isError } from "./validation";
 import { createTestGameState } from "./gameStateCreation";
-import { Game } from "../../state";
-import { BoardPosition, Board } from "../../board";
-import {
-  InvalidNumberOfPlayersError,
-  InvalidBoardConstraintsError,
-  InvalidPositionError,
-  InvalidGameStateError,
-} from "../types/errors";
+import { BoardPosition } from "../../board";
 import { InputBoardPosn, readStdin } from "./testHarnessInput";
 
 /**
@@ -23,29 +15,16 @@ const getNumReachableFromBoard = (
   arrayBoard: number[][],
   position: number[]
 ): number => {
-  const board:
-    | Board
-    | InvalidBoardConstraintsError
-    | InvalidPositionError = createNumberedBoard(arrayBoard);
-
-  // Ensure board is not error when creating game from board
-  if (!isError(board)) {
-    const game:
-      | Game
-      | InvalidNumberOfPlayersError
-      | InvalidGameStateError = createTestGameState(board);
-    // Ensure game is not error when finding reachable positions
-    if (!isError(game)) {
-      const startPosition: BoardPosition = {
-        row: position[0],
-        col: position[1],
-      };
-      const reachableTiles = getReachablePositions(game, startPosition);
-      return reachableTiles.length;
-    }
-    return 0;
-  }
-  return 0;
+  const board = createNumberedBoard(arrayBoard);
+  const game = board.map((board) => createTestGameState(board));
+  return game.mapOrElse(() => 0, game => {
+    const startPosition: BoardPosition = {
+      row: position[0],
+      col: position[1],
+    };
+    const reachableTiles = getReachablePositions(game.unsafelyUnwrap(), startPosition);
+    return reachableTiles.length;
+  });
 };
 
 readStdin<InputBoardPosn>().then((parsed: InputBoardPosn) => {

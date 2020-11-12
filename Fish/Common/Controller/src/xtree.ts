@@ -1,7 +1,6 @@
 import { tieBreakMovements } from "../../../Player/strategy";
 import { BoardPosition } from "../../board";
-import { GameTree, Movement, MovementToResultingTree } from "../../game-tree";
-import { Game } from "../../state";
+import { Movement, MovementToResultingTree } from "../../game-tree";
 import { createGameTree } from "./gameTreeCreation";
 import { getNextPosition } from "./movementChecking";
 import { positionsAreEqual } from "./penguinPlacement";
@@ -81,10 +80,10 @@ const collectMovements = (
 readStdin<MoveResponseQuery>()
   .then((parsed: MoveResponseQuery) => {
     // Apply the Movement to the Game state.
-    const game: Game = performMoveResponseQuery(parsed) as Game;
+    const game = performMoveResponseQuery(parsed);
 
     // Convert the Game state into a GameTree
-    const gameTree: GameTree = createGameTree(game) as GameTree;
+    const gameTree = game.andThen(game => createGameTree(game));
 
     // Map onto the GameTree's potential moves a function that determines if
     // the movement lands on a tile adjacent to the previous player's
@@ -92,18 +91,25 @@ readStdin<MoveResponseQuery>()
     const targetPosition: BoardPosition = inputPositionToBoardPosition(
       parsed.to
     );
-    const movementsToNeighbors: Array<Movement> = gameTree.potentialMoves
-      .map(movementLandsOnNeighborOfTarget(targetPosition))
-      .reduce<Array<Movement>>(collectMovements, []);
+    const movementsToNeighbors = gameTree.map(gameTree => gameTree.potentialMoves
+        .map(movementLandsOnNeighborOfTarget(targetPosition))
+        .reduce<Array<Movement>>(collectMovements, []))
+
+    if (movementsToNeighbors.isErr()) {
+      printFalse();
+      return;
+    }
+
+    const movements = movementsToNeighbors.unsafelyUnwrap();
 
     // If there are no possible moves, output false.
-    if (movementsToNeighbors.length < 1) {
+    if (movements.length < 1) {
       printFalse();
       return;
     }
 
     // Tie break the cases into a single Movement if possible.
-    const movement: Movement = tieBreakMovements(movementsToNeighbors);
+    const movement: Movement = tieBreakMovements(movements);
 
     // Convert the Movement into an Action and return it if it exists,
     const action: Action = movementToAction(movement);
