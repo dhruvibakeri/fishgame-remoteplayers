@@ -17,10 +17,7 @@ import {
   validatePenguinMove,
 } from "./validation";
 import { getFishNumberFromPosition, setTileToHole } from "./boardCreation";
-import {
-  getNextPlayerIndex,
-  skipToNextActivePlayer,
-} from "./gameStateCreation";
+import { shiftPlayers, skipToNextActivePlayer } from "./gameStateCreation";
 
 import { Result } from "true-myth";
 const { ok, err } = Result;
@@ -166,7 +163,7 @@ const placePenguin = (
 
   return ok({
     ...game,
-    curPlayerIndex: getNextPlayerIndex(game),
+    players: shiftPlayers(game.players),
     penguinPositions: updatedPenguinPositions,
     remainingUnplacedPenguins: newUnplacedPenguins,
   });
@@ -202,18 +199,14 @@ const movePenguin = (
         endPosition,
         startPosition
       );
-      const curPlayerIndex = getNextPlayerIndex(movementGame);
-      const gameWithNextActivePlayer = skipToNextActivePlayer({
-        ...movementGame,
-        curPlayerIndex,
-      });
       const result: MovementGame = {
-        ...gameWithNextActivePlayer,
+        ...movementGame,
         board,
+        players: shiftPlayers(movementGame.players),
         penguinPositions: updatedPenguinPositions,
         scores: updatePlayerScore(movementGame, startPosition),
       };
-      return result;
+      return skipToNextActivePlayer(result);
     })
   );
 };

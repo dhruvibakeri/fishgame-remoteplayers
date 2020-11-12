@@ -1,4 +1,9 @@
-import { Game, getCurrentPlayerColor, MovementGame } from "../../state";
+import {
+  Game,
+  getCurrentPlayer,
+  getCurrentPlayerColor,
+  MovementGame,
+} from "../../state";
 import {
   GameTree,
   Movement,
@@ -113,7 +118,7 @@ const createLazyGameTree = (
   // that have already been validated.
   const newGameState = movePenguin(
     game,
-    game.players[game.curPlayerIndex],
+    getCurrentPlayer(game),
     movement.startPosition,
     movement.endPosition
   ).unsafelyUnwrap();

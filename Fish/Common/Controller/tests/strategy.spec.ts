@@ -1,4 +1,4 @@
-import { createGameState } from "../src/gameStateCreation";
+import { createGameState, shiftPlayers } from "../src/gameStateCreation";
 import { Game, MovementGame, Player } from "../../state";
 import { Board, BoardPosition, PenguinColor } from "../../board";
 import {
@@ -71,7 +71,7 @@ describe("strategy", () => {
   ]);
   const gameAfterPlacement1 = {
     ...game,
-    curPlayerIndex: 1,
+    players: shiftPlayers(players),
     penguinPositions: penguinPositionsAfterPlacement1,
     remainingUnplacedPenguins: remainingUnplacedPenguinsAfterPlacement1,
     scores: scoresAfterPlacement1,
@@ -98,7 +98,7 @@ describe("strategy", () => {
   ]);
   const gameAfterPlacement2: Game = {
     ...gameAfterPlacement1,
-    curPlayerIndex: 0,
+    players,
     penguinPositions: penguinPositionsAfterPlacement2,
     remainingUnplacedPenguins: remainingUnplacedPenguinsAfterPlacement2,
     scores: scoresAfterPlacement2,
@@ -106,7 +106,7 @@ describe("strategy", () => {
 
   const gameAfterPlacement1WithHole: Game = {
     ...gameWithHole,
-    curPlayerIndex: 1,
+    players: shiftPlayers(players),
     penguinPositions: penguinPositionsAfterPlacement1,
     remainingUnplacedPenguins: remainingUnplacedPenguinsAfterPlacement1,
     scores: scoresAfterPlacement1,
@@ -122,7 +122,7 @@ describe("strategy", () => {
   ]);
   const gameAfterPlacement2WithHole: Game = {
     ...gameAfterPlacement1WithHole,
-    curPlayerIndex: 0,
+    players,
     penguinPositions: penguinPositionsAfterPlacement2WithHole,
     remainingUnplacedPenguins: remainingUnplacedPenguinsAfterPlacement2,
     scores: scoresAfterPlacement2,
@@ -149,7 +149,7 @@ describe("strategy", () => {
   ]);
   const gameAfterPlacement3WithHole: Game = {
     ...gameAfterPlacement2WithHole,
-    curPlayerIndex: 1,
+    players: shiftPlayers(players),
     penguinPositions: penguinPositionsAfterPlacement3WithHole,
     remainingUnplacedPenguins: remainingUnplacedPenguinsAfterPlacement3WithHole,
     scores: scoresAfterPlacement3WithHole,
@@ -190,7 +190,6 @@ describe("strategy", () => {
   ]);
   const gameAfterAllPlacement: MovementGame = {
     ...game,
-    curPlayerIndex: 0,
     penguinPositions: penguinPositionsAfterAllPlacement,
     remainingUnplacedPenguins: remainingUnplacedPenguinsAfterAllPlacement,
     scores: scoresAfterAllPlacement,
@@ -210,7 +209,9 @@ describe("strategy", () => {
 
   describe("getNextPenguinPlacementPosition", () => {
     it("returns next open position in the zig zag ordering", () => {
-      expect(getNextPenguinPlacementPosition(game)).toEqual(just(placement1Position));
+      expect(getNextPenguinPlacementPosition(game)).toEqual(
+        just(placement1Position)
+      );
       expect(getNextPenguinPlacementPosition(gameAfterPlacement1)).toEqual(
         just(placement2Position)
       );
@@ -259,12 +260,14 @@ describe("strategy", () => {
         remainingUnplacedPenguins: noMorePenguinsRemaining,
       };
       expect(placeNextPenguin(gameWithNoMorePenguinsRemaining)).toEqual(
-        err(new IllegalPlacementError(
-          gameWithNoMorePenguinsRemaining,
-          player1,
-          placement1Position,
+        err(
+          new IllegalPlacementError(
+            gameWithNoMorePenguinsRemaining,
+            player1,
+            placement1Position,
             "Player has no more penguins to place."
-        ))
+          )
+        )
       );
     });
   });
@@ -272,7 +275,14 @@ describe("strategy", () => {
   describe("placeAllPenguinsZigZag", () => {
     it("returns error if there aren't enough spaces to place penguins", () => {
       expect(placeAllPenguinsZigZag(smallGame)).toEqual(
-        err(new IllegalPlacementError(smallGame, player1, null, "No more placements available"))
+        err(
+          new IllegalPlacementError(
+            smallGame,
+            player1,
+            null,
+            "No more placements available"
+          )
+        )
       );
     });
 
@@ -350,8 +360,12 @@ describe("strategy", () => {
         startPosition: { col: 2, row: 0 },
         endPosition: { col: 2, row: 2 },
       };
-      expect(chooseNextAction(startingGame, 2).unsafelyUnwrap()).toEqual(expectedMove1);
-      expect(chooseNextAction(gameAfterPlacement, 1).unsafelyUnwrap()).toEqual(expectedMove2);
+      expect(chooseNextAction(startingGame, 2).unsafelyUnwrap()).toEqual(
+        expectedMove1
+      );
+      expect(chooseNextAction(gameAfterPlacement, 1).unsafelyUnwrap()).toEqual(
+        expectedMove2
+      );
     });
 
     it("rejects a placement for a player with no more available moves", () => {
@@ -361,28 +375,28 @@ describe("strategy", () => {
 
   describe("getMinMaxScore", () => {
     it("returns the searching player's score if the depth is 0", () => {
-      expect(getMinMaxScore(gameTree, 0, 1)).toEqual(0);
+      expect(getMinMaxScore(gameTree, player1.color, 1)).toEqual(0);
     });
 
     it("returns the searching player's score if there are no more potential moves", () => {
-      expect(getMinMaxScore(gameTreeNoMoves, 0, 1)).toEqual(1);
+      expect(getMinMaxScore(gameTreeNoMoves, player1.color, 1)).toEqual(1);
     });
 
     it("returns a maximum of the found scores if it's the searching player's turn", () => {
-      expect(getMinMaxScore(gameTree, 0, 2)).toEqual(1);
+      expect(getMinMaxScore(gameTree, player1.color, 2)).toEqual(1);
     });
 
     it("returns a minimum of the found scores if it's not the searching player's turns", () => {
       const opponentTurnGame: Game = {
         ...gameAfterAllPlacement,
-        curPlayerIndex: 1,
+        players: shiftPlayers(players),
       };
       const opponentTurnGameTree = createGameTree(
         opponentTurnGame
       ).unsafelyUnwrap();
-      expect(getMinMaxScore(opponentTurnGameTree, 0, 0)).toEqual(0);
-      expect(getMinMaxScore(opponentTurnGameTree, 0, 1)).toEqual(0);
-      expect(getMinMaxScore(opponentTurnGameTree, 0, 2)).toEqual(0);
+      expect(getMinMaxScore(opponentTurnGameTree, player1.color, 0)).toEqual(0);
+      expect(getMinMaxScore(opponentTurnGameTree, player1.color, 1)).toEqual(0);
+      expect(getMinMaxScore(opponentTurnGameTree, player1.color, 2)).toEqual(0);
     });
   });
 

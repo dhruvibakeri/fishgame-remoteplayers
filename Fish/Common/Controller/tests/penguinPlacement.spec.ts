@@ -11,7 +11,7 @@ import {
 } from "../src/penguinPlacement";
 
 import { createHoledOneFishBoard, setTileToHole } from "../src/boardCreation";
-import { createGameState } from "../src/gameStateCreation";
+import { createGameState, shiftPlayers } from "../src/gameStateCreation";
 import { Result } from "true-myth";
 const { ok, err } = Result;
 
@@ -155,7 +155,7 @@ describe("penguinMovement", () => {
     );
     const expectedGameState: Game = {
       ...game,
-      curPlayerIndex: 1,
+      players: shiftPlayers(players),
       penguinPositions: expectedPenguinPositions,
       remainingUnplacedPenguins: expectedRemainingUnplacedPenguins,
     };
@@ -163,19 +163,40 @@ describe("penguinMovement", () => {
 
     it("rejects placement position that is not on board", () => {
       expect(placePenguin(player1, game, outOfBoundsPosition)).toEqual(
-        err(new IllegalPlacementError(game, player1, outOfBoundsPosition, "Placement position is not playable."))
+        err(
+          new IllegalPlacementError(
+            game,
+            player1,
+            outOfBoundsPosition,
+            "Placement position is not playable."
+          )
+        )
       );
     });
 
     it("rejects placement position that is a hole", () => {
       expect(placePenguin(player1, game, holePosition)).toEqual(
-        err(new IllegalPlacementError(game, player1, holePosition, "Placement position is not playable."))
+        err(
+          new IllegalPlacementError(
+            game,
+            player1,
+            holePosition,
+            "Placement position is not playable."
+          )
+        )
       );
     });
 
     it("rejects placement position that already has a penguin", () => {
       expect(placePenguin(player1, game, validStartPosition)).toEqual(
-        err(new IllegalPlacementError(game, player1, validStartPosition, "Placement position is not playable."))
+        err(
+          new IllegalPlacementError(
+            game,
+            player1,
+            validStartPosition,
+            "Placement position is not playable."
+          )
+        )
       );
     });
 
@@ -191,12 +212,14 @@ describe("penguinMovement", () => {
       expect(
         placePenguin(player1, noUnplacedPenguinsGame, placePosition)
       ).toEqual(
-        err(new IllegalPlacementError(
+        err(
+          new IllegalPlacementError(
             noUnplacedPenguinsGame,
             getCurrentPlayer(noUnplacedPenguinsGame),
             placePosition,
             "Player has no more penguins to place."
-        ))
+          )
+        )
       );
     });
 
@@ -211,11 +234,11 @@ describe("penguinMovement", () => {
     it("rejects a start position not on the board", () => {
       const invalidStartPosition: BoardPosition = { col: 2, row: 2 };
       const expectedError = new IllegalMovementError(
-          game,
-          player1,
-          invalidStartPosition,
-          validEndPosition,
-          "Start and end positions do not form a straight, uninterrupted path."
+        game,
+        player1,
+        invalidStartPosition,
+        validEndPosition,
+        "Start and end positions do not form a straight, uninterrupted path."
       );
       expect(
         movePenguin(
@@ -234,7 +257,7 @@ describe("penguinMovement", () => {
         player1,
         validStartPosition,
         invalidEndPosition,
-          "Start and end positions do not form a straight, uninterrupted path."
+        "Start and end positions do not form a straight, uninterrupted path."
       );
       expect(
         movePenguin(
@@ -253,7 +276,7 @@ describe("penguinMovement", () => {
         player1,
         invalidStartPosition,
         validEndPosition,
-          "Start and end positions do not form a straight, uninterrupted path."
+        "Start and end positions do not form a straight, uninterrupted path."
       );
       expect(
         movePenguin(
@@ -272,7 +295,7 @@ describe("penguinMovement", () => {
         player1,
         validStartPosition,
         invalidEndPosition,
-          "Start and end positions do not form a straight, uninterrupted path."
+        "Start and end positions do not form a straight, uninterrupted path."
       );
       expect(
         movePenguin(
@@ -290,7 +313,7 @@ describe("penguinMovement", () => {
         player1,
         validEndPosition,
         holePosition,
-          "Start and end positions do not form a straight, uninterrupted path."
+        "Start and end positions do not form a straight, uninterrupted path."
       );
       expect(
         movePenguin(movementGame, player1, validEndPosition, holePosition)
@@ -312,7 +335,7 @@ describe("penguinMovement", () => {
         player1,
         validStartPosition,
         validEndPosition,
-          "Start and end positions do not form a straight, uninterrupted path."
+        "Start and end positions do not form a straight, uninterrupted path."
       );
       expect(
         movePenguin(
@@ -340,7 +363,7 @@ describe("penguinMovement", () => {
       expectedScores.set(player1.color, 1);
       const expectedGameState: Game = {
         ...movementGame,
-        curPlayerIndex: 0,
+        players: shiftPlayers(players),
         penguinPositions: expectedPenguinPositions,
         board: newBoard,
         scores: expectedScores,

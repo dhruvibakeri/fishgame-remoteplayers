@@ -1,16 +1,15 @@
-import { BoardPosition } from "../../board";
-import { Game, getCurrentPlayer, MovementGame, Player } from "../../state";
+import { BoardPosition, PenguinColor } from "../../board";
+import {
+  Game,
+  getCurrentPlayer,
+  getCurrentPlayerColor,
+  MovementGame,
+  Player,
+} from "../../state";
 import { placePenguin } from "./penguinPlacement";
 import { positionIsPlayable } from "./validation";
-import {
-  IllegalPlacementError,
-  NotMovementGameError,
-} from "../types/errors";
-import {
-  Movement,
-  GameTree,
-  MovementToResultingTree,
-} from "../../game-tree";
+import { IllegalPlacementError, NotMovementGameError } from "../types/errors";
+import { Movement, GameTree, MovementToResultingTree } from "../../game-tree";
 import {
   createGameTreeFromMovementGame,
   gameIsMovementGame,
@@ -29,9 +28,7 @@ const { just, nothing } = Maybe;
  * @returns BoardPosition representing the next available position to place
  * a penguin.
  */
-const getNextPenguinPlacementPosition = (
-  game: Game
-): Maybe<BoardPosition> => {
+const getNextPenguinPlacementPosition = (game: Game): Maybe<BoardPosition> => {
   for (let row = 0; row < game.board.tiles.length; row++) {
     for (let col = 0; col < game.board.tiles[row].length; col++) {
       if (positionIsPlayable(game, { row, col })) {
@@ -51,17 +48,22 @@ const getNextPenguinPlacementPosition = (
  * @return the resulting Game state from the placement or an error
  * if the penguin can't be placed
  */
-const placeNextPenguin = (
-  game: Game
-): Result<Game, IllegalPlacementError> => {
+const placeNextPenguin = (game: Game): Result<Game, IllegalPlacementError> => {
   const maybePos = getNextPenguinPlacementPosition(game);
 
   if (maybePos.isNothing()) {
-    return err(new IllegalPlacementError(game, getCurrentPlayer(game), null, "No more placements available"));
+    return err(
+      new IllegalPlacementError(
+        game,
+        getCurrentPlayer(game),
+        null,
+        "No more placements available"
+      )
+    );
   }
 
   return placePenguin(getCurrentPlayer(game), game, maybePos.unsafelyUnwrap());
-}
+};
 
 /**
  * Places all remaining unplaced penguins in given Game in the zig-zag pattern
@@ -73,11 +75,18 @@ const placeNextPenguin = (
 const placeAllPenguinsZigZag = (
   game: Game
 ): Result<MovementGame, IllegalPlacementError | NotMovementGameError> => {
-  const resultGameHasPlacements = (gameOrError: Result<Game, Error>): boolean => {
-    return gameOrError.isOk() && !gameIsMovementGame(gameOrError.unsafelyUnwrap());
-  }
+  const resultGameHasPlacements = (
+    gameOrError: Result<Game, Error>
+  ): boolean => {
+    return (
+      gameOrError.isOk() && !gameIsMovementGame(gameOrError.unsafelyUnwrap())
+    );
+  };
 
-  let placedPenguinGame: Result<Game, IllegalPlacementError | NotMovementGameError> = ok(game);
+  let placedPenguinGame: Result<
+    Game,
+    IllegalPlacementError | NotMovementGameError
+  > = ok(game);
 
   while (resultGameHasPlacements(placedPenguinGame)) {
     placedPenguinGame = placedPenguinGame.andThen((game: Game) =>
@@ -102,23 +111,25 @@ const placeAllPenguinsZigZag = (
  * This computation will be done up to a given remaining depth in the searching player's turns.
  *
  * @param gameTree GameTree representing the current node in tree traversal
- * @param searchingPlayerIndex Index in gameTree.gameState.players for the player the function is maximizing for
+ * @param searchingPlayerColor assigned PenguinColor the player the function is maximizing for
  * @param lookAheadTurnsDepth Depth remaining in tree traversal
  */
 const getMinMaxScore = (
   gameTree: GameTree,
-  searchingPlayerIndex: number,
+  searchingPlayerColor: PenguinColor,
   lookAheadTurnsDepth: number
 ): number => {
   // If current node is root node or if we've reached the desired depth, return current player score.
   if (lookAheadTurnsDepth === 1 || gameTree.potentialMoves.length === 0) {
     return gameTree.gameState.scores.get(
-      gameTree.gameState.players[searchingPlayerIndex].color
+      gameTree.gameState.players.find(
+        (player: Player) => player.color === searchingPlayerColor
+      ).color
     );
   }
 
   const isMaximizing: boolean =
-    searchingPlayerIndex === gameTree.gameState.curPlayerIndex;
+    searchingPlayerColor === getCurrentPlayerColor(gameTree.gameState);
   const curLookAheadTurnsDepth: number = isMaximizing
     ? lookAheadTurnsDepth - 1
     : lookAheadTurnsDepth;
@@ -128,7 +139,7 @@ const getMinMaxScore = (
     (movementToResultingTree: MovementToResultingTree) =>
       getMinMaxScore(
         movementToResultingTree.resultingGameTree(),
-        searchingPlayerIndex,
+        searchingPlayerColor,
         curLookAheadTurnsDepth
       )
   );
@@ -249,7 +260,7 @@ const chooseNextAction = (
       movementToResultingTree.movement,
       getMinMaxScore(
         movementToResultingTree.resultingGameTree(),
-        game.curPlayerIndex,
+        getCurrentPlayerColor(game),
         lookAheadTurnsDepth
       ),
     ]
