@@ -17,9 +17,9 @@ interface Player {
  * A Game is a structure representing the current game state of a fish game.
  *
  * @param players the array of Players participating in this game, in the
- * ordering which they will take turns
+ * ordering which they will take turns, shifted such that the first player
+ * of the array is always the current player.
  * @param board the current Board of the game
- * @param curPlayerIndex the index of the Player who's turn it currently is
  * @param penguinPositions a Map from each PenguinColor to the BoardPositions
  * of each of that color's Penguins
  * @param remainingUnplacedPenguins a Map from a player's color to a number, the number represents how
@@ -29,7 +29,6 @@ interface Player {
 interface Game {
   readonly players: Array<Player>;
   readonly board: Board;
-  readonly curPlayerIndex: number;
   readonly penguinPositions: Map<PenguinColor, Array<BoardPosition>>;
   readonly remainingUnplacedPenguins: Map<PenguinColor, number>;
   readonly scores: Map<PenguinColor, number>;
@@ -67,8 +66,7 @@ const getCurrentPlayerColor = (game: Game): PenguinColor =>
  * @param game the Game state to retrieve from
  * @return the current player
  */
-const getCurrentPlayer = (game: Game): Player =>
-  game.players[game.curPlayerIndex];
+const getCurrentPlayer = (game: Game): Player => game.players[0];
 
 export {
   Player,

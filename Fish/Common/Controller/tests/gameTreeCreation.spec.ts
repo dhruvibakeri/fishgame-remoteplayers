@@ -10,6 +10,7 @@ import {
 import { GameTree, Movement, MovementToResultingTree } from "../../game-tree";
 import { IllegalGameTreeError } from "../types/errors";
 import { Result } from "true-myth";
+import { shiftPlayers } from "../src/gameStateCreation";
 const { err } = Result;
 
 describe("gameTreeCreation", () => {
@@ -100,7 +101,6 @@ describe("gameTreeCreation", () => {
   const game: MovementGame = {
     players,
     board: boardBeforeMovement,
-    curPlayerIndex: 0,
     penguinPositions,
     remainingUnplacedPenguins,
     scores: scoresBeforeMovement,
@@ -109,25 +109,22 @@ describe("gameTreeCreation", () => {
   const gameAfterMovement1: Game = {
     players,
     board: boardAfterMovement1Or2,
-    curPlayerIndex: 0,
     penguinPositions: penguinPositionsAfterMovement1,
     remainingUnplacedPenguins,
     scores: scoresAfterMovement,
   };
 
   const gameAfterMovement2: Game = {
-    players,
+    players: shiftPlayers(players),
     board: boardAfterMovement1Or2,
-    curPlayerIndex: 1,
     penguinPositions: penguinPositionsAfterMovement2,
     remainingUnplacedPenguins,
     scores: scoresAfterMovement,
   };
 
   const gameAfterMovement3: Game = {
-    players,
+    players: shiftPlayers(players),
     board: boardAfterMovement3,
-    curPlayerIndex: 1,
     penguinPositions: penguinPositionsAfterMovement3,
     remainingUnplacedPenguins,
     scores: scoresAfterMovement,
@@ -138,9 +135,9 @@ describe("gameTreeCreation", () => {
     { movement: movement3, game: gameAfterMovement3 },
   ];
   const expectedPotentialMoveLengths = [
-    { movement: movement1, length: 2, curPlayerIndex: 0 },
-    { movement: movement2, length: 1, curPlayerIndex: 1 },
-    { movement: movement3, length: 1, curPlayerIndex: 1 },
+    { movement: movement1, length: 2 },
+    { movement: movement2, length: 1 },
+    { movement: movement3, length: 1 },
   ];
   const gameWithUnlacedPenguins: Game = {
     ...game,
@@ -163,8 +160,6 @@ describe("gameTreeCreation", () => {
           movement: movementToResultingTree.movement,
           length: movementToResultingTree.resultingGameTree().potentialMoves
             .length,
-          curPlayerIndex: movementToResultingTree.resultingGameTree().gameState
-            .curPlayerIndex,
         };
       }
     );
@@ -183,7 +178,12 @@ describe("gameTreeCreation", () => {
 
     it("rejects a non MovementGame", () => {
       expect(createGameTree(gameWithUnlacedPenguins)).toEqual(
-        err(new IllegalGameTreeError(gameWithUnlacedPenguins, "Invalid game for tree generation. Not all penguins have been placed"))
+        err(
+          new IllegalGameTreeError(
+            gameWithUnlacedPenguins,
+            "Invalid game for tree generation. Not all penguins have been placed"
+          )
+        )
       );
     });
   });
@@ -204,8 +204,6 @@ describe("gameTreeCreation", () => {
           movement: movementToResultingTree.movement,
           length: movementToResultingTree.resultingGameTree().potentialMoves
             .length,
-          curPlayerIndex: movementToResultingTree.resultingGameTree().gameState
-            .curPlayerIndex,
         };
       }
     );
@@ -249,8 +247,6 @@ describe("gameTreeCreation", () => {
           movement: movementToResultingTree.movement,
           length: movementToResultingTree.resultingGameTree().potentialMoves
             .length,
-          curPlayerIndex: movementToResultingTree.resultingGameTree().gameState
-            .curPlayerIndex,
         };
       }
     );
