@@ -699,4 +699,3 @@ export {
   numberOfPenguinPlacements,
   runGame,
 };
-

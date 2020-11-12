@@ -32,13 +32,9 @@ const makePlacement = (game: Game): Promise<BoardPosition> => {
   // valid in that it contains enough positions for all of each player's
   // placements, in which case this strategy must be able to find an
   // available BoardPosition.
-<<<<<<< HEAD
   return Promise.resolve(
     getNextPenguinPlacementPosition(game).unsafelyUnwrap()
   );
-=======
-  return getNextPenguinPlacementPosition(game).unwrapOrElse(null);
->>>>>>> 8f7580c... use result and clean up error types
 };
 
 /**
@@ -52,15 +48,10 @@ const makeMovement = (game: Game): Promise<Movement> => {
   // The player assumes the given game is a valid MovementGame, as it's being
   // handed to the player directly from the Referee. Since the given game is a
   // valid MovementGame the function will return a valid Movement.
-<<<<<<< HEAD
   return Promise.resolve(
     chooseNextAction(game as MovementGame, LOOKAHEAD_DEPTH).unsafelyUnwrap()
   );
-=======
-  return chooseNextAction(game as MovementGame, LOOKAHEAD_DEPTH).unwrapOrElse(null);
->>>>>>> 8f7580c... use result and clean up error types
-};
-
+}
 /**
  * Function to let the player know that the game has ended, and to inform them
  * of the game's outcome using a GameDebrief.

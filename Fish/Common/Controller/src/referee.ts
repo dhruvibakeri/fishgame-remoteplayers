@@ -36,7 +36,6 @@ import { checkMovementLegal } from "./queryGameTree";
 import { Result } from "true-myth";
 const { err } = Result;
 
-
 const PLAYER_REQUEST_TIMEOUT = 5000;
 
 /**
