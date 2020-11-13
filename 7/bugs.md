@@ -1,0 +1,1 @@
+There are no outstanding bugs from previous feedbacks that have not already been addressed pre-partner switch. Points mentioned within the Milestone 6 feedback have not been addressed for this milestone per [Piazza @386](https://piazza.com/class/kevisd7ggfb502?cid=386).
