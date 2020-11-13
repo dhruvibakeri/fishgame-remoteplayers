@@ -7,9 +7,9 @@ import {
   createEmptyScoreSheet,
   createGameState,
   createTestGameState,
-  getNextPlayerIndex,
   isValidNumberOfPlayers,
   numOfPenguinsPerPlayer,
+  shiftPlayers,
   skipToNextActivePlayer,
 } from "../src/gameStateCreation";
 
@@ -30,20 +30,28 @@ describe("gameStateCreation", () => {
 
   const board: Board = createBlankBoard(2, 2, 1).unsafelyUnwrap();
 
-  describe("getNextPlayerIndex", () => {
-    const board: Board = createBlankBoard(3, 3, 1).unsafelyUnwrap();
-    const game: Game = createTestGameState(board).unsafelyUnwrap();
-
-    it("gets the next player index", () => {
-      expect(getNextPlayerIndex(game)).toEqual(1);
+  describe("shiftPlayers", () => {
+    it("shifts an array of length 1", () => {
+      expect(shiftPlayers([player1])).toEqual([player1]);
     });
 
-    it("wraps to the start after the last player", () => {
-      const lastPlayerTurnGame: Game = {
-        ...game,
-        curPlayerIndex: game.players.length - 1,
-      };
-      expect(getNextPlayerIndex(lastPlayerTurnGame)).toEqual(0);
+    it("shifts an array of length 2", () => {
+      expect(shiftPlayers([player1, player2])).toEqual([player2, player1]);
+    });
+
+    it("shifts an array of length 4", () => {
+      expect(shiftPlayers([player1, player2, player3, player4])).toEqual([
+        player2,
+        player3,
+        player4,
+        player1,
+      ]);
+    });
+
+    it("handles multiple shifts", () => {
+      expect(
+        shiftPlayers(shiftPlayers([player1, player2, player3, player4]))
+      ).toEqual([player3, player4, player1, player2]);
     });
   });
 
@@ -109,7 +117,7 @@ describe("gameStateCreation", () => {
     it("skips to the next player that can move", () => {
       const expectedGame: MovementGame = {
         ...movementGameSkipPlayer,
-        curPlayerIndex: 1,
+        players: shiftPlayers(movementGameSkipPlayer.players),
       };
       expect(skipToNextActivePlayer(movementGameSkipPlayer)).toEqual(
         expectedGame
@@ -175,14 +183,26 @@ describe("gameStateCreation", () => {
     it("rejects an empty list of players", () => {
       const players: Array<Player> = [];
       expect(createGameState(players, board)).toEqual(
-        err(new IllegalGameStateError(players, board, "Invalid number of players specified for game: 0"))
+        err(
+          new IllegalGameStateError(
+            players,
+            board,
+            "Invalid number of players specified for game: 0"
+          )
+        )
       );
     });
 
     it("rejects a single player", () => {
       const players: Array<Player> = [player1];
       expect(createGameState(players, board)).toEqual(
-        err(new IllegalGameStateError(players, board, "Invalid number of players specified for game: 1"))
+        err(
+          new IllegalGameStateError(
+            players,
+            board,
+            "Invalid number of players specified for game: 1"
+          )
+        )
       );
     });
 
@@ -195,14 +215,26 @@ describe("gameStateCreation", () => {
         player3,
       ];
       expect(createGameState(players, board)).toEqual(
-        err(new IllegalGameStateError(players, board, "Invalid number of players specified for game: 5"))
+        err(
+          new IllegalGameStateError(
+            players,
+            board,
+            "Invalid number of players specified for game: 5"
+          )
+        )
       );
     });
 
     it("rejects an array of players with non-unique colors", () => {
       const players: Array<Player> = [player1, player2, player4, player2];
       expect(createGameState(players, board)).toEqual(
-        err(new IllegalGameStateError(players, board, "Not all player colors are unique"))
+        err(
+          new IllegalGameStateError(
+            players,
+            board,
+            "Not all player colors are unique"
+          )
+        )
       );
     });
 
@@ -211,7 +243,6 @@ describe("gameStateCreation", () => {
       const expectedGameState: Game = {
         players: players,
         board,
-        curPlayerIndex: 0,
         remainingUnplacedPenguins: unplacedPenguins4Players,
         penguinPositions: createEmptyPenguinPositions(players),
         scores: createEmptyScoreSheet(players),
@@ -225,7 +256,6 @@ describe("gameStateCreation", () => {
       const expectedGameState: Game = {
         players: players,
         board,
-        curPlayerIndex: 0,
         remainingUnplacedPenguins: unplacedPenguins3Players,
         penguinPositions: createEmptyPenguinPositions(players),
         scores: createEmptyScoreSheet(players),
@@ -303,9 +333,7 @@ describe("gameStateCreation", () => {
     const expectedGameState = createGameState(samplePlayers, board);
 
     it("creates test game state", () => {
-      expect(createTestGameState(board)).toEqual(
-        expectedGameState
-      );
+      expect(createTestGameState(board)).toEqual(expectedGameState);
     });
   });
 });

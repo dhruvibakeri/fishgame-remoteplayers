@@ -1,4 +1,4 @@
-import { createTestGameState } from "../src/gameStateCreation";
+import { createTestGameState, shiftPlayers } from "../src/gameStateCreation";
 import {
   Game,
   getCurrentPlayer,
@@ -19,9 +19,10 @@ describe("state.ts", () => {
     ...createTestGameState(board).unsafelyUnwrap(),
     scores,
   };
-  const gameSecondTurn = { ...game, curPlayerIndex: 1 };
   const samplePlayer1: Player = { name: "foo", color: PenguinColor.Black };
   const samplePlayer2: Player = { name: "bar", color: PenguinColor.Brown };
+  const players = [samplePlayer1, samplePlayer2];
+  const gameSecondTurn = { ...game, players: shiftPlayers(players) };
 
   describe("getCurrentPlayerScore", () => {
     it("retrieves the score of the first player in the beginning state", () => {

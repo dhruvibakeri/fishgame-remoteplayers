@@ -199,14 +199,14 @@ const movePenguin = (
         endPosition,
         startPosition
       );
-      const gameWithNextActivePlayer = skipToNextActivePlayer(movementGame);
       const result: MovementGame = {
-        ...gameWithNextActivePlayer,
+        ...movementGame,
         board,
+        players: shiftPlayers(movementGame.players),
         penguinPositions: updatedPenguinPositions,
         scores: updatePlayerScore(movementGame, startPosition),
       };
-      return result;
+      return skipToNextActivePlayer(result);
     })
   );
 };

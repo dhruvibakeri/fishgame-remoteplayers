@@ -38,7 +38,7 @@ export default Vue.extend({
      * @return whether the given player is the current player.
      */
     isCurPlayer(player: PlayerType) {
-      return this.game.players[this.game.curPlayerIndex].color === player.color;
+      return this.game.players[0].color === player.color;
     },
   },
 });

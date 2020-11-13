@@ -352,7 +352,7 @@ const disqualifyCurrentFailingPlayer = (
 ): RefereeState => {
   // Add current player to list of failing players
   const newFailingPlayers = [
-    ...refereeState.cheatingPlayers,
+    ...refereeState.failingPlayers,
     getCurrentPlayer(refereeState.game),
   ];
 
@@ -419,7 +419,7 @@ const disqualifyCurrentPlayer = (
 
   // Remove player from list of TournamentPlayers
   const newTournamentPlayers = new Map(refereeState.tournamentPlayers);
-  newTournamentPlayers.delete(getCurrentPlayerColor(refereeState.game));
+  newTournamentPlayers.delete(getCurrentPlayer(refereeState.game).name);
 
   // Remove player from game
   const newGame = removeDisqualifiedPlayerFromGame(refereeState.game);

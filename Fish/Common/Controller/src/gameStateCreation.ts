@@ -10,12 +10,11 @@ const MAX_NUMBER_OF_PLAYERS = 4;
 const MIN_NUMBER_OF_PLAYERS = 2;
 const PENGUIN_AMOUNT_N = 6;
 
-// TODO test
 /**
- * Shift the given array of players such that the first player becomes the last.
+ * Shift the given non-empty array of players such that the first player becomes the last.
  * For example, an array like [p1, p2, p3, p4] will be shifted to [p2, p3, p4, p1].
  *
- * @param players the array of Players to shift.
+ * @param players a non-emptyarray of Players to shift.
  * @return the shifted array of players.
  */
 const shiftPlayers = (players: Array<Player>): Array<Player> => {
@@ -25,8 +24,8 @@ const shiftPlayers = (players: Array<Player>): Array<Player> => {
 };
 
 /**
- * Update the current player index of the given MovementGame to the that of the
- * next player who can make a movement, including the current player. In the
+ * Update the player array of the given MovementGame to shift to the next player
+ * that can make a move, including the current player. In the
  * case of there being no more moves for any player, return the given state as
  * the final state. It is up to the caller to determine if the Game is the
  * final state.
@@ -175,7 +174,6 @@ const createGameState = (
   return ok({
     players,
     board,
-    curPlayerIndex: 0,
     penguinPositions: createEmptyPenguinPositions(players),
     remainingUnplacedPenguins: buildUnplacedPenguinMap(players),
     scores: createEmptyScoreSheet(players),

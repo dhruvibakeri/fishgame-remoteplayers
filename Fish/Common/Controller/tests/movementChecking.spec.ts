@@ -253,7 +253,7 @@ describe("movementChecking", () => {
           col: 2,
           row: 1,
         }).unsafelyUnwrap(),
-        curPlayerIndex: 1,
+        players: shiftPlayers(players),
       };
       const holeGameWithPenguinsPlaced = placePenguin(
         player2,
@@ -294,7 +294,7 @@ describe("movementChecking", () => {
           col: 2,
           row: 1,
         }).unsafelyUnwrap(),
-        curPlayerIndex: 1,
+        players: shiftPlayers(players),
       };
       expect(anyPlayersCanMove(holeGameWithPenguinPlaced)).toEqual(false);
     });

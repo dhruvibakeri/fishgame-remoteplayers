@@ -5,7 +5,5 @@
 ## Functionality
 
 [x] Add in timeouts within `referee.ts` and catch failing players
-[x] Refactor error handling to either use a try/catch approach or a Result type of data structure
-[x] Refactor error types to remove any overlapping cases
-[ ] Remove the notion of `curPlayerIndex` and instead re-order the `players` array (shift elements, the current player will always be the first element)
-[x] Remove unecessary copying of board tiles array within `board.ts`
+[x] Refactor error handling to use a Result data structure and organize error types to remove any overlapping cases
+[x] Remove the notion of `curPlayerIndex` and instead re-order the `players` array (shift elements, the current player will always be the first element)

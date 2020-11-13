@@ -2,7 +2,7 @@
 // Reason for this is because we are importing a library, and
 // rather than installing node_modules every where we use the library,
 // our Common/Controller/src will have all files that need this library (and more)
-import { PenguinColor, Board, BoardPosition, Tile } from "../../board";
+import { PenguinColor, Board, BoardPosition } from "../../board";
 import {
   GameDebrief,
   ActivePlayer,
@@ -23,7 +23,6 @@ import {
   getCurrentPlayer,
 } from "../../state";
 import { createHoledOneFishBoard, getTileOnBoard } from "./boardCreation";
-import { isError } from "./validation";
 import {
   createGameTreeFromMovementGame,
   gameIsMovementGame,
@@ -61,9 +60,8 @@ interface BoardDimension {
  * are necessary for running it.
  *
  * @param game the current Game state of the Game this referee is running
- * @param tournamentPlayers an array of the TournamentPlayers participating in
- * this game, each representing an individual player's implementation of the
- * Player-Referee protocol
+ * @param tournamentPlayers a mapping from each participating player's
+ * name to the courresponding TournamentPlayer
  * @param cheatingPlayers an array of all the players currently caught cheating
  * throughout the game, where a cheating player is one who has provided a
  * placement or movement that violates the rules of the game
@@ -73,7 +71,7 @@ interface BoardDimension {
  */
 interface RefereeState {
   readonly game: Game;
-  readonly tournamentPlayers: Array<TournamentPlayer>;
+  readonly tournamentPlayers: Map<string, TournamentPlayer>;
   readonly cheatingPlayers: Array<Player>;
   readonly failingPlayers: Array<Player>;
 }
@@ -84,6 +82,20 @@ interface RefereeState {
  * made. It is simply a RefereeState where the Game state is a MovementGame.
  */
 type RefereeStateWithMovementGame = RefereeState & { game: MovementGame };
+
+/**
+ * Given the currrent Referee state, returns the currently playing
+ * TournamentPlayer in the Game.
+ *
+ * @param refereeState the state of the referee.
+ * @return the TournamentPlayer whose turn is next.
+ */
+const getCurrentTournamentPlayer = (
+  refereeState: RefereeState
+): TournamentPlayer => {
+  const game = refereeState.game;
+  return refereeState.tournamentPlayers.get(getCurrentPlayer(game).name);
+};
 
 /**
  * Given an array of TournamentPlayers, returns an array of corresponding Players.
@@ -222,8 +234,9 @@ const runPlacementRounds = async (
   let currRefereeState: RefereeState = refereeState;
 
   while (!gameIsMovementGame(currRefereeState.game)) {
-    const currentTournamentPlayer: TournamentPlayer =
-      currRefereeState.tournamentPlayers[currRefereeState.game.curPlayerIndex];
+    const currentTournamentPlayer: TournamentPlayer = getCurrentTournamentPlayer(
+      currRefereeState
+    );
 
     currRefereeState = await timeoutRequest(
       currentTournamentPlayer.makePlacement(currRefereeState.game),
@@ -306,8 +319,9 @@ const runMovementRounds = async (
   let currRefereeState: RefereeStateWithMovementGame = refereeState;
 
   while (!gameIsFinished(currRefereeState.game as MovementGame)) {
-    const currentTournamentPlayer: TournamentPlayer =
-      currRefereeState.tournamentPlayers[currRefereeState.game.curPlayerIndex];
+    const currentTournamentPlayer: TournamentPlayer = getCurrentTournamentPlayer(
+      currRefereeState
+    );
 
     currRefereeState = await timeoutRequest(
       currentTournamentPlayer.makeMovement(currRefereeState.game),
@@ -342,7 +356,7 @@ const disqualifyCurrentFailingPlayer = (
 ): RefereeState => {
   // Add current player to list of failing players
   const newFailingPlayers = [
-    ...refereeState.cheatingPlayers,
+    ...refereeState.failingPlayers,
     getCurrentPlayer(refereeState.game),
   ];
 
@@ -405,13 +419,11 @@ const disqualifyCurrentPlayer = (
   message: string
 ): RefereeState => {
   // Notify player they were disqualified
-  refereeState.tournamentPlayers[refereeState.game.curPlayerIndex].disqualifyMe(
-    message
-  );
+  getCurrentTournamentPlayer(refereeState).disqualifyMe(message);
 
   // Remove player from list of TournamentPlayers
-  const newTournamentPlayers = [...refereeState.tournamentPlayers];
-  newTournamentPlayers.splice(refereeState.game.curPlayerIndex, 1);
+  const newTournamentPlayers = new Map(refereeState.tournamentPlayers);
+  newTournamentPlayers.delete(getCurrentPlayer(refereeState.game).name);
 
   // Remove player from game
   const newGame = removeDisqualifiedPlayerFromGame(refereeState.game);
@@ -447,13 +459,8 @@ const removeDisqualifiedPlayerFromGame = (game: Game): Game => {
   newRemainingUnplacedPenguins.delete(disqualifiedPlayerColor);
 
   // Remove player from game players
-  const newPlayers = game.players.filter(
-    (player: Player) => player.color !== disqualifiedPlayerColor
-  );
-
-  // Calculate next player index
-  const nextPlayerIndex =
-    game.curPlayerIndex === game.players.length - 1 ? 0 : game.curPlayerIndex;
+  const newPlayers = [...game.players];
+  newPlayers.shift();
 
   const updatedGame: Game = {
     ...game,
@@ -461,7 +468,6 @@ const removeDisqualifiedPlayerFromGame = (game: Game): Game => {
     penguinPositions: newPenguinPositions,
     remainingUnplacedPenguins: newRemainingUnplacedPenguins,
     players: newPlayers,
-    curPlayerIndex: nextPlayerIndex,
   };
 
   return gameIsMovementGame(updatedGame)
@@ -585,6 +591,22 @@ const boardIsBigEnough = (
 };
 
 /**
+ * Create a mapping from each given TournamentPlayer's name to the actual TournamentPlayer.
+ *
+ * @param tournamentPlayers the participating TournamentPlayers to make a mapping from
+ * @return the created mapping from names to TournamentPlayers
+ */
+const createTournamentPlayerMapping = (
+  tournamentPlayers: Array<TournamentPlayer>
+): Map<string, TournamentPlayer> =>
+  new Map(
+    tournamentPlayers.map((tournamentPlayer: TournamentPlayer) => [
+      tournamentPlayer.name,
+      tournamentPlayer,
+    ])
+  );
+
+/**
  * Given an array of participating TournamentPlayers and a set of
  * BoardDimenesions, setup and run a full Fish game. This call represents the
  * core functionality of the Referee component.
@@ -626,7 +648,7 @@ const runGame = (
       // Create the initial RefereeState.
       const initialRefereeState: RefereeState = {
         game,
-        tournamentPlayers,
+        tournamentPlayers: createTournamentPlayerMapping(tournamentPlayers),
         cheatingPlayers: [],
         failingPlayers: [],
       };
