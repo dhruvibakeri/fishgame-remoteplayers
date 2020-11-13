@@ -51,8 +51,7 @@ const makeMovement = (game: Game): Promise<Movement> => {
   return Promise.resolve(
     chooseNextAction(game as MovementGame, LOOKAHEAD_DEPTH).unsafelyUnwrap()
   );
-};
-
+}
 /**
  * Function to let the player know that the game has ended, and to inform them
  * of the game's outcome using a GameDebrief.
