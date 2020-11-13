@@ -18,7 +18,6 @@ import {
 } from "./validation";
 import { getFishNumberFromPosition, setTileToHole } from "./boardCreation";
 import { shiftPlayers, skipToNextActivePlayer } from "./gameStateCreation";
-
 import { Result } from "true-myth";
 const { ok, err } = Result;
 
