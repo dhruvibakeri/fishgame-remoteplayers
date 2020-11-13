@@ -19,7 +19,6 @@ import {
   getCurrentPlayer,
 } from "../../state";
 import { createHoledOneFishBoard, getTileOnBoard } from "./boardCreation";
-import { isError } from "./validation";
 import {
   createGameTreeFromMovementGame,
   gameIsMovementGame,
