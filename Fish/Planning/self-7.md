@@ -77,6 +77,7 @@ Point to at least two of the following three points of remediation:
   https://github.ccs.neu.edu/CS4500-F20/christine/commit/34575281436bb561c2cc10753fcf2e0fa44ab28c#diff-327924acc1fbd2520dbd09d26e189579L33-L36
 
 - a "debugging session" starting from a failed integration test:
+   Also N/A -- previously failing integration tests were fixed prior
   - the failed integration test
   - its translation into a unit test (or several unit tests)
   - its fix
