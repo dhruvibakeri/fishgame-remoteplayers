@@ -91,7 +91,7 @@ Point to at least two of the following three points of remediation:
   - its fix
   - bonus: deriving additional unit tests from the initial ones
 
-  As of this milestone, there were no outstanding bugs caught by integration tests related to our data representation/component functionalities or pointed out by grading feedback.
+  As of this milestone, there were no outstanding bugs caught by integration tests or pointed out by grading feedback related to our data representation/component functionalities.
 
 ### Bonus
 
