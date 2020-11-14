@@ -21,42 +21,61 @@ critical elements of the project, though by no means all of them.
 - a data definition and an interpretation for the game _board_
 
   We did not need to rework our board data definition/interpretation as it has already been functional and passing integration tests. Feedback on our interpretation has already been previously addressed.
+  
+  [Board Data Definition](https://github.ccs.neu.edu/CS4500-F20/christine/blob/d367c5aed9641ebd4c65b7ff0c90ba59c36e6ff6/Fish/Common/board.ts#L12-L31)
 
 - a purpose statement for the "reachable tiles" functionality on the board representation
 
   We did not need to rework our purpose statement for this functionality, since we did not receive feedback deeming it inadequate.
 
+  [Reachable Tiles Purpose Statement](https://github.ccs.neu.edu/CS4500-F20/christine/blob/d367c5aed9641ebd4c65b7ff0c90ba59c36e6ff6/Fish/Common/Controller/src/movementChecking.ts#L142-L211)
+
 - two unit tests for the "reachable tiles" functionality
 
   We did not need to further implement unit tests for this functionality since we had already included tests previously.
+  
+  [Unit Tests](https://github.ccs.neu.edu/CS4500-F20/christine/blob/d367c5aed9641ebd4c65b7ff0c90ba59c36e6ff6/Fish/Common/Controller/tests/movementChecking.spec.ts#L147-L206)
 
 ### Game States
 
 - a data definition and an interpretation for the game _state_
 
   We did not need to rework our game state data definition/interpretation as it has already been functional and passing integration tests. Feedback on our representation and interpretation has already been previously addressed.
+  
+  [Game Data Definition](https://github.ccs.neu.edu/CS4500-F20/christine/blob/d367c5aed9641ebd4c65b7ff0c90ba59c36e6ff6/Fish/Common/state.ts#L16-L35)
 
 - a purpose statement for the "take turn" functionality on states
 
   We did not need to rework our purpose statement for this functionality, since we did not receive feedback deeming it inadequate.
+  
+  [Placing](https://github.ccs.neu.edu/CS4500-F20/christine/blob/d367c5aed9641ebd4c65b7ff0c90ba59c36e6ff6/Fish/Common/Controller/src/penguinPlacement.ts#L96-L104) and [Moving](https://github.ccs.neu.edu/CS4500-F20/christine/blob/d367c5aed9641ebd4c65b7ff0c90ba59c36e6ff6/Fish/Common/Controller/src/penguinPlacement.ts#L171-L180)
 
 - two unit tests for the "take turn" functionality
 
   We did not need to further implement unit tests for this functionality since we had already included tests previously.
+  
+  [Unit Tests](https://github.ccs.neu.edu/CS4500-F20/christine/blob/d367c5aed9641ebd4c65b7ff0c90ba59c36e6ff6/Fish/Common/Controller/tests/penguinPlacement.spec.ts#L138-L373)
 
 ### Trees and Strategies
 
 - a data definition including an interpretation for _tree_ that represent entire games
 
   We did not need to rework our game tree data definition/interpretation as it has already been functional and passing integration tests. Feedback on our representation and interpretation including properly modeling the different types of states of a game (game is over, current player is stuck, current player can't move) has already been previously addressed.
+  
+  [Tree Data Definition](https://github.ccs.neu.edu/CS4500-F20/christine/blob/d367c5aed9641ebd4c65b7ff0c90ba59c36e6ff6/Fish/Common/game-tree.ts#L40-L68)
 
 - a purpose statement for the "maximin strategy" functionality on trees
 
   We did not need to rework our purpose statemnt for this functionality, since we did not receive feedback deeming it inadequate.
+  
+  [Maxmin](https://github.ccs.neu.edu/CS4500-F20/christine/blob/d367c5aed9641ebd4c65b7ff0c90ba59c36e6ff6/Fish/Common/Controller/src/strategy.ts#L108-L116)
+  and [chooseNextAction](https://github.ccs.neu.edu/CS4500-F20/christine/blob/d367c5aed9641ebd4c65b7ff0c90ba59c36e6ff6/Fish/Common/Controller/src/strategy.ts#L232-L241)
 
 - two unit tests for the "maximin" functionality
 
   We did not need to further implement unit tests for this functionality since we had already included tests previously.
+  
+  [Unit Tests](https://github.ccs.neu.edu/CS4500-F20/christine/blob/d367c5aed9641ebd4c65b7ff0c90ba59c36e6ff6/Fish/Common/Controller/tests/strategy.spec.ts#L294-L401)
 
 ### General Issues
 
