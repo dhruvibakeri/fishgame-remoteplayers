@@ -28,6 +28,8 @@ critical elements of the project, though by no means all of them.
   - Our code base currently correctly addresses this aspect from the beginning and we never received any criticism about it.
   - For the current state of the reachable tiles functionality, see the purpose statements for [getReachablePositions](https://github.ccs.neu.edu/CS4500-F20/christine/blob/688c220eed00b5b3d5004e5bc8a8c2a8b356cac5/Fish/Common/Controller/src/movementChecking.ts#L180-L189) and [getReachablePositionsInDirection](https://github.ccs.neu.edu/CS4500-F20/christine/blob/688c220eed00b5b3d5004e5bc8a8c2a8b356cac5/Fish/Common/Controller/src/movementChecking.ts#L142-L152).
 
+  [Reachable Tiles Purpose Statement](https://github.ccs.neu.edu/CS4500-F20/christine/blob/d367c5aed9641ebd4c65b7ff0c90ba59c36e6ff6/Fish/Common/Controller/src/movementChecking.ts#L142-L211)
+
 - two unit tests for the "reachable tiles" functionality
 
   - Our code base currently correctly addresses this aspect from the beginning and we never received any criticism about it.
