@@ -109,7 +109,7 @@ type InputDepthState = [InputDepth, InputState];
 
 /**
  * GameDescriptionPlayer represents a basic Tournament Player that will
- * have the provided name (alphabetical and at most 12 characters long), 
+ * have the provided name (alphabetical and at most 12 characters long),
  * and use the minimax strategy at the provided depth.
  */
 type GameDescriptionPlayer = [string, InputDepth];
@@ -118,10 +118,10 @@ type GameDescriptionPlayer = [string, InputDepth];
  * A GameDescription represents the specification of game to be run by a Referee.
  * It specifies the size of the board to be created, the participating players, and
  * the number of fish per tile ont he board.
- * 
+ *
  * @param row the number of rows in the game's board which is a Natural in [2, 5]
  * @param column the number of columns in the game's board which is a Natural in [2, 5]
- * @param players an array of length [2, 4] containing the participating 
+ * @param players an array of length [2, 4] containing the participating
  *                GameDescriptionPlayers in ascending order of age, where
  *                they must be pairwise-distinct.
  * @param fish the number of fish per tile on the board which is a Natural in [1, 5]
@@ -129,7 +129,7 @@ type GameDescriptionPlayer = [string, InputDepth];
 interface GameDescription {
   readonly row: number;
   readonly column: number;
-  readonly players: Array<GameDescriptionPlayer>
+  readonly players: Array<GameDescriptionPlayer>;
   readonly fish: number;
 }
 

@@ -23,7 +23,7 @@ interface TournamentStatistics {
  * @param update call for the tournament manager to update the observer of
  * tournament happenings with a simple message string
  */
-interface TournamentObserver {
+export interface TournamentObserver {
   readonly update: (msg: string) => void;
 }
 
@@ -64,3 +64,14 @@ type RunTournament = (
   tournamentPlayers: Array<TournamentPlayer>,
   tournamentObservers: Array<TournamentObserver>
 ) => TournamentStatistics;
+
+/**
+ * A TournamentDebrief contains the outcome of running an entire tournament
+ * which consists of an array of the names of the winners.
+ *
+ * @param winners an array containing the names of all the winners of the
+ * tournament.
+ */
+export interface TournamentDebrief {
+  readonly winners: Array<string>;
+}

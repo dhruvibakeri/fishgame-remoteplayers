@@ -116,13 +116,22 @@ type GameHasEnded = (gameDebrief: GameDebrief) => void;
 type DisqualifyMe = (msg: string) => void;
 
 /**
+ * A WonTournament call gives the tournament manager a way to signal to the player
+ * that they've won the tournament. The player must then accept this tournament victory
+ * by responding with a truthy statement, or else they forfeit their win
+ * and the money goes into the tournament manager's pockets.
+ */
+type WonTournament = (won: boolean) => Promise<boolean>;
+
+/**
  * A TournamentPlayer represents an implementation of the player-referee
  * protocol, specifying both identifying information for the player, along
  * with the various calls that the referee may make to this player in order
  * to notify them of the game starting or ending, request the corresponding
  * actions for their turns, and notify them of potential disqualification.
  *
- *
+ * @param name the player's name, which must be unique within a tournament's
+ * entire roster of players
  * @param gameIsStarting call to tell the player that the game is starting
  * @param makePlacement call to ask the player for a penguin placement location
  * @param makeMovement call to ask the player for a penguin movement
@@ -131,12 +140,17 @@ type DisqualifyMe = (msg: string) => void;
  * @param disqualifyMe call to tell the player they've been disqualified
  */
 interface TournamentPlayer {
-  name: string;
-  gameIsStarting: GameIsStarting;
-  makePlacement: MakePlacement;
-  makeMovement: MakeMovement;
-  gameHasEnded: GameHasEnded;
-  disqualifyMe: DisqualifyMe;
+  readonly name: string;
+  readonly gameIsStarting: GameIsStarting;
+  readonly makePlacement: MakePlacement;
+  readonly makeMovement: MakeMovement;
+  readonly gameHasEnded: GameHasEnded;
+  readonly disqualifyMe: DisqualifyMe;
+  readonly wonTournament: WonTournament;
+}
+
+interface TournamentPlayerWithAge extends TournamentPlayer {
+  readonly age: number;
 }
 
 export {
@@ -149,4 +163,5 @@ export {
   GameHasEnded,
   DisqualifyMe,
   TournamentPlayer,
+  TournamentPlayerWithAge,
 };

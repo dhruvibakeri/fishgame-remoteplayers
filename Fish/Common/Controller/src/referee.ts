@@ -146,10 +146,7 @@ const notifyPlayersGameStarting = (
 const createInitialGameState = (
   tournamentPlayers: Array<TournamentPlayer>,
   boardParams: BoardParameters
-): Result<
-  Game,
-  IllegalBoardError | IllegalPositionError | IllegalGameStateError
-> => {
+): Result<Game, IllegalBoardError | IllegalGameStateError> => {
   // Create the Game state's player roster.
   const players: Array<Player> = tournamentPlayersToGamePlayers(
     tournamentPlayers
@@ -161,7 +158,7 @@ const createInitialGameState = (
     boardParams.numFish || 1
   ) as Result<
     Board,
-    IllegalBoardError | IllegalPositionError | IllegalGameStateError
+    IllegalBoardError | IllegalGameStateError
   >).andThen((board: Board) => createGameState(players, board));
 };
 
@@ -516,17 +513,18 @@ const addScoresOfPlacedPenguins = (game: Game): Game => {
  * @return the created GameDebrief
  */
 const createGameDebrief = (refereeState: RefereeState): GameDebrief => {
-  const compareActivePlayers = (player1: ActivePlayer, player2: ActivePlayer) => player2.score - player1.score;
+  const compareActivePlayers = (player1: ActivePlayer, player2: ActivePlayer) =>
+    player2.score - player1.score;
 
   // Get the active players from the Game's roster of players.
-  const activePlayers: Array<ActivePlayer> = refereeState.game.players.map(
-    (player: Player) => {
+  const activePlayers: Array<ActivePlayer> = refereeState.game.players
+    .map((player: Player) => {
       return {
         name: player.name,
         score: refereeState.game.scores.get(player.color),
       };
-    }
-  ).sort(compareActivePlayers);
+    })
+    .sort(compareActivePlayers);
 
   // Get kicked players from the RefereeState.
   const kickedPlayers: Array<InactivePlayer> = [
@@ -631,7 +629,7 @@ const createTournamentPlayerMapping = (
 const runGame = (
   tournamentPlayers: Array<TournamentPlayer>,
   boardParameters: BoardParameters
-): Result<Promise<GameDebrief>, Error> => {
+): Result<Promise<GameDebrief>, IllegalBoardError | IllegalGameStateError> => {
   if (!boardIsBigEnough(tournamentPlayers.length, boardParameters)) {
     return err(
       new IllegalBoardError(boardParameters.cols, boardParameters.rows)
@@ -694,4 +692,6 @@ export {
   addScoresOfPlacedPenguins,
   numberOfPenguinPlacements,
   runGame,
+  timeoutRequest,
+  PLAYER_REQUEST_TIMEOUT,
 };
