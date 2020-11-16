@@ -1,8 +1,8 @@
 import { BoardPosition } from "../Common/board";
 import { Game, MovementGame } from "../Common/state";
 import { getNextPenguinPlacementPosition, chooseNextAction } from "../Common/Controller/src/strategy";
-import { Movement } from "../Common/game-tree";
 import { GameDebrief, TournamentPlayer } from "../Common/player-interface";
+import { InputDepth } from "../Common/Controller/src/testHarnessInput";
 
 const LOOKAHEAD_DEPTH = 2;
 
@@ -38,20 +38,17 @@ const makePlacement = (game: Game): Promise<BoardPosition> => {
 };
 
 /**
- * Given a game, this function uses the logic from ./strategy.ts to make
- * the best possible move based on the tree with LOOKAHEAD_DEPTH and returns
+ * Given a depth, create a MakeMovement function that uses the logic from ./strategy.ts 
+ * to make the best possible move based on the tree with that depth and return
  * that best move.
  *
- * @param game current state of the game for the player to make a move on
+ * @param depth the maximum lookahead depth to use in this player's minimax strategy
+ * @return a MakeMovement function which uses the minimax strategy with the given depth
  */
-const makeMovement = (game: Game): Promise<Movement> => {
-  // The player assumes the given game is a valid MovementGame, as it's being
-  // handed to the player directly from the Referee. Since the given game is a
-  // valid MovementGame the function will return a valid Movement.
-  return Promise.resolve(
-    chooseNextAction(game as MovementGame, LOOKAHEAD_DEPTH).unsafelyUnwrap()
+const makeMovementWithDepth = (depth: number) => (game: Game) => Promise.resolve(
+    chooseNextAction(game as MovementGame, depth).unsafelyUnwrap()
   );
-}
+
 /**
  * Function to let the player know that the game has ended, and to inform them
  * of the game's outcome using a GameDebrief.
@@ -83,12 +80,12 @@ const disqualifyMe = (msg: string): void => {
  * @param name the name of the player
  * @return the created sample TournamentPlayer
  */
-const createSamplePlayer = (name: string): TournamentPlayer => {
+const createSamplePlayer = (name: string, depth: InputDepth = LOOKAHEAD_DEPTH): TournamentPlayer => {
   return {
     name,
     gameIsStarting,
     makePlacement,
-    makeMovement,
+    makeMovement: makeMovementWithDepth(depth),
     gameHasEnded,
     disqualifyMe,
   };

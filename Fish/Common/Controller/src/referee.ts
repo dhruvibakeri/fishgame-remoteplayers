@@ -18,7 +18,7 @@ import {
   getCurrentPlayerColor,
   getCurrentPlayer,
 } from "../../state";
-import { createHoledOneFishBoard, getTileOnBoard } from "./boardCreation";
+import { createBlankBoard, getTileOnBoard } from "./boardCreation";
 import {
   createGameTreeFromMovementGame,
   gameIsMovementGame,
@@ -38,15 +38,18 @@ const { err } = Result;
 const PLAYER_REQUEST_TIMEOUT = 5000;
 
 /**
- * A BoardDimension represents the size of a board within a Fish game. It
- * specifies both the number of rows and the number of columns in the board.
+ * A BoardParameters represents the size of a board within a Fish game. It
+ * specifies both the number of rows and the number of columns in the board,
+ * and the fish that should be on each tile.
  *
  * @param rows the number of rows in the board, must be a positive integer
  * @param cols the number of columns in the board, must be a positive integer
+ * @param numFish the number of fish that each tile should have, if provided. Defaults to 1.
  */
-interface BoardDimension {
+interface BoardParameters {
   readonly rows: number;
   readonly cols: number;
+  readonly numFish?: number;
 }
 
 /**
@@ -142,7 +145,7 @@ const notifyPlayersGameStarting = (
  */
 const createInitialGameState = (
   tournamentPlayers: Array<TournamentPlayer>,
-  boardDimensions: BoardDimension
+  boardParams: BoardParameters
 ): Result<
   Game,
   IllegalBoardError | IllegalPositionError | IllegalGameStateError
@@ -152,11 +155,10 @@ const createInitialGameState = (
     tournamentPlayers
   );
 
-  return (createHoledOneFishBoard(
-    boardDimensions.cols,
-    boardDimensions.rows,
-    [],
-    1
+  return (createBlankBoard(
+    boardParams.rows,
+    boardParams.cols,
+    boardParams.numFish || 1
   ) as Result<
     Board,
     IllegalBoardError | IllegalPositionError | IllegalGameStateError
@@ -514,25 +516,22 @@ const addScoresOfPlacedPenguins = (game: Game): Game => {
  * @return the created GameDebrief
  */
 const createGameDebrief = (refereeState: RefereeState): GameDebrief => {
-  const updatedScoresRefereeState: RefereeState = {
-    ...refereeState,
-    game: addScoresOfPlacedPenguins(refereeState.game),
-  };
+  const compareActivePlayers = (player1: ActivePlayer, player2: ActivePlayer) => player2.score - player1.score;
 
   // Get the active players from the Game's roster of players.
-  const activePlayers: Array<ActivePlayer> = updatedScoresRefereeState.game.players.map(
+  const activePlayers: Array<ActivePlayer> = refereeState.game.players.map(
     (player: Player) => {
       return {
         name: player.name,
-        score: updatedScoresRefereeState.game.scores.get(player.color),
+        score: refereeState.game.scores.get(player.color),
       };
     }
-  );
+  ).sort(compareActivePlayers);
 
   // Get kicked players from the RefereeState.
   const kickedPlayers: Array<InactivePlayer> = [
-    ...updatedScoresRefereeState.cheatingPlayers,
-    ...updatedScoresRefereeState.failingPlayers,
+    ...refereeState.cheatingPlayers,
+    ...refereeState.failingPlayers,
   ].map((player: Player) => {
     return { name: player.name };
   });
@@ -579,7 +578,7 @@ const numberOfPenguinPlacements = (numOfPlayers: number) =>
  */
 const boardIsBigEnough = (
   numOfPlayers: number,
-  boardDimension: BoardDimension
+  boardDimension: BoardParameters
 ): boolean => {
   const numOfPlacements = numberOfPenguinPlacements(numOfPlayers);
   const numOfTilesOnBoard = boardDimension.cols * boardDimension.rows;
@@ -623,7 +622,7 @@ const createTournamentPlayerMapping = (
  * @param tournamentPlayers the TournamentPlayers participating in the game,
  * being at most length 4 and uniquely identified by name. The order of
  * received players is the ordering used when playing
- * @param boardDimensions the dimensions of the board to be created in the
+ * @param boardParameters the dimensions of the board to be created in the
  * game, this must at least have enough containers to hold all the players'
  * avatars
  * @return the GameDebrief from the finished game or an Error if the game
@@ -631,15 +630,15 @@ const createTournamentPlayerMapping = (
  */
 const runGame = (
   tournamentPlayers: Array<TournamentPlayer>,
-  boardDimensions: BoardDimension
+  boardParameters: BoardParameters
 ): Result<Promise<GameDebrief>, Error> => {
-  if (!boardIsBigEnough(tournamentPlayers.length, boardDimensions)) {
+  if (!boardIsBigEnough(tournamentPlayers.length, boardParameters)) {
     return err(
-      new IllegalBoardError(boardDimensions.cols, boardDimensions.rows)
+      new IllegalBoardError(boardParameters.cols, boardParameters.rows)
     );
   }
 
-  return createInitialGameState(tournamentPlayers, boardDimensions).map(
+  return createInitialGameState(tournamentPlayers, boardParameters).map(
     async (game: Game) => {
       // Create the initial RefereeState.
       const initialRefereeState: RefereeState = {
@@ -676,6 +675,7 @@ const runGame = (
 export {
   RefereeState,
   RefereeStateWithMovementGame,
+  BoardParameters,
   tournamentPlayersToGamePlayers,
   notifyPlayersGameStarting,
   runPlacementRounds,

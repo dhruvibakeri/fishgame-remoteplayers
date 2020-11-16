@@ -212,12 +212,12 @@ describe("penguinMovement", () => {
       expect(
         placePenguin(player1, noUnplacedPenguinsGame, placePosition)
       ).toEqual(
+          err(new IllegalPlacementError(
             noUnplacedPenguinsGame,
             getCurrentPlayer(noUnplacedPenguinsGame),
             placePosition,
             "Player has no more penguins to place."
-          )
-        )
+          ))
       );
     });
 

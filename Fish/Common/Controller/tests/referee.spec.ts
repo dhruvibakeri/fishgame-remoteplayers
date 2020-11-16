@@ -71,7 +71,7 @@ const createDummyPlayer = (
   name: string,
   placements: Array<BoardPosition>,
   moves: Array<Movement>,
-  timeout: number = 0
+  timeout = 0
 ): TournamentPlayer => {
   const placementIterator = actionIterator<BoardPosition>(placements);
   const movesIterator = actionIterator<Movement>(moves);
@@ -860,8 +860,8 @@ describe("referee", () => {
 
       const expectedGameDebrief: GameDebrief = {
         activePlayers: [
-          { name: player1Name, score: 20 },
-          { name: player2Name, score: 22 },
+          { name: player2Name, score: 10 },
+          { name: player1Name, score: 8 },          
         ],
         kickedPlayers: [{ name: player3Name }, { name: player4Name }],
       };

@@ -12,8 +12,11 @@ import {
   InputBoard,
   Action,
   MoveResponseQuery,
+  GameDescriptionPlayer,
 } from "./testHarnessInput";
 import { Result } from "true-myth";
+import { TournamentPlayer } from "../../player-interface";
+import { createSamplePlayer } from "../../../Player/player";
 const { ok, err } = Result;
 
 /**
@@ -336,6 +339,64 @@ const movementToAction = (movement: Movement): Action => [
   boardPositionToInputPosition(movement.endPosition),
 ];
 
+/**
+ * Attempt to convert the given GameDescriptionPlayer into a TournamentPlayer.
+ * 
+ * @param gameDescriptionPlayer the GameDescriptionPlayer to convert
+ * @return the converted TournamentPlayer 
+ */
+const gameDescriptionPlayerToTournamentPlayer = (gameDescriptionPlayer: GameDescriptionPlayer): Result<TournamentPlayer, Error> => {
+  const name = gameDescriptionPlayer[0];
+  const depth = gameDescriptionPlayer[1];
+  if (name.length > 12) {
+    return err(new Error("Name must be 12 characters or less"));
+  }
+  return ok(createSamplePlayer(`${name}_${depth}`, depth));
+}
+
+/**
+ * Convert the given GameDescriptionPlayer into a TournamentPlayer and add it 
+ * to the given accumulator if the conversion was successful and the accumulator
+ * is not an error.
+ * 
+ * @param acc the accumulated TournamentPlayers or an Error
+ * @param gameDescriptionPlayer the GameDescriptionPlayer to convert
+ * @return the updated accumulator containing the new player if conversion was 
+ * successful and the accumulator is not an error
+ */
+const gameDescriptionPlayersReducer = (
+  acc: Result<Array<TournamentPlayer>, Error>,  
+  gameDescriptionPlayer: GameDescriptionPlayer
+): Result<Array<TournamentPlayer>, Error> => 
+  acc.andThen((accPlayers: Array<TournamentPlayer>) =>
+    gameDescriptionPlayerToTournamentPlayer(gameDescriptionPlayer).map((tournamentPlayer: TournamentPlayer) => [...accPlayers, tournamentPlayer]))
+
+/**
+ * Attempt to convert the given array of GameDescriptionPlayers into an array of 
+ * TournamentPlayers, returning the converted array if successful and an Error
+ * if not.
+ * 
+ * @param gameDescriptionPlayers the array of GameDescriptionPlayers to convert
+ * @return an array of the converted TournamentPlayers if successful or an 
+ * error if not
+ */
+const gameDescriptionPlayersToTournamentPlayers = (
+  gameDescriptionPlayers: Array<GameDescriptionPlayer>
+): Result<Array<TournamentPlayer>, Error> => gameDescriptionPlayers.reduce<Result<Array<TournamentPlayer>, Error>>(gameDescriptionPlayersReducer, ok([]))
+
+/**
+ * Return an original inputted name given a converted TournamentPlayer's name.
+ * 
+ * This is necessary for handling inputs with duplicate names since 
+ * GameDescriptionPlayers given to the referee are only guaranteed to 
+ * be pairwise distinct i.e. duplicate names are allowed so long as 
+ * the depths are different. 
+ * 
+ * @param tpName a converted TournamentPlayer's name
+ * @return the original GameDescriptionPlayer name
+ */
+const tournamentPlayerNameToGameDescriptionName = (tpName: string): string => tpName.split("_")[0]
+
 export {
   printFalse,
   inputStateToGameState,
@@ -343,4 +404,6 @@ export {
   performMoveResponseQuery,
   inputPositionToBoardPosition,
   movementToAction,
+  gameDescriptionPlayersToTournamentPlayers,
+  tournamentPlayerNameToGameDescriptionName,
 };
