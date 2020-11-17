@@ -77,7 +77,7 @@ const generatePotentialMoveMapping = (
   game: MovementGame
 ): Array<MovementToResultingTree> => {
   // From the given starting position, get all the possible Movements from it.
-  const startPositionToMovementToResultingTreess = (
+  const startPositionToMovementToResultingTrees = (
     startPosition: BoardPosition
   ): Array<Movement> =>
     getReachablePositions(game, startPosition).map(
@@ -86,11 +86,15 @@ const generatePotentialMoveMapping = (
       }
     );
 
+  if (game.players.length === 0) {
+    return [];
+  }
+
   // For the current Player of the Game state, get an array of PotentialMoves
   // The player could make in the Game state.
   return game.penguinPositions
     .get(getCurrentPlayerColor(game))
-    .map(startPositionToMovementToResultingTreess)
+    .map(startPositionToMovementToResultingTrees)
     .reduce((arr1, arr2) => [...arr1, ...arr2], []) // Flatten the array.
     .map((movement: Movement) => {
       return {

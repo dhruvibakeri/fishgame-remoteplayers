@@ -72,6 +72,17 @@ const disqualifyMe = (msg: string): void => {
 };
 
 /**
+ * Function to let this player know whether they've won or not. At this point,
+ * this player implementation doesn't need to do anything with this information,
+ * so we simply accept the outcome.
+ *
+ * @param didIWin whether this player won the tournament
+ */
+const wonTournament = async (didIWin: boolean): Promise<boolean> => {
+  return true;
+}
+
+/**
  * Given the player's name, create a TournamentPlayer implementation using the
  * strategies for placement and movement outlined within "./strategy.ts"
  *
@@ -88,6 +99,7 @@ const createSamplePlayer = (name: string, depth: InputDepth = LOOKAHEAD_DEPTH): 
     makeMovement: makeMovementWithDepth(depth),
     gameHasEnded,
     disqualifyMe,
+    wonTournament
   };
 };
 

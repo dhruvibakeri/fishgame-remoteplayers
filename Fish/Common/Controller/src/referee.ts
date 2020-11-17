@@ -9,7 +9,6 @@ import {
   IllegalGameStateError,
   IllegalMovementError,
   IllegalPlacementError,
-  IllegalPositionError,
 } from "../types/errors";
 import {
   Game,

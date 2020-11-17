@@ -160,19 +160,11 @@ const runTournament = (
     new Promise(async (resolve) => {
       let previousPool: Array<TournamentPlayer> = [];
       let tournamentPool: Array<TournamentPlayer> = tournamentPlayers;
-      const tournamentMapping: Map<string, TournamentPlayerWithAge> = new Map(
-        tournamentPlayers.map((tp: TournamentPlayer, index) => [
-          tp.name,
-          { ...tp, age: index } as TournamentPlayerWithAge,
-        ])
-      );
-
       while (continueTournament(tournamentPool.length, previousPool.length)) {
         previousPool = tournamentPool;
         tournamentPool = await runTournamentRound(
           tournamentPool,
-          boardParameters,
-          tournamentMapping
+          boardParameters
         );
       }
 
@@ -197,17 +189,17 @@ const runTournament = (
  * @param boardParameters the specifications for the boards for each game
  * @param tournamentMapping a mapping for every player in the entire
  * tournament (active or inactive) from their name to their TournamentPlayer
- * @return an array containing
+ * @return an array containing the players who have survived this round.
  */
 const runTournamentRound = async (
   tournamentPool: Array<TournamentPlayer>,
-  boardParameters: BoardParameters,
-  tournamentMapping: Map<string, TournamentPlayerWithAge>
-): Promise<Array<TournamentPlayerWithAge>> => {
+  boardParameters: BoardParameters
+): Promise<Array<TournamentPlayer>> => {
   const sortByAge = (
     tp1: TournamentPlayerWithAge,
     tp2: TournamentPlayerWithAge
   ) => tp1.age - tp2.age;
+  const tournamentMapping: Map<string, TournamentPlayerWithAge> = makeTournamentPlayerMapping(tournamentPool);
   const games = assignAndRunGames(tournamentPool, boardParameters);
   const results = await Promise.all(games);
   return results
@@ -230,7 +222,7 @@ const informWinnersAndLosers = async (
   winners: Array<TournamentPlayer>
 ): Promise<Array<TournamentPlayer>> => {
   if (players.length === 0) {
-    return winners;
+    players = winners;
   }
 
   const finalWinners: Array<TournamentPlayer> = [];
@@ -240,11 +232,29 @@ const informWinnersAndLosers = async (
       return timeoutRequest(
         tp.wonTournament(hasWon),
         PLAYER_REQUEST_TIMEOUT
-      ).then((v) => v && finalWinners.push(tp));
+      ).then((v) => hasWon && v && finalWinners.push(tp))
+       // eslint-disable-next-line @typescript-eslint/no-empty-function
+       .catch(err => {});
     })
   );
   return finalWinners;
 };
+
+/**
+ * Creates a mapping of a player's name to their TournamentPlayerWithAge
+ * representation. This uses the indexes of the players (in the provided array)
+ * to represent the age of the players.
+ *
+ * @param players the array of players to make a mapping out of.
+ */
+const makeTournamentPlayerMapping = (players: Array<TournamentPlayer>): Map<string, TournamentPlayerWithAge> => {
+  return new Map(
+      players.map((tp: TournamentPlayer, index) => [
+        tp.name,
+        { ...tp, age: index } as TournamentPlayerWithAge,
+      ])
+  );
+}
 
 export {
   continueTournament,
@@ -253,4 +263,5 @@ export {
   runTournament,
   runTournamentRound,
   informWinnersAndLosers,
+  makeTournamentPlayerMapping,
 };
