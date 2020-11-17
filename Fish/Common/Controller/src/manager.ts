@@ -73,24 +73,27 @@ const assignParties = (
   tournamentPool: Array<TournamentPlayer>, // Non empty
   maximalSize: number = MAX_NUMBER_OF_PLAYERS
 ): Array<Array<TournamentPlayer>> => {
-  // TODO error check maximal size? or just specify bounds in purpose statement.
   let unassignedPool = [...tournamentPool];
   const parties: Array<Array<TournamentPlayer>> = [];
 
-  // Take as many maximal groups as possible.
-  while (unassignedPool.length >= maximalSize) {
-    const party = unassignedPool.slice(0, maximalSize);
-    unassignedPool = unassignedPool.slice(maximalSize);
-
-    parties.push(party);
+  if (maximalSize <= 1) {
+    return parties;
   }
 
-  // Handle remainders if there are any..
+  // Take as many maximal groups as possible.
+  while (unassignedPool.length >= maximalSize) {
+    parties.push(unassignedPool.slice(0, maximalSize));
+    unassignedPool = unassignedPool.slice(maximalSize);
+  }
+
+  // Handle remainders if there are any.
   if (unassignedPool.length > 0) {
-    // If parties were assigned, unassign the players from the last one
+    // If parties were assigned, unassign the last player from the last one.
     if (parties.length > 0) {
       const lastAssignedPlayers: Array<TournamentPlayer> = parties.pop();
-      unassignedPool = [...lastAssignedPlayers, ...unassignedPool];
+      const lastAssignedPlayer: TournamentPlayer = lastAssignedPlayers.pop();
+      parties.push(lastAssignedPlayers);
+      unassignedPool.push(lastAssignedPlayer);
     }
 
     // Try assigning the rest of the players with a smaller maximal size.
@@ -199,7 +202,10 @@ const runTournamentRound = async (
     tp1: TournamentPlayerWithAge,
     tp2: TournamentPlayerWithAge
   ) => tp1.age - tp2.age;
-  const tournamentMapping: Map<string, TournamentPlayerWithAge> = makeTournamentPlayerMapping(tournamentPool);
+  const tournamentMapping: Map<
+    string,
+    TournamentPlayerWithAge
+  > = makeTournamentPlayerMapping(tournamentPool);
   const games = assignAndRunGames(tournamentPool, boardParameters);
   const results = await Promise.all(games);
   return results
@@ -229,12 +235,12 @@ const informWinnersAndLosers = async (
   await Promise.all(
     players.map((tp) => {
       const hasWon = winners.findIndex((win) => win.name === tp.name) !== -1;
-      return timeoutRequest(
-        tp.wonTournament(hasWon),
-        PLAYER_REQUEST_TIMEOUT
-      ).then((v) => hasWon && v && finalWinners.push(tp))
-       // eslint-disable-next-line @typescript-eslint/no-empty-function
-       .catch(err => {});
+      return (
+        timeoutRequest(tp.wonTournament(hasWon), PLAYER_REQUEST_TIMEOUT)
+          .then((v) => hasWon && v && finalWinners.push(tp))
+          // eslint-disable-next-line @typescript-eslint/no-empty-function
+          .catch((err) => {})
+      );
     })
   );
   return finalWinners;
@@ -247,14 +253,16 @@ const informWinnersAndLosers = async (
  *
  * @param players the array of players to make a mapping out of.
  */
-const makeTournamentPlayerMapping = (players: Array<TournamentPlayer>): Map<string, TournamentPlayerWithAge> => {
+const makeTournamentPlayerMapping = (
+  players: Array<TournamentPlayer>
+): Map<string, TournamentPlayerWithAge> => {
   return new Map(
-      players.map((tp: TournamentPlayer, index) => [
-        tp.name,
-        { ...tp, age: index } as TournamentPlayerWithAge,
-      ])
+    players.map((tp: TournamentPlayer, index) => [
+      tp.name,
+      { ...tp, age: index } as TournamentPlayerWithAge,
+    ])
   );
-}
+};
 
 export {
   continueTournament,

@@ -83,6 +83,7 @@ const createDummyPlayer = (
     makeMovement: () => delay(movesIterator.next().value, timeout),
     gameHasEnded: jest.fn(),
     disqualifyMe: jest.fn(),
+    wonTournament: jest.fn(),
   };
 };
 
@@ -861,7 +862,7 @@ describe("referee", () => {
       const expectedGameDebrief: GameDebrief = {
         activePlayers: [
           { name: player2Name, score: 10 },
-          { name: player1Name, score: 8 },          
+          { name: player1Name, score: 8 },
         ],
         kickedPlayers: [{ name: player3Name }, { name: player4Name }],
       };
@@ -951,7 +952,10 @@ describe("referee", () => {
   describe("disqualifyCurrentCheatingPlayer", () => {
     it("disqualifies current player for cheating", () => {
       const mockCall = jest.fn();
-      tournamentPlayer1.disqualifyMe = mockCall;
+      const mockTournamentPlayer1 = {
+        ...tournamentPlayer1,
+        disqualifyMe: mockCall,
+      };
       const newScores = new Map(numberedGame.scores);
       newScores.delete(PenguinColor.Red);
       const newPenguinPositions = new Map(numberedGame.penguinPositions);
@@ -972,7 +976,7 @@ describe("referee", () => {
       const initialRefereeState: RefereeState = {
         game: numberedGame,
         tournamentPlayers: new Map([
-          [tournamentPlayer1.name, tournamentPlayer1],
+          [mockTournamentPlayer1.name, mockTournamentPlayer1],
           [tournamentPlayer2.name, tournamentPlayer2],
         ]),
         cheatingPlayers: [],
@@ -1000,7 +1004,10 @@ describe("referee", () => {
   describe("disqualifyCurrentFailingPlayer", () => {
     it("disqualifies current player for cheating", () => {
       const mockCall = jest.fn();
-      tournamentPlayer1.disqualifyMe = mockCall;
+      const mockTournamentPlayer1 = {
+        ...tournamentPlayer1,
+        disqualifyMe: mockCall,
+      };
       const newScores = new Map(numberedGame.scores);
       newScores.delete(PenguinColor.Red);
       const newPenguinPositions = new Map(numberedGame.penguinPositions);
@@ -1021,7 +1028,7 @@ describe("referee", () => {
       const initialRefereeState: RefereeState = {
         game: numberedGame,
         tournamentPlayers: new Map([
-          [tournamentPlayer1.name, tournamentPlayer1],
+          [mockTournamentPlayer1.name, mockTournamentPlayer1],
           [tournamentPlayer2.name, tournamentPlayer2],
         ]),
         cheatingPlayers: [],
@@ -1049,7 +1056,11 @@ describe("referee", () => {
   describe("disqualifyCurrentPlayer", () => {
     it("disqualifies current player", () => {
       const mockCall = jest.fn();
-      tournamentPlayer1.disqualifyMe = mockCall;
+      const mockTournamentPlayer1 = {
+        ...tournamentPlayer1,
+        disqualifyMe: mockCall,
+      };
+      mockTournamentPlayer1;
       const newScores = new Map(numberedGame.scores);
       newScores.delete(PenguinColor.Red);
       const newPenguinPositions = new Map(numberedGame.penguinPositions);
@@ -1070,7 +1081,7 @@ describe("referee", () => {
       const initialRefereeState: RefereeState = {
         game: numberedGame,
         tournamentPlayers: new Map([
-          [tournamentPlayer1.name, tournamentPlayer1],
+          [mockTournamentPlayer1.name, mockTournamentPlayer1],
           [tournamentPlayer2.name, tournamentPlayer2],
         ]),
         cheatingPlayers: [],
