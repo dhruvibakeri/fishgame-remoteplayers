@@ -57,51 +57,49 @@ const continueTournament = (
 };
 
 /**
- * Given a pool of unassigned players and a maximal game size to try and assign
- * to, assign all of the players into parties and return this assignment.
+ * Given a pool of unassigned players, try and assign all of the players into
+ * parties and return this assignment.
  *
  * The way this handles remainders is by first backtracking to the last assigned
  * party, unassigning the las assiged player, and then trying to assign the
  * remaining unassigned players with a new maximal size decremented by 1.
  *
  * @param tournamentPool the pool of players to assign in ascending order of age
- * @param maximalSize the maximal size of each party to attempt to assign as
- * many games to
  * @return an array of arrays of TournamentPlayers where each nested array is
  * a single game party
  */
 const assignParties = (
-  tournamentPool: Array<TournamentPlayer>, // Non empty
-  maximalSize: number = MAX_NUMBER_OF_PLAYERS
+  tournamentPool: Array<TournamentPlayer> // Non empty
 ): Array<Array<TournamentPlayer>> => {
-  let unassignedPool = [...tournamentPool];
-  const parties: Array<Array<TournamentPlayer>> = [];
-
-  if (maximalSize <= 1) {
-    return parties;
-  }
-
-  // Take as many maximal groups as possible.
-  while (unassignedPool.length >= maximalSize) {
-    parties.push(unassignedPool.slice(0, maximalSize));
-    unassignedPool = unassignedPool.slice(maximalSize);
-  }
-
-  // Handle remainders if there are any.
-  if (unassignedPool.length > 0) {
-    // If parties were assigned, unassign the last player from the last one.
-    if (parties.length > 0) {
-      const lastAssignedPlayers: Array<TournamentPlayer> = parties.pop();
-      const lastAssignedPlayer: TournamentPlayer = lastAssignedPlayers.pop();
-      parties.push(lastAssignedPlayers);
-      unassignedPool.unshift(lastAssignedPlayer);
+  const assignPartiesRecursive = (
+    tournamentPool: Array<TournamentPlayer>,
+    maximalSize: number,
+    parties: Array<Array<TournamentPlayer>>
+  ): Array<Array<TournamentPlayer>> => {
+    if (tournamentPool.length < 1) {
+      return parties;
+    } else if (tournamentPool.length >= maximalSize) {
+      const party = tournamentPool.slice(0, maximalSize);
+      const remainder = tournamentPool.slice(maximalSize);
+      return assignPartiesRecursive(remainder, maximalSize, [
+        ...parties,
+        party,
+      ]);
+    } else {
+      // Remove the last assigned game and add the players back to the pool.
+      const pool =
+        parties.length > 0
+          ? [parties[parties.length - 1].pop(), ...tournamentPool]
+          : tournamentPool;
+      return parties.concat(assignPartiesRecursive(pool, maximalSize - 1, []));
     }
+  };
 
-    // Try assigning the rest of the players with a smaller maximal size.
-    return parties.concat(assignParties(unassignedPool, maximalSize - 1));
+  if (tournamentPool.length > 1) {
+    return assignPartiesRecursive(tournamentPool, MAX_NUMBER_OF_PLAYERS, []);
+  } else {
+    return [];
   }
-
-  return parties;
 };
 
 /**
@@ -204,10 +202,10 @@ const runTournamentRound = async (
     tp2: TournamentPlayerWithAge
   ) => tp1.age - tp2.age;
   const deleteAge = (tp: TournamentPlayerWithAge): TournamentPlayer => {
-    const res = { ...tp }
-    delete res['age'];
+    const res = { ...tp };
+    delete res["age"];
     return res as TournamentPlayer;
-  }
+  };
   const tournamentMapping: Map<
     string,
     TournamentPlayerWithAge

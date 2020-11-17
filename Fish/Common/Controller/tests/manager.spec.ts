@@ -1,5 +1,6 @@
 import {
   DisqualifyMe,
+  GameDebrief,
   GameHasEnded,
   GameIsStarting,
   MakeMovement,
@@ -42,9 +43,10 @@ describe("manager tests", () => {
     endPosition: { row: destRow, col: destCol },
   });
 
-  const players = [1, 2, 3, 4, 5, 6, 7, 8]
-    .map((num) => num.toString())
-    .map((name) => makeMockPlayer(name, 1, {}));
+  const makePlayers = (numOfPlayers: number): Array<TournamentPlayer> =>
+    [...Array(numOfPlayers).keys()]
+      .map((num) => num.toString())
+      .map((name) => makeMockPlayer(name, 1, {}));
 
   const boardParameters: BoardParameters = {
     rows: 4,
@@ -81,37 +83,60 @@ describe("manager tests", () => {
     });
 
     it("returns an empty array given a pool of length 1", () => {
-      expect(assignParties(players.slice(0, 1))).toEqual([]);
-    });
-
-    it("returns an empty array given a maximal size of 0", () => {
-      expect(assignParties(players, 0)).toEqual([]);
+      expect(assignParties(makePlayers(1).slice(0, 1))).toEqual([]);
     });
 
     it("assigns a pool of <= the maximum game size to a single game", () => {
-      const fourPool = players.slice(0, 4);
-      const threePool = players.slice(0, 3);
-      const twoPool = players.slice(0, 2);
+      const fourPool = makePlayers(4);
+      const threePool = makePlayers(3);
+      const twoPool = makePlayers(2);
       expect(assignParties(fourPool)).toEqual([fourPool]);
       expect(assignParties(threePool)).toEqual([threePool]);
       expect(assignParties(twoPool)).toEqual([twoPool]);
     });
 
     it("assigns a pool divisible by the maximal size to equal sized games", () => {
-      expect(assignParties(players, 2)).toEqual([
-        players.slice(0, 2),
-        players.slice(2, 4),
-        players.slice(4, 6),
-        players.slice(6, 8),
+      const players = makePlayers(8);
+      expect(assignParties(players)).toEqual([
+        players.slice(0, 4),
+        players.slice(4, 8),
       ]);
     });
 
-    it("assigns a pool that is not divisible by the maximal game size", () => {
-      // TODO this is not right.... should split appropriately
-      expect(assignParties(players, 3)).toEqual([
-        players.slice(0, 3),
-        players.slice(3, 5),
-        players.slice(5, 6),
+    it("assigns pools with a remainder of 1", () => {
+      const players = makePlayers(13);
+      const actual = assignParties(players);
+      console.log(JSON.stringify(actual));
+      expect(assignParties(players)).toEqual([
+        players.slice(0, 4), // 4 players
+        players.slice(4, 8), // 4 players
+        players.slice(8, 11), // 3 players
+        players.slice(11, 13), // 2 players
+      ]);
+    });
+
+    it("assigns pools with a remainder of 2", () => {
+      const players = makePlayers(14);
+      const actual = assignParties(players);
+      console.log(JSON.stringify(actual));
+      expect(assignParties(players)).toEqual([
+        players.slice(0, 4), // 4 players
+        players.slice(4, 8), // 4 players
+        players.slice(8, 11), // 3 players
+        players.slice(11, 14), // 3 players
+      ]);
+    });
+
+    it("assigns pools with a remainder of 3", () => {
+      const players = makePlayers(15);
+      const actual = assignParties(players);
+      console.log(JSON.stringify(actual));
+      expect(assignParties(players)).toEqual([
+        players.slice(0, 4), // 4 players
+        players.slice(4, 8), // 4 players
+        players.slice(8, 11), // 3 players
+        players.slice(11, 13), // 2 players
+        players.slice(13, 15), // 2 players
       ]);
     });
   });
@@ -122,8 +147,31 @@ describe("manager tests", () => {
     });
 
     it("assigns games and then runs each game", () => {
-      // TODO Fix
-      expect(assignAndRunGames(players, boardParameters)).toEqual([]);
+      const players = makePlayers(7);
+      const expectedGameDebrief1: GameDebrief = {
+        activePlayers: players.slice(0, 4).map((tp) => {
+          return {
+            name: tp.name,
+            score: 2,
+          };
+        }),
+        kickedPlayers: [],
+      };
+      const expectedGameDebrief2: GameDebrief = {
+        activePlayers: players.slice(4, 7).map((tp) => {
+          return {
+            name: tp.name,
+            score: 2,
+          };
+        }),
+        kickedPlayers: [],
+      };
+      const debriefs = [expectedGameDebrief1, expectedGameDebrief2];
+      assignAndRunGames(players, boardParameters).map((promise, index) => {
+        promise.then((gameDebrief) =>
+          expect(gameDebrief).toEqual(debriefs[index])
+        );
+      });
     });
   });
 
@@ -216,35 +264,35 @@ describe("manager tests", () => {
       const results = await runTournamentRound([playerA, playerB], boardParams);
       expect(results).toStrictEqual([playerA, playerB]);
     });
-    
+
     it("should combine winners of two separate games", async () => {
       const playerA = makeMockPlayer("a", 1, {});
       const playerB = makeMockPlayer("b", 1, {});
       const playerC = makeMockPlayer("c", 1, {});
       const playerD = makeMockPlayer("d", 1, {});
       const playerE = makeMockPlayer("e", 1, {});
-      
-      const players = [playerA, playerB, playerC, playerD, playerE]
+
+      const players = [playerA, playerB, playerC, playerD, playerE];
 
       const results = await runTournamentRound(players, boardParams);
       expect(results).toStrictEqual([playerB, playerD]);
     });
 
-    it('should produce winners in the order given', async () => {
+    it("should produce winners in the order given", async () => {
       const playerA = makeMockPlayer("a", 1, {});
       const playerB = makeMockPlayer("b", 1, {});
       const playerC = makeMockPlayer("c", 1, {});
       const playerD = makeMockPlayer("d", 1, {});
 
-      const players = [playerA, playerB, playerC, playerD]
+      const players = [playerA, playerB, playerC, playerD];
 
       const boardParams: BoardParameters = {
         rows: 3,
         cols: 5,
         holes: [{ row: 2, col: 4 }],
-      }
+      };
       const results = await runTournamentRound(players, boardParams);
-      expect(results).toStrictEqual([playerA, playerD])
+      expect(results).toStrictEqual([playerA, playerD]);
     });
   });
 });
