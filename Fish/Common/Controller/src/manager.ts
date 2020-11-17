@@ -86,7 +86,7 @@ const assignParties = (
         party,
       ]);
     } else {
-      // Remove the last assigned game and add the players back to the pool.
+      // If possible, unassign the last player of the last assigned party.
       const pool =
         parties.length > 0
           ? [parties[parties.length - 1].pop(), ...tournamentPool]
