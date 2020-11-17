@@ -106,7 +106,6 @@ describe("manager tests", () => {
     it("assigns pools with a remainder of 1", () => {
       const players = makePlayers(13);
       const actual = assignParties(players);
-      console.log(JSON.stringify(actual));
       expect(assignParties(players)).toEqual([
         players.slice(0, 4), // 4 players
         players.slice(4, 8), // 4 players
@@ -118,7 +117,6 @@ describe("manager tests", () => {
     it("assigns pools with a remainder of 2", () => {
       const players = makePlayers(14);
       const actual = assignParties(players);
-      console.log(JSON.stringify(actual));
       expect(assignParties(players)).toEqual([
         players.slice(0, 4), // 4 players
         players.slice(4, 8), // 4 players
@@ -130,7 +128,6 @@ describe("manager tests", () => {
     it("assigns pools with a remainder of 3", () => {
       const players = makePlayers(15);
       const actual = assignParties(players);
-      console.log(JSON.stringify(actual));
       expect(assignParties(players)).toEqual([
         players.slice(0, 4), // 4 players
         players.slice(4, 8), // 4 players
@@ -149,29 +146,31 @@ describe("manager tests", () => {
     it("assigns games and then runs each game", () => {
       const players = makePlayers(7);
       const expectedGameDebrief1: GameDebrief = {
-        activePlayers: players.slice(0, 4).map((tp) => {
-          return {
-            name: tp.name,
-            score: 2,
-          };
-        }),
+        activePlayers: [
+          { name: players[0].name, score: 3 },
+          { name: players[1].name, score: 2 },
+          { name: players[2].name, score: 2 },
+        ],
         kickedPlayers: [],
       };
       const expectedGameDebrief2: GameDebrief = {
-        activePlayers: players.slice(4, 7).map((tp) => {
-          return {
-            name: tp.name,
-            score: 2,
-          };
-        }),
+        activePlayers: [
+          { name: players[3].name, score: 4 },
+          { name: players[4].name, score: 4 },
+        ],
         kickedPlayers: [],
       };
-      const debriefs = [expectedGameDebrief1, expectedGameDebrief2];
-      assignAndRunGames(players, boardParameters).map((promise, index) => {
-        promise.then((gameDebrief) =>
-          expect(gameDebrief).toEqual(debriefs[index])
-        );
-      });
+      const expectedGameDebrief3: GameDebrief = {
+        activePlayers: [
+          { name: players[5].name, score: 4 },
+          { name: players[6].name, score: 4 },
+        ],
+        kickedPlayers: [],
+      };
+      const actual = assignAndRunGames(players, boardParameters);
+      expect(actual[0]).resolves.toEqual(expectedGameDebrief1);
+      expect(actual[1]).resolves.toEqual(expectedGameDebrief2);
+      expect(actual[2]).resolves.toEqual(expectedGameDebrief3);
     });
   });
 
