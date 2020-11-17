@@ -130,54 +130,20 @@ const assignAndRunGames = (
 };
 
 /**
- * Given the specifications for boards, an array of participating players
- * sorted in ascending order of age, and an array of tournament observers,
- * run an entire tournament, producing either the winners of the successfully
- * run tournament, or an error if one occurred.
+ * Creates a mapping of a player's name to their TournamentPlayerWithAge
+ * representation. This uses the indexes of the players (in the provided array)
+ * to represent the age of the players.
  *
- * @param boardParameters the specifications for the boards to be used in the
- * tournament
- * @param tournamentPlayers the participating TournamentPlayers sorted in
- * ascending order of age
- * @param observers any watching observers of the tournament, as of now this
- * is optional and unused as there has been no requirement for their implementation.
- * @return the outcome of the tournament or an error
+ * @param players the array of players to make a mapping out of.
  */
-const runTournament = (
-  boardParameters: BoardParameters,
-  tournamentPlayers: Array<TournamentPlayer>,
-  observers?: Array<TournamentObserver>
-): Result<
-  Promise<TournamentDebrief>,
-  IllegalBoardError | IllegalGameStateError
-> => {
-  // Check board size.
-  if (!boardIsBigEnough(LARGEST_BOARD_PLAYER_AMT, boardParameters)) {
-    return err(
-      new IllegalBoardError(boardParameters.cols, boardParameters.rows)
-    );
-  }
-
-  return ok(
-    new Promise(async (resolve) => {
-      let previousPool: Array<TournamentPlayer> = [];
-      let tournamentPool: Array<TournamentPlayer> = tournamentPlayers;
-      while (continueTournament(tournamentPool.length, previousPool.length)) {
-        previousPool = tournamentPool;
-        tournamentPool = await runTournamentRound(
-          tournamentPool,
-          boardParameters
-        );
-      }
-
-      // Inform players of the last game they have won (or lost)
-      const informedWinners = await informWinnersAndLosers(
-        previousPool,
-        tournamentPool
-      );
-
-      resolve({ winners: informedWinners.map((tp) => tp.name) });
-    })
+const makeTournamentPlayerMapping = (
+  players: Array<TournamentPlayer>
+): Map<string, TournamentPlayerWithAge> => {
+  return new Map(
+    players.map((tp: TournamentPlayer, index) => [
+      tp.name,
+      { ...tp, age: index } as TournamentPlayerWithAge,
+    ])
   );
 };
 
@@ -252,20 +218,56 @@ const informWinnersAndLosers = async (
 };
 
 /**
- * Creates a mapping of a player's name to their TournamentPlayerWithAge
- * representation. This uses the indexes of the players (in the provided array)
- * to represent the age of the players.
+ * Given the specifications for boards, an array of participating players
+ * sorted in ascending order of age, and an array of tournament observers,
+ * run an entire tournament, producing either the winners of the successfully
+ * run tournament, or an error if one occurred.
  *
- * @param players the array of players to make a mapping out of.
+ * @param boardParameters the specifications for the boards to be used in the
+ * tournament
+ * @param tournamentPlayers the participating TournamentPlayers sorted in
+ * ascending order of age
+ * @param observers any watching observers of the tournament, as of now this
+ * is optional and unused as there has been no requirement for their implementation.
+ * @return the outcome of the tournament or an error
  */
-const makeTournamentPlayerMapping = (
-  players: Array<TournamentPlayer>
-): Map<string, TournamentPlayerWithAge> => {
-  return new Map(
-    players.map((tp: TournamentPlayer, index) => [
-      tp.name,
-      { ...tp, age: index } as TournamentPlayerWithAge,
-    ])
+const runTournament = (
+  boardParameters: BoardParameters,
+  tournamentPlayers: Array<TournamentPlayer>,
+  observers?: Array<TournamentObserver>
+): Result<
+  Promise<TournamentDebrief>,
+  IllegalBoardError | IllegalGameStateError
+> => {
+  // Check board size.
+  if (!boardIsBigEnough(LARGEST_BOARD_PLAYER_AMT, boardParameters)) {
+    return err(
+      new IllegalBoardError(boardParameters.cols, boardParameters.rows)
+    );
+  } else if (tournamentPlayers.length < 2) {
+    // TODO create an error to model this case
+  }
+
+  return ok(
+    new Promise(async (resolve) => {
+      let previousPool: Array<TournamentPlayer> = [];
+      let tournamentPool: Array<TournamentPlayer> = tournamentPlayers;
+      while (continueTournament(tournamentPool.length, previousPool.length)) {
+        previousPool = tournamentPool;
+        tournamentPool = await runTournamentRound(
+          tournamentPool,
+          boardParameters
+        );
+      }
+
+      // Inform players of the last game they have won (or lost)
+      const informedWinners = await informWinnersAndLosers(
+        previousPool,
+        tournamentPool
+      );
+
+      resolve({ winners: informedWinners.map((tp) => tp.name) });
+    })
   );
 };
 

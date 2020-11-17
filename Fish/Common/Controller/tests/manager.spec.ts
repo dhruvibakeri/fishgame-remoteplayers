@@ -294,4 +294,22 @@ describe("manager tests", () => {
       expect(results).toStrictEqual([playerA, playerD]);
     });
   });
+
+  describe("runTournament", () => {
+    it("rejects a specified board with less than 9 tiles", () => {});
+
+    it("rejects a single tournament player");
+
+    it(
+      "recognizes a single winner from a game if all other games produce no winners"
+    );
+
+    it("produces a winner from one final game");
+
+    it("produces an empty result if there are no winners");
+
+    it(
+      "produces winners if two rounds in a row produce the same exact winners"
+    );
+  });
 });
