@@ -17,7 +17,7 @@ import {
   getCurrentPlayerColor,
   getCurrentPlayer,
 } from "../../state";
-import { createBlankBoard, getTileOnBoard } from "./boardCreation";
+import {createBlankBoard, createHoledOneFishBoard, getTileOnBoard} from "./boardCreation";
 import {
   createGameTreeFromMovementGame,
   gameIsMovementGame,
@@ -49,6 +49,7 @@ interface BoardParameters {
   readonly rows: number;
   readonly cols: number;
   readonly numFish?: number;
+  readonly holes?: Array<BoardPosition>;
 }
 
 /**
@@ -151,9 +152,11 @@ const createInitialGameState = (
     tournamentPlayers
   );
 
-  return (createBlankBoard(
-    boardParams.rows,
-    boardParams.cols,
+  return (createHoledOneFishBoard(
+      boardParams.cols,
+      boardParams.rows,
+    boardParams.holes || [],
+    1,
     boardParams.numFish || 1
   ) as Result<
     Board,
@@ -669,6 +672,20 @@ const runGame = (
   );
 };
 
+/**
+ * Gets the winners of a game from the game debrief.
+ * The winners are the highest scoring active players in the game.
+ *
+ * @param debrief the game debrief, which is the outcome of the run game.
+ */
+const getWinners = (debrief: GameDebrief): Array<ActivePlayer> => {
+  const activePlayers = debrief.activePlayers;
+  if (activePlayers.length === 0) {
+    return [];
+  }
+  return activePlayers.filter((player: ActivePlayer) => player.score === activePlayers[0].score);
+}
+
 export {
   RefereeState,
   RefereeStateWithMovementGame,
@@ -693,4 +710,5 @@ export {
   runGame,
   timeoutRequest,
   PLAYER_REQUEST_TIMEOUT,
+  getWinners,
 };

@@ -10,6 +10,7 @@ import {
   timeoutRequest,
   PLAYER_REQUEST_TIMEOUT,
   runGame,
+  getWinners,
 } from "./referee";
 import { IllegalBoardError, IllegalGameStateError } from "../types/errors";
 import {
@@ -93,7 +94,7 @@ const assignParties = (
       const lastAssignedPlayers: Array<TournamentPlayer> = parties.pop();
       const lastAssignedPlayer: TournamentPlayer = lastAssignedPlayers.pop();
       parties.push(lastAssignedPlayers);
-      unassignedPool.push(lastAssignedPlayer);
+      unassignedPool.unshift(lastAssignedPlayer);
     }
 
     // Try assigning the rest of the players with a smaller maximal size.
@@ -202,6 +203,11 @@ const runTournamentRound = async (
     tp1: TournamentPlayerWithAge,
     tp2: TournamentPlayerWithAge
   ) => tp1.age - tp2.age;
+  const deleteAge = (tp: TournamentPlayerWithAge): TournamentPlayer => {
+    const res = { ...tp }
+    delete res['age'];
+    return res as TournamentPlayer;
+  }
   const tournamentMapping: Map<
     string,
     TournamentPlayerWithAge
@@ -209,9 +215,10 @@ const runTournamentRound = async (
   const games = assignAndRunGames(tournamentPool, boardParameters);
   const results = await Promise.all(games);
   return results
-    .reduce((acc, gd: GameDebrief) => acc.concat(gd.activePlayers), [])
+    .reduce((acc, gd: GameDebrief) => acc.concat(getWinners(gd)), [])
     .map((value: ActivePlayer) => tournamentMapping.get(value.name))
-    .sort(sortByAge);
+    .sort(sortByAge)
+    .map(deleteAge);
 };
 
 /**

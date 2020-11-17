@@ -152,7 +152,8 @@ const createHoledOneFishBoard = (
   columns: number,
   rows: number,
   holePositions: Array<BoardPosition>,
-  minimumOneFishTiles: number
+  minimumOneFishTiles: number,
+  fishPerTile: number = DEFAULT_FISH_PER_TILE
 ): Result<Board, IllegalBoardError | IllegalPositionError> => {
   if (
     !isValidMinimumOneFishTiles(
@@ -174,7 +175,7 @@ const createHoledOneFishBoard = (
 
   // Try to create a board with holes at specified positions and a minimum
   // number of 1-fish tiles.
-  return (createBlankBoard(rows, columns, DEFAULT_FISH_PER_TILE) as Result<
+  return (createBlankBoard(rows, columns, fishPerTile) as Result<
     Board,
     IllegalBoardError | IllegalPositionError
   >).flatMap((board: Board) => addHolesToBoard(board, holePositions));
