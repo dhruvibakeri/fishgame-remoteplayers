@@ -288,13 +288,13 @@ describe("manager tests", () => {
   describe("runTournament", () => {
     it.todo("rejects a specified board with less than 9 tiles");
 
+    it.todo("produces a winner from one final game");
+
     it.todo("rejects a single tournament player");
 
     it.todo(
       "recognizes a single winner from a game if all other games produce no winners"
     );
-
-    it.todo("produces a winner from one final game");
 
     it.todo("produces an empty result if there are no winners");
 
