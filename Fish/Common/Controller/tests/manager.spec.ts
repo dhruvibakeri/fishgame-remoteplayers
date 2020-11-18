@@ -105,7 +105,6 @@ describe("manager tests", () => {
 
     it("assigns pools with a remainder of 1", () => {
       const players = makePlayers(13);
-      const actual = assignParties(players);
       expect(assignParties(players)).toEqual([
         players.slice(0, 4), // 4 players
         players.slice(4, 8), // 4 players
@@ -116,24 +115,21 @@ describe("manager tests", () => {
 
     it("assigns pools with a remainder of 2", () => {
       const players = makePlayers(14);
-      const actual = assignParties(players);
       expect(assignParties(players)).toEqual([
         players.slice(0, 4), // 4 players
         players.slice(4, 8), // 4 players
-        players.slice(8, 11), // 3 players
-        players.slice(11, 14), // 3 players
+        players.slice(8, 12), // 4 players
+        players.slice(12, 14), // 2 players
       ]);
     });
 
     it("assigns pools with a remainder of 3", () => {
       const players = makePlayers(15);
-      const actual = assignParties(players);
       expect(assignParties(players)).toEqual([
         players.slice(0, 4), // 4 players
         players.slice(4, 8), // 4 players
-        players.slice(8, 11), // 3 players
-        players.slice(11, 13), // 2 players
-        players.slice(13, 15), // 2 players
+        players.slice(8, 12), // 4 players
+        players.slice(12, 15), // 3 players
       ]);
     });
   });
@@ -147,30 +143,24 @@ describe("manager tests", () => {
       const players = makePlayers(7);
       const expectedGameDebrief1: GameDebrief = {
         activePlayers: [
-          { name: players[0].name, score: 3 },
+          { name: players[0].name, score: 2 },
           { name: players[1].name, score: 2 },
           { name: players[2].name, score: 2 },
+          { name: players[3].name, score: 2 },
         ],
         kickedPlayers: [],
       };
       const expectedGameDebrief2: GameDebrief = {
         activePlayers: [
-          { name: players[3].name, score: 4 },
-          { name: players[4].name, score: 4 },
-        ],
-        kickedPlayers: [],
-      };
-      const expectedGameDebrief3: GameDebrief = {
-        activePlayers: [
-          { name: players[5].name, score: 4 },
-          { name: players[6].name, score: 4 },
+          { name: players[4].name, score: 3 },
+          { name: players[5].name, score: 2 },
+          { name: players[6].name, score: 2 },
         ],
         kickedPlayers: [],
       };
       const actual = assignAndRunGames(players, boardParameters);
       expect(actual[0]).resolves.toEqual(expectedGameDebrief1);
       expect(actual[1]).resolves.toEqual(expectedGameDebrief2);
-      expect(actual[2]).resolves.toEqual(expectedGameDebrief3);
     });
   });
 
@@ -296,19 +286,19 @@ describe("manager tests", () => {
   });
 
   describe("runTournament", () => {
-    it("rejects a specified board with less than 9 tiles", () => {});
+    it.todo("rejects a specified board with less than 9 tiles");
 
-    it("rejects a single tournament player");
+    it.todo("rejects a single tournament player");
 
-    it(
+    it.todo(
       "recognizes a single winner from a game if all other games produce no winners"
     );
 
-    it("produces a winner from one final game");
+    it.todo("produces a winner from one final game");
 
-    it("produces an empty result if there are no winners");
+    it.todo("produces an empty result if there are no winners");
 
-    it(
+    it.todo(
       "produces winners if two rounds in a row produce the same exact winners"
     );
   });

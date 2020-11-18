@@ -76,22 +76,21 @@ const assignParties = (
     maximalSize: number,
     parties: Array<Array<TournamentPlayer>>
   ): Array<Array<TournamentPlayer>> => {
-    if (tournamentPool.length < 1) {
-      return parties;
-    } else if (tournamentPool.length >= maximalSize) {
+    if (tournamentPool.length > maximalSize) {
       const party = tournamentPool.slice(0, maximalSize);
       const remainder = tournamentPool.slice(maximalSize);
       return assignPartiesRecursive(remainder, maximalSize, [
         ...parties,
         party,
       ]);
+    } else if (tournamentPool.length > 1) {
+      return [...parties, tournamentPool];
     } else {
-      // If possible, unassign the last player of the last assigned party.
-      const pool =
-        parties.length > 0
-          ? [parties[parties.length - 1].pop(), ...tournamentPool]
-          : tournamentPool;
-      return parties.concat(assignPartiesRecursive(pool, maximalSize - 1, []));
+      // Add the last game back to the unassigned pool and try to
+      // match them with a maximalSize decremented by 1.
+      const lastParty = parties.pop();
+      const pool = [...lastParty, ...tournamentPool];
+      return assignPartiesRecursive(pool, maximalSize - 1, parties);
     }
   };
 
