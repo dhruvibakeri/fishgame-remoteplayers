@@ -685,6 +685,19 @@ const getWinners = (debrief: GameDebrief): Array<ActivePlayer> => {
   }
   return activePlayers.filter((player: ActivePlayer) => player.score === activePlayers[0].score);
 }
+/**
+ * Gets the losers of a game from the game debrief.
+ * The losers are all the players who did not get the highest score in the game.
+ *
+ * @param debrief the game debrief, which is the outcome of the run game.
+ */
+const getLosers = (debrief: GameDebrief): Array<ActivePlayer> => {
+  const activePlayers = debrief.activePlayers;
+  if (activePlayers.length === 0) {
+    return [];
+  }
+  return activePlayers.filter((player: ActivePlayer) => player.score !== activePlayers[0].score);
+}
 
 export {
   RefereeState,
@@ -711,4 +724,5 @@ export {
   timeoutRequest,
   PLAYER_REQUEST_TIMEOUT,
   getWinners,
+  getLosers,
 };

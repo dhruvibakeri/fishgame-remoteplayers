@@ -75,3 +75,13 @@ type RunTournament = (
 export interface TournamentDebrief {
   readonly winners: Array<string>;
 }
+
+/**
+ * The Results of running a single Tournament Round.
+ * The remaining suriving players of a Round are split
+ * into Winners (highest-score) and Losers.
+ */
+export type RoundResults = [
+  winners: Array<TournamentPlayer>,
+  losers: Array<TournamentPlayer>,
+]

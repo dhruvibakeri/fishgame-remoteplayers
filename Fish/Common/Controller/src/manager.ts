@@ -11,11 +11,13 @@ import {
   PLAYER_REQUEST_TIMEOUT,
   runGame,
   getWinners,
+  getLosers,
 } from "./referee";
 import { IllegalBoardError, IllegalGameStateError } from "../types/errors";
 import {
   TournamentObserver,
   TournamentDebrief,
+  RoundResults,
 } from "../../../Admin/manager-interface";
 import {
   MAX_NUMBER_OF_PLAYERS,
@@ -161,7 +163,7 @@ const makeTournamentPlayerMapping = (
 const runTournamentRound = async (
   tournamentPool: Array<TournamentPlayer>,
   boardParameters: BoardParameters
-): Promise<Array<TournamentPlayer>> => {
+): Promise<RoundResults> => {
   const sortByAge = (
     tp1: TournamentPlayerWithAge,
     tp2: TournamentPlayerWithAge
@@ -177,11 +179,16 @@ const runTournamentRound = async (
   > = makeTournamentPlayerMapping(tournamentPool);
   const games = assignAndRunGames(tournamentPool, boardParameters);
   const results = await Promise.all(games);
-  return results
+  const winners = results
     .reduce((acc, gd: GameDebrief) => acc.concat(getWinners(gd)), [])
     .map((value: ActivePlayer) => tournamentMapping.get(value.name))
     .sort(sortByAge)
     .map(deleteAge);
+  const losers = results
+      .reduce((acc, gd: GameDebrief) => acc.concat(getLosers(gd)), [])
+      .map((value: ActivePlayer) => tournamentMapping.get(value.name))
+      .map(deleteAge);
+  return [winners, losers];
 };
 
 /**
@@ -189,18 +196,15 @@ const runTournamentRound = async (
  * has won the tournament, they are part of the winners array, otherwise they
  * are listed in the players array alongside the winners.
  *
- * @param players the list of remaining active players that were able to participate in final round of tournament
  * @param winners the list of players who won the tournament
+ * @param losers the list of players who lost the tournament
  * @return the list of winners who ACCEPTED the results of the tournament.
  */
 const informWinnersAndLosers = async (
-  players: Array<TournamentPlayer>,
-  winners: Array<TournamentPlayer>
+  winners: Array<TournamentPlayer>,
+  losers: Array<TournamentPlayer>
 ): Promise<Array<TournamentPlayer>> => {
-  if (players.length === 0) {
-    players = winners;
-  }
-
+  const players = [...winners, ...losers];
   const finalWinners: Array<TournamentPlayer> = [];
   await Promise.all(
     players.map((tp) => {
@@ -249,20 +253,23 @@ const runTournament = (
 
   return ok(
     new Promise(async (resolve) => {
-      let previousPool: Array<TournamentPlayer> = [];
+      let previousPoolLength = 0;
+      let loserPool: Array<TournamentPlayer> = [];
       let tournamentPool: Array<TournamentPlayer> = tournamentPlayers;
-      while (continueTournament(tournamentPool.length, previousPool.length)) {
-        previousPool = tournamentPool;
-        tournamentPool = await runTournamentRound(
+      while (continueTournament(tournamentPool.length, previousPoolLength)) {
+        previousPoolLength = tournamentPool.length;
+        let losers;
+        [tournamentPool, losers] = await runTournamentRound(
           tournamentPool,
           boardParameters
         );
+        loserPool = loserPool.concat(losers);
       }
 
       // Inform players of the last game they have won (or lost)
       const informedWinners = await informWinnersAndLosers(
-        previousPool,
-        tournamentPool
+        tournamentPool,
+        loserPool
       );
 
       resolve({ winners: informedWinners.map((tp) => tp.name) });
