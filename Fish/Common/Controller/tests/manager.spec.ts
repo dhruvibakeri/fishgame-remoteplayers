@@ -15,11 +15,14 @@ import {
   continueTournament,
   assignParties,
   assignAndRunGames,
+  runTournament,
 } from "../src/manager";
 import { createSamplePlayer } from "../../../Player/player";
 import { InputDepth } from "../src/testHarnessInput";
 import { Movement } from "../../game-tree";
 import { BoardParameters } from "../src/referee";
+import { IllegalBoardError, IllegalTournamentError } from "../types/errors";
+import { Result } from "true-myth";
 
 describe("manager tests", () => {
   const makeMockPlayer = (
@@ -174,10 +177,10 @@ describe("manager tests", () => {
     });
 
     it("should inform winners that they won and losers they lost", async () => {
-      const players = [playerA, playerB];
       const winners = [playerA];
+      const losers = [playerB];
 
-      const results = await informWinnersAndLosers(players, winners);
+      const results = await informWinnersAndLosers(winners, losers);
       expect(results).toStrictEqual([playerA]);
       expect(playerA.wonTournament).toHaveBeenCalledWith(true);
       expect(playerB.wonTournament).toHaveBeenCalledWith(false);
@@ -187,10 +190,10 @@ describe("manager tests", () => {
       const playerC = makeMockPlayer("c", 1, {
         wonTournament: jest.fn(() => false),
       });
-      const players = [playerA, playerB, playerC];
       const winners = [playerA, playerC];
+      const losers = [playerB];
 
-      const results = await informWinnersAndLosers(players, winners);
+      const results = await informWinnersAndLosers(winners, losers);
       expect(results).toStrictEqual([playerA]);
       expect(playerA.wonTournament).toHaveBeenCalledWith(true);
       expect(playerB.wonTournament).toHaveBeenCalledWith(false);
@@ -203,10 +206,10 @@ describe("manager tests", () => {
       const playerC = makeMockPlayer("c", 1, {
         wonTournament: jest.fn(resolveTrueAfterDelay),
       });
-      const players = [playerA, playerB, playerC];
       const winners = [playerA, playerC];
+      const losers = [playerB];
 
-      const results = await informWinnersAndLosers(players, winners);
+      const results = await informWinnersAndLosers(winners, losers);
       expect(results).toStrictEqual([playerA]);
       expect(playerA.wonTournament).toHaveBeenCalledWith(true);
       expect(playerB.wonTournament).toHaveBeenCalledWith(false);
@@ -241,7 +244,7 @@ describe("manager tests", () => {
       const players = [playerA, playerB, playerC, playerD];
 
       const results = await runTournamentRound(players, boardParams);
-      expect(results).toStrictEqual([]);
+      expect(results).toStrictEqual([[], []]);
     });
 
     it("should produce both winners if two players tied in a game", async () => {
@@ -251,7 +254,7 @@ describe("manager tests", () => {
       });
       const playerB = makeMockPlayer("b", 1, {});
       const results = await runTournamentRound([playerA, playerB], boardParams);
-      expect(results).toStrictEqual([playerA, playerB]);
+      expect(results).toStrictEqual([[playerA, playerB], []]);
     });
 
     it("should combine winners of two separate games", async () => {
@@ -264,7 +267,10 @@ describe("manager tests", () => {
       const players = [playerA, playerB, playerC, playerD, playerE];
 
       const results = await runTournamentRound(players, boardParams);
-      expect(results).toStrictEqual([playerB, playerD]);
+      expect(results).toStrictEqual([
+        [playerB, playerD],
+        [playerA, playerC, playerE],
+      ]);
     });
 
     it("should produce winners in the order given", async () => {
@@ -281,16 +287,43 @@ describe("manager tests", () => {
         holes: [{ row: 2, col: 4 }],
       };
       const results = await runTournamentRound(players, boardParams);
-      expect(results).toStrictEqual([playerA, playerD]);
+      expect(results).toStrictEqual([
+        [playerA, playerD],
+        [playerB, playerC],
+      ]);
     });
   });
 
   describe("runTournament", () => {
-    it.todo("rejects a specified board with less than 9 tiles");
+    it("rejects a specified board with less than 9 tiles", () => {
+      const invalidBoardParameters: BoardParameters = {
+        rows: 2,
+        cols: 2,
+      };
+      expect(runTournament(invalidBoardParameters, makePlayers(4))).toEqual(
+        new Result.Err(new IllegalBoardError(2, 2))
+      );
+    });
 
-    it.todo("produces a winner from one final game");
+    it("rejects a single tournament player", () => {
+      const players = makePlayers(1);
+      expect(runTournament(boardParameters, players)).toEqual(
+        new Result.Err(new IllegalTournamentError(boardParameters, players))
+      );
+    });
 
-    it.todo("rejects a single tournament player");
+    it("rejects no tournament players", () => {
+      expect(runTournament(boardParameters, [])).toEqual(
+        new Result.Err(new IllegalTournamentError(boardParameters, []))
+      );
+    });
+
+    it("produces a winner from one final game", () => {
+      const players = makePlayers(7);
+      expect(
+        runTournament(boardParameters, players).unsafelyUnwrap()
+      ).resolves.toEqual({ winners: [players[0].name] });
+    });
 
     it.todo(
       "recognizes a single winner from a game if all other games produce no winners"

@@ -13,7 +13,11 @@ import {
   getWinners,
   getLosers,
 } from "./referee";
-import { IllegalBoardError, IllegalGameStateError } from "../types/errors";
+import {
+  IllegalBoardError,
+  IllegalGameStateError,
+  IllegalTournamentError,
+} from "../types/errors";
 import {
   TournamentObserver,
   TournamentDebrief,
@@ -185,9 +189,10 @@ const runTournamentRound = async (
     .sort(sortByAge)
     .map(deleteAge);
   const losers = results
-      .reduce((acc, gd: GameDebrief) => acc.concat(getLosers(gd)), [])
-      .map((value: ActivePlayer) => tournamentMapping.get(value.name))
-      .map(deleteAge);
+    .reduce((acc, gd: GameDebrief) => acc.concat(getLosers(gd)), [])
+    .map((value: ActivePlayer) => tournamentMapping.get(value.name))
+    .sort(sortByAge)
+    .map(deleteAge);
   return [winners, losers];
 };
 
@@ -240,7 +245,7 @@ const runTournament = (
   observers?: Array<TournamentObserver>
 ): Result<
   Promise<TournamentDebrief>,
-  IllegalBoardError | IllegalGameStateError
+  IllegalBoardError | IllegalGameStateError | IllegalTournamentError
 > => {
   // Check board size.
   if (!boardIsBigEnough(LARGEST_BOARD_PLAYER_AMT, boardParameters)) {
@@ -248,7 +253,7 @@ const runTournament = (
       new IllegalBoardError(boardParameters.cols, boardParameters.rows)
     );
   } else if (tournamentPlayers.length < 2) {
-    // TODO create an error to model this case
+    return err(new IllegalTournamentError(boardParameters, tournamentPlayers));
   }
 
   return ok(

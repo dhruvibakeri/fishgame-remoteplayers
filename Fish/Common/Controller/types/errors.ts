@@ -1,4 +1,6 @@
+import { BoardParameters } from "../src/referee";
 import { Board, BoardPosition } from "../../board";
+import { TournamentPlayer } from "../../player-interface";
 import { Game, Player } from "../../state";
 
 /**
@@ -160,6 +162,28 @@ class IllegalPositionError extends Error {
   }
 }
 
+class IllegalTournamentError extends Error {
+  boardParameters: BoardParameters;
+  tournamentPlayers: Array<TournamentPlayer>;
+  message: string;
+
+  constructor(
+    boardParameters: BoardParameters,
+    tournamentPlayers: Array<TournamentPlayer>,
+    message?: string;
+  ) {
+    super();
+    if (message) {
+      this.message = message;
+    } else {
+      this.message = "Invalid board parameters and tournament players for tournament."
+    }
+    this.boardParameters = boardParameters;
+    this.tournamentPlayers = tournamentPlayers;
+    this.stack = new Error().stack;
+  }
+}
+
 class NotMovementGameError extends Error {
   game: Game;
   message: string;
@@ -170,7 +194,7 @@ class NotMovementGameError extends Error {
     if (message) {
       this.message = message;
     } else {
-      this.message = "Not all penguins have been placed."
+      this.message = "Not all penguins have been placed.";
     }
     this.stack = new Error().stack;
   }
@@ -184,4 +208,5 @@ export {
   IllegalPlacementError,
   IllegalPositionError,
   NotMovementGameError,
+  IllegalTournamentError
 };
