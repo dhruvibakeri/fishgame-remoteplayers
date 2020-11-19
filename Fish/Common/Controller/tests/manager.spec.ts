@@ -1,17 +1,10 @@
 import {
-  DisqualifyMe,
   GameDebrief,
-  GameHasEnded,
-  GameIsStarting,
-  MakeMovement,
-  MakePlacement,
   TournamentPlayer,
-  TournamentPlayerWithAge,
 } from "../../player-interface";
 import {
   runTournamentRound,
   informWinnersAndLosers,
-  makeTournamentPlayerMapping,
   continueTournament,
   assignParties,
   assignAndRunGames,
@@ -23,6 +16,7 @@ import { Movement } from "../../game-tree";
 import { BoardParameters } from "../src/referee";
 import { IllegalBoardError, IllegalTournamentError } from "../types/errors";
 import { Result } from "true-myth";
+import {TournamentDebrief} from "../../../Admin/manager-interface";
 
 describe("manager tests", () => {
   const makeMockPlayer = (
@@ -50,6 +44,12 @@ describe("manager tests", () => {
     [...Array(numOfPlayers).keys()]
       .map((num) => num.toString())
       .map((name) => makeMockPlayer(name, 1, {}));
+
+  const makePlayersWithProperties = (listOfProperties: Array<Record<string, any>>): Array<TournamentPlayer> => {
+    return listOfProperties.map((properties, index) => {
+      return makeMockPlayer(index.toString(), 1, { ...properties });
+    })
+  }
 
   const boardParameters: BoardParameters = {
     rows: 4,
@@ -228,20 +228,8 @@ describe("manager tests", () => {
     });
 
     it("should produce empty results if everyone cheats", async () => {
-      const badMovement = makeMovementFunction(0, 0, 0, 0);
-      const playerA = makeMockPlayer("a", 1, {
-        makeMovement: jest.fn(badMovement),
-      });
-      const playerB = makeMockPlayer("b", 1, {
-        makeMovement: jest.fn(badMovement),
-      });
-      const playerC = makeMockPlayer("c", 1, {
-        makeMovement: jest.fn(badMovement),
-      });
-      const playerD = makeMockPlayer("d", 1, {
-        makeMovement: jest.fn(badMovement),
-      });
-      const players = [playerA, playerB, playerC, playerD];
+      const badMovement = { makeMovement: jest.fn(makeMovementFunction(0, 0, 0, 0)) };
+      const players = makePlayersWithProperties([badMovement, badMovement, badMovement, badMovement])
 
       const results = await runTournamentRound(players, boardParams);
       expect(results).toStrictEqual([[], []]);
@@ -295,6 +283,14 @@ describe("manager tests", () => {
   });
 
   describe("runTournament", () => {
+    let boardParams: BoardParameters;
+    beforeEach(() => {
+      boardParams = {
+        rows: 5,
+        cols: 2,
+      };
+    })
+
     it("rejects a specified board with less than 9 tiles", () => {
       const invalidBoardParameters: BoardParameters = {
         rows: 2,
@@ -325,14 +321,42 @@ describe("manager tests", () => {
       ).resolves.toEqual({ winners: [players[0].name] });
     });
 
-    it.todo(
-      "recognizes a single winner from a game if all other games produce no winners"
-    );
+    it("recognizes a single winner from a game if all other games produce no winners", () => {
+      const badMovement = { makeMovement: jest.fn(makeMovementFunction(0, 0, 0, 0)) };
+      const defaultProperties = {};
+      const players = makePlayersWithProperties([defaultProperties, defaultProperties, defaultProperties, badMovement, badMovement]);
 
-    it.todo("produces an empty result if there are no winners");
+      runTournament(boardParams, players).map((prom) => {
+        expect(prom).resolves.toStrictEqual({ winners: [players[0].name]});
+      });
+    });
 
-    it.todo(
-      "produces winners if two rounds in a row produce the same exact winners"
-    );
+    it("produces an empty result if there are no winners", () => {
+      const badMovement = { makeMovement: jest.fn(makeMovementFunction(0, 0, 0, 0)) };
+      const players = makePlayersWithProperties([badMovement, badMovement, badMovement, badMovement, badMovement, badMovement, badMovement, badMovement]);
+
+      runTournament(boardParams, players).map((prom) => {
+        expect(prom).resolves.toStrictEqual({ winners: [] });
+      });
+    });
+
+    it("produces winners if two rounds in a row produce the same exact winners", () => {
+      const players = makePlayers(4);
+      const boardParams: BoardParameters = {
+        rows: 4,
+        cols: 2,
+      };
+      runTournament(boardParams, players).map((prom) => {
+        // everyone wins
+        expect(prom).resolves.toStrictEqual({ winners: players.map(p => p.name) });
+      });
+    });
+
+    it("should run multiple tournament rounds if there is enough players for another round", () => {
+      const players = makePlayers(15);
+      runTournament(boardParams, players).map((prom: Promise<TournamentDebrief> ) => {
+        expect(prom).resolves.toStrictEqual({ winners: [players[0].name]});
+      })
+    });
   });
 });
