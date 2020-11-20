@@ -170,7 +170,7 @@ class IllegalTournamentError extends Error {
   constructor(
     boardParameters: BoardParameters,
     tournamentPlayers: Array<TournamentPlayer>,
-    message?: string;
+    message?: string
   ) {
     super();
     if (message) {
