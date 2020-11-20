@@ -1,5 +1,48 @@
 # Fish - Andrew Leung and Fiona Gridley
 
+## 8 &mdash; The League
+
+These additions are for the assignment, [8 - The League](https://felleisen.org/matthias/4500-f20/8.html). The purpose of this assignment is to implement the tournament manager component and design the upcoming the upcoming proxy protocol.
+
+<details>
+  <summary>Click to see the new elements:</summary>
+  
+- `Fish`
+  - `Admin`
+    - `manager.ts` : TypeScript file with tournament manager implementations used for abiding by the specified project structure
+  - `Common`
+    - `Controller`
+      - `src`
+        - `manager.ts` : TypeScript file with tournament manager implementations actually used
+        - `xref.ts` : TypeScript file with implementation of the `xref` integration test harness
+      - `tests`
+        - `manager.spec.ts` : `manager.ts` test file
+  - `Planning`
+    - `remote.md` : Design document for the remote collaboration protocol
+    - `remote.png` : Image of our diagram for the remote collaboration protocol
+
+</details>
+<br/>
+
+### How To Test
+
+#### Our test suite
+
+Running the test suite for milestone 8 is the same as for milestone 6, see below.
+
+#### The test harness
+
+As requested within the assignment, we have created a test harness available in `libertyhill/8`. It consumes test data like those within `8/Test` (any file marked as input such like `<n>-in.json`) via STDIN and outputs via STDOUT.
+
+To run the harness from the `8` directory, run the following:
+
+```
+make
+./xref < Tests/<n>-in.json
+```
+
+---
+
 ## 6 &mdash; Games!
 
 These additions are for the assignment, [6 - Games!](https://felleisen.org/matthias/4500-f20/6.html). The purpose of this assignment is to implement the referee component along with a sample implementation of the player-referee protocol as previously designed, and design the upcoming tournament manager component.
