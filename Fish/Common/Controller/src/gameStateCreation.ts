@@ -18,7 +18,10 @@ const PENGUIN_AMOUNT_N = 6;
  * @return the shifted array of players.
  */
 const shiftPlayers = (players: Array<Player>): Array<Player> => {
-  const nextPlayers = [...players];
+  if (players.length === 0) {
+    return players;
+  }
+  const nextPlayers: Array<Player> = [...players];
   nextPlayers.push(nextPlayers.shift());
   return nextPlayers;
 };

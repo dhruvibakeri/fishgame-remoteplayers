@@ -3,6 +3,8 @@ import {
   GameDebrief,
   ActivePlayer,
   InactivePlayer,
+  GameHasEnded,
+  GameIsStarting,
 } from "../../player-interface";
 import {
   IllegalBoardError,
@@ -82,6 +84,15 @@ interface RefereeState {
  */
 type RefereeStateWithMovementGame = RefereeState & { game: MovementGame };
 
+
+type GameHasChanged = (game: Game) => void;
+
+interface GameObserver {
+  readonly gameIsStarting: GameIsStarting;
+  readonly gameHasChanged: GameHasChanged;
+  readonly gameHasEnded: GameHasEnded;
+}
+
 /**
  * Given the currrent Referee state, returns the currently playing
  * TournamentPlayer in the Game.
@@ -134,6 +145,16 @@ const notifyPlayersGameStarting = (
     player.gameIsStarting(startingGameState);
   }
 };
+
+// TODO
+const notifyObserversGameStarting = (
+  observers: Array<GameObserver>,
+  startingGameState: Game
+): void => {
+  observers.forEach((observer) => {
+    observer.gameIsStarting(startingGameState);
+  })
+}
 
 /**
  * Given an array of TournamentPlayers and a set of BoardDimenesions, for a new
@@ -205,14 +226,18 @@ const timeoutRequest = <T>(
   request: Promise<T>,
   timeout: number
 ): Promise<T> => {
+  let id: NodeJS.Timeout;
   const timeoutPromise = new Promise<T>((resolve, reject) => {
-    setTimeout(
+    id = setTimeout(
       () => reject(`Player did not respond in ${timeout}ms.`),
       timeout
     );
   });
 
-  return Promise.race([request, timeoutPromise]);
+  return Promise.race([request, timeoutPromise]).then((result) => {
+    clearTimeout(id);
+    return result;
+  });
 };
 
 /**
@@ -226,7 +251,8 @@ const timeoutRequest = <T>(
  */
 const runPlacementRounds = async (
   refereeState: RefereeState,
-  timeout: number = PLAYER_REQUEST_TIMEOUT
+  timeout: number = PLAYER_REQUEST_TIMEOUT,
+  observers?: Array<GameObserver>
 ): Promise<RefereeStateWithMovementGame> => {
   let currRefereeState: RefereeState = refereeState;
 
@@ -245,6 +271,8 @@ const runPlacementRounds = async (
       .catch((err: string) => {
         return disqualifyCurrentFailingPlayer(currRefereeState, err);
       });
+
+    observers && notifyObserversOfChange(observers, currRefereeState.game);
   }
 
   // With the invariant that the board made by the referee must contain enough
@@ -311,7 +339,8 @@ const runMovementTurn = (
  */
 const runMovementRounds = async (
   refereeState: RefereeStateWithMovementGame,
-  timeout: number = PLAYER_REQUEST_TIMEOUT
+  timeout: number = PLAYER_REQUEST_TIMEOUT,
+  observers?: Array<GameObserver>,
 ): Promise<RefereeStateWithMovementGame> => {
   let currRefereeState: RefereeStateWithMovementGame = refereeState;
 
@@ -333,6 +362,8 @@ const runMovementRounds = async (
           err
         ) as RefereeStateWithMovementGame;
       });
+    
+    observers && notifyObserversOfChange(observers, currRefereeState.game);
   }
 
   return currRefereeState;
@@ -524,7 +555,7 @@ const createGameDebrief = (refereeState: RefereeState): GameDebrief => {
       return {
         name: player.name,
         score: refereeState.game.scores.get(player.color),
-      };
+      } as ActivePlayer;
     })
     .sort(compareActivePlayers);
 
@@ -557,6 +588,26 @@ const notifyPlayersOfOutcome = (
     tournamentPlayer.gameHasEnded(gameDebrief)
   );
 };
+
+// TODO purpose
+const notifyObserversOfOutcome = (
+  observers: Array<GameObserver>,
+  gameDebrief: GameDebrief
+): void => {
+  observers.forEach((observer: GameObserver) => {
+    observer.gameHasEnded(gameDebrief)
+  })
+}
+
+// TODO purpose
+const notifyObserversOfChange = (
+  observers: Array<GameObserver>,
+  game: Game
+): void => {
+  observers.forEach((observer: GameObserver) => {
+    observer.gameHasChanged(game);
+  })
+}
 
 /**
  * Get the total number of penguin placements which would be made for the given
@@ -630,7 +681,8 @@ const createTournamentPlayerMapping = (
  */
 const runGame = (
   tournamentPlayers: Array<TournamentPlayer>,
-  boardParameters: BoardParameters
+  boardParameters: BoardParameters,
+  observers?: Array<GameObserver>
 ): Result<Promise<GameDebrief>, IllegalBoardError | IllegalGameStateError> => {
   if (!boardIsBigEnough(tournamentPlayers.length, boardParameters)) {
     return err(
@@ -638,8 +690,8 @@ const runGame = (
     );
   }
 
-  return createInitialGameState(tournamentPlayers, boardParameters).map(
-    async (game: Game) => {
+  return createInitialGameState(tournamentPlayers, boardParameters).map((game: Game) => {
+    return new Promise(async (resolve) => {
       // Create the initial RefereeState.
       const initialRefereeState: RefereeState = {
         game,
@@ -651,25 +703,30 @@ const runGame = (
       // Notify all players the game is starting.
       notifyPlayersGameStarting(tournamentPlayers, game);
 
+      observers && notifyObserversGameStarting(observers, game);
+
       // Run placement rounds.
       const refereeStateAfterPlacements = await runPlacementRounds(
-        initialRefereeState
+        initialRefereeState, PLAYER_REQUEST_TIMEOUT, observers || []
       );
 
       // Run movement rounds.
       const refereeStateAfterMovements = await runMovementRounds(
-        refereeStateAfterPlacements
+        refereeStateAfterPlacements, PLAYER_REQUEST_TIMEOUT, observers || []
       );
 
       // Deliver the game outcome.
       const gameDebrief: GameDebrief = createGameDebrief(
         refereeStateAfterMovements
       );
+
       notifyPlayersOfOutcome(tournamentPlayers, gameDebrief);
 
-      return gameDebrief;
-    }
-  );
+      observers && notifyObserversOfOutcome(observers, gameDebrief);
+
+      resolve(gameDebrief);
+    });
+  });
 };
 
 /**
@@ -703,6 +760,7 @@ export {
   RefereeState,
   RefereeStateWithMovementGame,
   BoardParameters,
+  GameObserver,
   tournamentPlayersToGamePlayers,
   notifyPlayersGameStarting,
   runPlacementRounds,

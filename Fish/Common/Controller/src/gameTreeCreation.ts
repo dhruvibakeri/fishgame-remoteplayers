@@ -99,7 +99,7 @@ const generatePotentialMoveMapping = (
     .map((movement: Movement) => {
       return {
         movement: movement,
-        resultingGameTree: createLazyGameTree(game, movement),
+        resultingGameTree: () => createLazyGameTree(game, movement),
       };
     });
 };
@@ -116,7 +116,7 @@ const generatePotentialMoveMapping = (
 const createLazyGameTree = (
   game: MovementGame,
   movement: Movement
-): LazyGameTree => {
+): GameTree => {
   // This resulting game state is guaranteed to receive valid inputs as it is
   // only used for GameTree creation, which uses penguins and reachable positions
   // that have already been validated.
@@ -127,7 +127,7 @@ const createLazyGameTree = (
     movement.endPosition
   ).unsafelyUnwrap();
 
-  return () => createGameTreeFromMovementGame(newGameState);
+  return createGameTreeFromMovementGame(newGameState);
 };
 
 export {

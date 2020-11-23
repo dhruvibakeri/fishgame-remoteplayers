@@ -68,6 +68,7 @@ class IllegalGameStateError extends Error {
 
   constructor(players: Array<Player>, board: Board, message?: string) {
     super();
+    this.players = players;
     this.board = board;
     if (message) {
       this.message = message;

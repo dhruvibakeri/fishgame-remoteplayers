@@ -4,9 +4,10 @@
     "node": true
   },
   "extends": [
-    "plugin:vue/essential",
+    // "plugin:vue/essential",
+    "plugin:@typescript-eslint/recommended",    
     // "eslint:recommended",
-    "@vue/typescript/recommended"
+    //"@vue/typescript/recommended"
     // "@vue/prettier",
     // "@vue/prettier/@typescript-eslint"
   ],

@@ -1,9 +1,8 @@
-<!-- Renders a grid of hexagon tiles from given board. -->
 <template lang="pug">
     div.board(:style='calculateBoardSize()')
-        div.col(v-for='tileCol, colIndex in board.tiles' :key='colIndex' msg="blah")
-            div.tile-container(v-for='tile, rowIndex in tileCol' :style='tileAbsolutePosition(colIndex, rowIndex, tile)')
-                Tile.tile(:size='tileSize' :numFish='tile.numOfFish' :key='rowIndex')
+        div.row(v-for='tileRow, rowIndex in board.tiles' :key='rowIndex' msg="blah")
+            div.tile-container(v-for='tile, colIndex in tileRow' :style='tileAbsolutePosition(colIndex, rowIndex, tile)')
+                Tile.tile(:size='tileSize' :numFish='tile.numOfFish' :key='colIndex')
 </template>
 
 <script lang="ts">

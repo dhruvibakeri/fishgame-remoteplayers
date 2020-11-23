@@ -1,2 +1,4 @@
 ../../board.ts
 ../../state.ts
+../../../Player/player.ts
+./main.ts

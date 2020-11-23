@@ -3,6 +3,7 @@ import { Game, MovementGame } from "../Common/state";
 import { getNextPenguinPlacementPosition, chooseNextAction } from "../Common/Controller/src/strategy";
 import { GameDebrief, TournamentPlayer } from "../Common/player-interface";
 import { InputDepth } from "../Common/Controller/src/testHarnessInput";
+import { Movement } from "../Common/game-tree";
 
 const LOOKAHEAD_DEPTH = 2;
 
@@ -45,9 +46,9 @@ const makePlacement = (game: Game): Promise<BoardPosition> => {
  * @param depth the maximum lookahead depth to use in this player's minimax strategy
  * @return a MakeMovement function which uses the minimax strategy with the given depth
  */
-const makeMovementWithDepth = (depth: number) => (game: Game) => Promise.resolve(
-    chooseNextAction(game as MovementGame, depth).unsafelyUnwrap()
-  );
+const makeMovementWithDepth = (depth: number) => (game: Game) => new Promise<Movement>((resolve) => {
+  resolve(chooseNextAction(game as MovementGame, depth).unsafelyUnwrap());
+});
 
 /**
  * Function to let the player know that the game has ended, and to inform them

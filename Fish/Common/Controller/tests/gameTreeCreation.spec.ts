@@ -260,11 +260,11 @@ describe("gameTreeCreation", () => {
     });
   });
 
-  describe("createLazyGameTree", () => {
-    it("creates a LazyGameTree from a game state and movement", () => {
-      const actual: GameTree = createLazyGameTree(game, movement1)();
-      expect(actual.gameState).toEqual(gameAfterMovement1);
-      expect(Array.from(actual.potentialMoves).length).toEqual(2);
-    });
-  });
+  // describe("createLazyGameTree", () => {
+  //   it("creates a LazyGameTree from a game state and movement", () => {
+  //     const actual: GameTree = createLazyGameTree(game, movement1)();
+  //     expect(actual.gameState).toEqual(gameAfterMovement1);
+  //     expect(Array.from(actual.potentialMoves).length).toEqual(2);
+  //   });
+  // });
 });
