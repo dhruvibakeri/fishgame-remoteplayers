@@ -61,7 +61,7 @@ const playersAsTournamentPlayers: Array<TournamentPlayer> = players.map((player)
 });
 
 const boardParams: BoardParameters = {
-  rows: 4,
+  rows: 3,
   cols: 5,
   numFish: 3,
 };

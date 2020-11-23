@@ -67,6 +67,32 @@ const createGameTreeFromMovementGame = (game: MovementGame): GameTree => {
 };
 
 /**
+ * Given a MovementGame state and a Movement, create the resulting LazyGameTree
+ * corresponding to the current player of the given state making that
+ * Movement. This function is only used by createGameTree.
+ *
+ * @param game the Game state
+ * @param movement the Movement to apply
+ * @return the resultng LazyGameTree
+ */
+const createLazyGameTree = (
+  game: MovementGame,
+  movement: Movement
+): GameTree => {
+  // This resulting game state is guaranteed to receive valid inputs as it is
+  // only used for GameTree creation, which uses penguins and reachable positions
+  // that have already been validated.
+  const newGameState = movePenguin(
+    game,
+    getCurrentPlayer(game),
+    movement.startPosition,
+    movement.endPosition
+  ).unsafelyUnwrap();
+
+  return createGameTreeFromMovementGame(newGameState);
+};
+
+/**
  * Given a Game state, generate a mapping from each of its current Player's
  * possible Movements to their resulting LazyGameTrees.
  *
@@ -102,32 +128,6 @@ const generatePotentialMoveMapping = (
         resultingGameTree: () => createLazyGameTree(game, movement),
       };
     });
-};
-
-/**
- * Given a MovementGame state and a Movement, create the resulting LazyGameTree
- * corresponding to the current player of the given state making that
- * Movement. This function is only used by createGameTree.
- *
- * @param game the Game state
- * @param movement the Movement to apply
- * @return the resultng LazyGameTree
- */
-const createLazyGameTree = (
-  game: MovementGame,
-  movement: Movement
-): GameTree => {
-  // This resulting game state is guaranteed to receive valid inputs as it is
-  // only used for GameTree creation, which uses penguins and reachable positions
-  // that have already been validated.
-  const newGameState = movePenguin(
-    game,
-    getCurrentPlayer(game),
-    movement.startPosition,
-    movement.endPosition
-  ).unsafelyUnwrap();
-
-  return createGameTreeFromMovementGame(newGameState);
 };
 
 export {
