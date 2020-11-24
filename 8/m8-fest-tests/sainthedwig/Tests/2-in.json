@@ -1,0 +1,11 @@
+{
+  "row": 4,
+  "column": 2,
+  "players": [
+    [ "ethical", 2 ],
+    [ "consumption", 2 ],
+    [ "under", 2 ],
+    [ "capitalism", 2 ]
+  ],
+  "fish": 4
+}

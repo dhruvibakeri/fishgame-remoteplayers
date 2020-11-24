@@ -1,0 +1,23 @@
+{
+  "row": 3,
+  "column": 3,
+  "players": [
+    [
+      "matthias",
+      2
+    ],
+    [
+      "jason",
+      1
+    ],
+    [
+      "julia",
+      1
+    ],
+    [
+      "Suzanne",
+      1
+    ]
+  ],
+  "fish": 1
+}

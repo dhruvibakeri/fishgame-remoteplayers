@@ -1,0 +1,19 @@
+{
+  "row": 4,
+  "column": 5,
+  "players": [
+    [
+      "oooooooo",
+      1
+    ],
+    [
+      "oooo",
+      2
+    ],
+    [
+      "aaaahhhhhh",
+      1
+    ]
+  ],
+  "fish": 1
+}

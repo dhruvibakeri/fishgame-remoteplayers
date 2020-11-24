@@ -130,18 +130,25 @@ const getMinMaxScore = (
 
   const isMaximizing: boolean =
     searchingPlayerColor === getCurrentPlayerColor(gameTree.gameState);
-  const curLookAheadTurnsDepth: number = isMaximizing
-    ? lookAheadTurnsDepth - 1
-    : lookAheadTurnsDepth;
+  
+  let curLookAheadTurnsDepth: number = lookAheadTurnsDepth
+
 
   // Get minimax scores for all child nodes of current gameTree.
   const scores: Array<number> = gameTree.potentialMoves.map(
     (movementToResultingTree: MovementToResultingTree) =>
-      getMinMaxScore(
-        movementToResultingTree.resultingGameTree(),
+    { 
+      let resGameTree = movementToResultingTree.resultingGameTree()
+
+      if(gameTree.gameState.players[1].color === searchingPlayerColor) {
+        curLookAheadTurnsDepth = lookAheadTurnsDepth - 1
+      }
+      return getMinMaxScore(
+        resGameTree,
         searchingPlayerColor,
         curLookAheadTurnsDepth
       )
+    }
   );
 
   if (isMaximizing) {

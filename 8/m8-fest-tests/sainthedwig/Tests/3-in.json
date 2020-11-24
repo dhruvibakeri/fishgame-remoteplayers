@@ -1,0 +1,10 @@
+{
+  "row": 3,
+  "column": 3,
+  "players": [
+    [ "real", 2 ],
+    [ "birds", 1 ],
+    [ "are", 1 ]
+  ],
+  "fish": 1
+}

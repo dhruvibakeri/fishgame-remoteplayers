@@ -1,0 +1,135 @@
+#!/bin/bash
+
+case "$(uname -s)" in
+
+   Darwin)
+        ./xref <./m8-fest-tests/amarillo/Tests/1-in.json | diff -w -B - ./m8-fest-tests/amarillo/Tests/1-out.json;
+        ./xref <./m8-fest-tests/bells/Tests/3-in.json | diff -w -B - ./m8-fest-tests/bells/Tests/3-out.json;
+        ./xref <./m8-fest-tests/burton/Tests/2-in.json | diff -w -B - ./m8-fest-tests/burton/Tests/2-out.json;
+        ./xref <./m8-fest-tests/burton/Tests/3-in.json | diff -w -B - ./m8-fest-tests/burton/Tests/3-out.json;
+        ./xref <./m8-fest-tests/bynum/Tests/1-in.json | diff -w -B - ./m8-fest-tests/bynum/Tests/1-out.json;
+        ./xref <./m8-fest-tests/bynum/Tests/2-in.json | diff -w -B - ./m8-fest-tests/bynum/Tests/2-out.json;
+        ./xref <./m8-fest-tests/bynum/Tests/3-in.json | diff -w -B - ./m8-fest-tests/bynum/Tests/3-out.json;
+        ./xref <./m8-fest-tests/chinagrove/Tests/1-in.json | diff -w -B - ./m8-fest-tests/chinagrove/Tests/1-out.json;
+        ./xref <./m8-fest-tests/chinagrove/Tests/2-in.json | diff -w -B - ./m8-fest-tests/chinagrove/Tests/2-out.json;
+        ./xref <./m8-fest-tests/chinagrove/Tests/3-in.json | diff -w -B - ./m8-fest-tests/chinagrove/Tests/3-out.json;
+        ./xref <./m8-fest-tests/christine/Tests/1-in.json | diff -w -B - ./m8-fest-tests/christine/Tests/1-out.json;
+        ./xref <./m8-fest-tests/christine/Tests/2-in.json | diff -w -B - ./m8-fest-tests/christine/Tests/2-out.json;
+        ./xref <./m8-fest-tests/christine/Tests/3-in.json | diff -w -B - ./m8-fest-tests/christine/Tests/3-out.json;
+        ./xref <./m8-fest-tests/clarksvillecity/Tests/1-in.json | diff -w -B - ./m8-fest-tests/clarksvillecity/Tests/1-out.json;
+        ./xref <./m8-fest-tests/clarksvillecity/Tests/2-in.json | diff -w -B - ./m8-fest-tests/clarksvillecity/Tests/2-out.json;
+        ./xref <./m8-fest-tests/clarksvillecity/Tests/3-in.json | diff -w -B - ./m8-fest-tests/clarksvillecity/Tests/3-out.json;
+        ./xref <./m8-fest-tests/bells/Tests/2-in.json | diff -w -B - ./m8-fest-tests/bells/Tests/2-out.json;
+        ./xref <./m8-fest-tests/collinsville/Tests/1-in.json | diff -w -B - ./m8-fest-tests/collinsville/Tests/1-out.json;
+        ./xref <./m8-fest-tests/collinsville/Tests/3-in.json | diff -w -B - ./m8-fest-tests/collinsville/Tests/3-out.json;
+        ./xref <./m8-fest-tests/crawford/Tests/1-in.json | diff -w -B - ./m8-fest-tests/crawford/Tests/1-out.json;
+        ./xref <./m8-fest-tests/crawford/Tests/2-in.json | diff -w -B - ./m8-fest-tests/crawford/Tests/2-out.json;
+        ./xref <./m8-fest-tests/crawford/Tests/3-in.json | diff -w -B - ./m8-fest-tests/crawford/Tests/3-out.json;
+        ./xref <./m8-fest-tests/crossroads/Tests/1-in.json | diff -w -B - ./m8-fest-tests/crossroads/Tests/1-out.json;
+        ./xref <./m8-fest-tests/detroit/Tests/1-in.json | diff -w -B - ./m8-fest-tests/detroit/Tests/1-out.json;
+        ./xref <./m8-fest-tests/detroit/Tests/2-in.json | diff -w -B - ./m8-fest-tests/detroit/Tests/2-out.json;
+        ./xref <./m8-fest-tests/detroit/Tests/3-in.json | diff -w -B - ./m8-fest-tests/detroit/Tests/3-out.json;
+        ./xref <./m8-fest-tests/dish/Tests/1-in.json | diff -w -B - ./m8-fest-tests/dish/Tests/1-out.json;
+        ./xref <./m8-fest-tests/dish/Tests/2-in.json | diff -w -B - ./m8-fest-tests/dish/Tests/2-out.json;
+        ./xref <./m8-fest-tests/dish/Tests/3-in.json | diff -w -B - ./m8-fest-tests/dish/Tests/3-out.json;
+        ./xref <./m8-fest-tests/dorchester/Tests/1-in.json | diff -w -B - ./m8-fest-tests/dorchester/Tests/1-out.json;
+        ./xref <./m8-fest-tests/dorchester/Tests/2-in.json | diff -w -B - ./m8-fest-tests/dorchester/Tests/2-out.json;
+        ./xref <./m8-fest-tests/dorchester/Tests/3-in.json | diff -w -B - ./m8-fest-tests/dorchester/Tests/3-out.json;
+        ./xref <./m8-fest-tests/earth/Tests/1-in.json | diff -w -B - ./m8-fest-tests/earth/Tests/1-out.json;
+        ./xref <./m8-fest-tests/earth/Tests/2-in.json | diff -w -B - ./m8-fest-tests/earth/Tests/2-out.json;
+        ./xref <./m8-fest-tests/eden/Tests/1-in.json | diff -w -B - ./m8-fest-tests/eden/Tests/1-out.json;
+        ./xref <./m8-fest-tests/eden/Tests/2-in.json | diff -w -B - ./m8-fest-tests/eden/Tests/2-out.json;
+        ./xref <./m8-fest-tests/eden/Tests/3-in.json | diff -w -B - ./m8-fest-tests/eden/Tests/3-out.json;
+        ./xref <./m8-fest-tests/fritch/Tests/2-in.json | diff -w -B - ./m8-fest-tests/fritch/Tests/2-out.json;
+        ./xref <./m8-fest-tests/fritch/Tests/3-in.json | diff -w -B - ./m8-fest-tests/fritch/Tests/3-out.json;
+        ./xref <./m8-fest-tests/garycity/Tests/2-in.json | diff -w -B - ./m8-fest-tests/garycity/Tests/2-out.json;
+        ./xref <./m8-fest-tests/granger/Tests/1-in.json | diff -w -B - ./m8-fest-tests/granger/Tests/1-out.json;
+        ./xref <./m8-fest-tests/granger/Tests/2-in.json | diff -w -B - ./m8-fest-tests/granger/Tests/2-out.json;
+        ./xref <./m8-fest-tests/granger/Tests/3-in.json | diff -w -B - ./m8-fest-tests/granger/Tests/3-out.json;
+        ./xref <./m8-fest-tests/hollywoodpark/Tests/1-in.json | diff -w -B - ./m8-fest-tests/hollywoodpark/Tests/1-out.json;
+        ./xref <./m8-fest-tests/hutto/Tests/1-in.json | diff -w -B - ./m8-fest-tests/hutto/Tests/1-out.json;
+        ./xref <./m8-fest-tests/hollywoodpark/Tests/2-in.json | diff -w -B - ./m8-fest-tests/hollywoodpark/Tests/2-out.json;
+        ./xref <./m8-fest-tests/hutto/Tests/2-in.json | diff -w -B - ./m8-fest-tests/hutto/Tests/2-out.json;
+        ./xref <./m8-fest-tests/italy/Tests/1-in.json | diff -w -B - ./m8-fest-tests/italy/Tests/1-out.json;
+        ./xref <./m8-fest-tests/hutto/Tests/3-in.json | diff -w -B - ./m8-fest-tests/hutto/Tests/3-out.json;
+        ./xref <./m8-fest-tests/italy/Tests/2-in.json | diff -w -B - ./m8-fest-tests/italy/Tests/2-out.json;
+        ./xref <./m8-fest-tests/italy/Tests/3-in.json | diff -w -B - ./m8-fest-tests/italy/Tests/3-out.json;
+        ./xref <./m8-fest-tests/judson/Tests/1-in.json | diff -w -B - ./m8-fest-tests/judson/Tests/1-out.json;
+        ./xref <./m8-fest-tests/judson/Tests/2-in.json | diff -w -B - ./m8-fest-tests/judson/Tests/2-out.json;
+        ./xref <./m8-fest-tests/judson/Tests/3-in.json | diff -w -B - ./m8-fest-tests/judson/Tests/3-out.json;
+        ./xref <./m8-fest-tests/kilgore/Tests/1-in.json | diff -w -B - ./m8-fest-tests/kilgore/Tests/1-out.json;
+        ./xref <./m8-fest-tests/kilgore/Tests/2-in.json | diff -w -B - ./m8-fest-tests/kilgore/Tests/2-out.json;
+        ./xref <./m8-fest-tests/kilgore/Tests/3-in.json | diff -w -B - ./m8-fest-tests/kilgore/Tests/3-out.json;
+        ./xref <./m8-fest-tests/lagunavista/Tests/1-in.json | diff -w -B - ./m8-fest-tests/lagunavista/Tests/1-out.json;
+        ./xref <./m8-fest-tests/lagunavista/Tests/2-in.json | diff -w -B - ./m8-fest-tests/lagunavista/Tests/2-out.json;
+        ./xref <./m8-fest-tests/lagunavista/Tests/3-in.json | diff -w -B  - ./m8-fest-tests/lagunavista/Tests/3-out.json;
+        ./xref <./m8-fest-tests/lakeview/Tests/3-in.json | diff -w -B - ./m8-fest-tests/lakeview/Tests/3-out.json;
+        ./xref <./m8-fest-tests/levelland/Tests/1-in.json | diff -w -B - ./m8-fest-tests/levelland/Tests/1-out.json;
+        ./xref <./m8-fest-tests/levelland/Tests/2-in.json | diff -w -B - ./m8-fest-tests/levelland/Tests/2-out.json;
+        ./xref <./m8-fest-tests/levelland/Tests/3-in.json | diff -w -B - ./m8-fest-tests/levelland/Tests/3-out.json;
+        ./xref <./m8-fest-tests/lexington/Tests/1-in.json | diff -w -B - ./m8-fest-tests/lexington/Tests/1-out.json;
+        ./xref <./m8-fest-tests/lexington/Tests/2-in.json | diff -w -B - ./m8-fest-tests/lexington/Tests/2-out.json;
+        ./xref <./m8-fest-tests/lexington/Tests/3-in.json | diff -w -B - ./m8-fest-tests/lexington/Tests/3-out.json;
+        ./xref <./m8-fest-tests/mountvernon/Tests/2-in.json | diff -w -B - ./m8-fest-tests/mountvernon/Tests/2-out.json;
+        ./xref <./m8-fest-tests/muleshoe/Tests/1-in.json | diff -w -B - ./m8-fest-tests/muleshoe/Tests/1-out.json;
+        ./xref <./m8-fest-tests/muleshoe/Tests/2-in.json | diff -w -B - ./m8-fest-tests/muleshoe/Tests/2-out.json;
+        ./xref <./m8-fest-tests/muleshoe/Tests/3-in.json | diff -w -B - ./m8-fest-tests/muleshoe/Tests/3-out.json;
+        ./xref <./m8-fest-tests/mustang/Tests/1-in.json | diff -w -B - ./m8-fest-tests/mustang/Tests/1-out.json;
+        ./xref <./m8-fest-tests/mustang/Tests/2-in.json | diff -w -B - ./m8-fest-tests/mustang/Tests/2-out.json;
+        ./xref <./m8-fest-tests/mustang/Tests/3-in.json | diff -w -B - ./m8-fest-tests/mustang/Tests/3-out.json;
+        ./xref <./m8-fest-tests/newdiana/Tests/2-in.json | diff -w -B - ./m8-fest-tests/newdiana/Tests/2-out.json;
+        ./xref <./m8-fest-tests/newdiana/Tests/3-in.json | diff -w -B - ./m8-fest-tests/newdiana/Tests/3-out.json;
+        ./xref <./m8-fest-tests/normangee/Tests/2-in.json | diff -w -B - ./m8-fest-tests/normangee/Tests/2-out.json;
+        ./xref <./m8-fest-tests/normangee/Tests/3-in.json | diff -w -B - ./m8-fest-tests/normangee/Tests/3-out.json;
+        ./xref <./m8-fest-tests/newdiana/Tests/1-in.json | diff -w -B - ./m8-fest-tests/newdiana/Tests/1-out.json;
+        ./xref <./m8-fest-tests/penelope/Tests/1-in.json | diff -w -B - ./m8-fest-tests/penelope/Tests/1-out.json;
+        ./xref <./m8-fest-tests/penelope/Tests/2-in.json | diff -w -B - ./m8-fest-tests/penelope/Tests/2-out.json;
+        ./xref <./m8-fest-tests/quintana/Tests/1-in.json | diff -w -B - ./m8-fest-tests/quintana/Tests/1-out.json;
+        ./xref <./m8-fest-tests/rhonesboro/Tests/1-in.json | diff -w -B - ./m8-fest-tests/rhonesboro/Tests/1-out.json;
+        ./xref <./m8-fest-tests/richland/Tests/1-in.json | diff -w -B - ./m8-fest-tests/richland/Tests/1-out.json;
+        ./xref <./m8-fest-tests/richland/Tests/2-in.json | diff -w -B - ./m8-fest-tests/richland/Tests/2-out.json;
+        ./xref <./m8-fest-tests/richland/Tests/3-in.json | diff -w -B - ./m8-fest-tests/richland/Tests/3-out.json;
+        ./xref <./m8-fest-tests/richlandsprings/Tests/3-in.json | diff -w -B - ./m8-fest-tests/richlandsprings/Tests/3-out.json;
+        ./xref <./m8-fest-tests/roaringsprings/Tests/1-in.json | diff -w -B - ./m8-fest-tests/roaringsprings/Tests/1-out.json;
+        ./xref <./m8-fest-tests/sainthedwig/Tests/1-in.json | diff -w -B - ./m8-fest-tests/sainthedwig/Tests/1-out.json;
+        ./xref <./m8-fest-tests/sainthedwig/Tests/2-in.json | diff -w -B - ./m8-fest-tests/sainthedwig/Tests/2-out.json;
+        ./xref <./m8-fest-tests/sainthedwig/Tests/3-in.json | diff -w -B - ./m8-fest-tests/sainthedwig/Tests/3-out.json;
+        ./xref <./m8-fest-tests/seminole/Tests/1-in.json | diff -w -B - ./m8-fest-tests/seminole/Tests/1-out.json;
+        ./xref <./m8-fest-tests/seminole/Tests/2-in.json | diff -w -B - ./m8-fest-tests/seminole/Tests/2-out.json;
+        ./xref <./m8-fest-tests/spade/Tests/1-in.json | diff -w -B - ./m8-fest-tests/spade/Tests/1-out.json;
+        ./xref <./m8-fest-tests/spade/Tests/2-in.json | diff -w -B - ./m8-fest-tests/spade/Tests/2-out.json;
+        ./xref <./m8-fest-tests/spade/Tests/3-in.json | diff -w -B - ./m8-fest-tests/spade/Tests/3-out.json;
+        ./xref <./m8-fest-tests/sudan/Tests/1-in.json | diff -w -B - ./m8-fest-tests/sudan/Tests/1-out.json;
+        ./xref <./m8-fest-tests/sudan/Tests/2-in.json | diff -w -B - ./m8-fest-tests/sudan/Tests/2-out.json;
+        ./xref <./m8-fest-tests/sudan/Tests/3-in.json | diff -w -B - ./m8-fest-tests/sudan/Tests/3-out.json;
+        ./xref <./m8-fest-tests/texarkana/Tests/1-in.json | diff -w -B - ./m8-fest-tests/texarkana/Tests/1-out.json;
+        ./xref <./m8-fest-tests/texarkana/Tests/2-in.json | diff -w -B - ./m8-fest-tests/texarkana/Tests/2-out.json;
+        ./xref <./m8-fest-tests/texarkana/Tests/3-in.json | diff -w -B - ./m8-fest-tests/texarkana/Tests/3-out.json;
+        ./xref <./m8-fest-tests/thorntonville/Tests/1-in.json | diff -w -B - ./m8-fest-tests/thorntonville/Tests/1-out.json;
+        ./xref <./m8-fest-tests/thorntonville/Tests/2-in.json | diff -w -B - ./m8-fest-tests/thorntonville/Tests/2-out.json;
+        ./xref <./m8-fest-tests/tioga/Tests/1-in.json | diff -w -B - ./m8-fest-tests/tioga/Tests/1-out.json;
+        ./xref <./m8-fest-tests/tioga/Tests/2-in.json | diff -w -B - ./m8-fest-tests/tioga/Tests/2-out.json;
+        ./xref <./m8-fest-tests/tioga/Tests/3-in.json | diff -w -B - ./m8-fest-tests/tioga/Tests/3-out.json;
+        ./xref <./m8-fest-tests/tira/Tests/2-in.json | diff -w -B - ./m8-fest-tests/tira/Tests/2-out.json;
+        ./xref <./m8-fest-tests/trent/Tests/1-in.json | diff -w -B - ./m8-fest-tests/trent/Tests/1-out.json;
+        ./xref <./m8-fest-tests/trent/Tests/2-in.json | diff -w -B - ./m8-fest-tests/trent/Tests/2-out.json;
+        ./xref <./m8-fest-tests/unionhill/Tests/1-in.json | diff -w -B - ./m8-fest-tests/unionhill/Tests/1-out.json;
+        ./xref <./m8-fest-tests/unionhill/Tests/2-in.json | diff -w -B - ./m8-fest-tests/unionhill/Tests/2-out.json;
+        ./xref <./m8-fest-tests/unionhill/Tests/3-in.json | diff -w -B - ./m8-fest-tests/unionhill/Tests/3-out.json;
+        ./xref <./m8-fest-tests/vanhorn/Tests/1-in.json | diff -w -B - ./m8-fest-tests/vanhorn/Tests/1-out.json;
+        ./xref <./m8-fest-tests/vanhorn/Tests/2-in.json | diff -w -B - ./m8-fest-tests/vanhorn/Tests/2-out.json;
+        ./xref <./m8-fest-tests/vanhorn/Tests/3-in.json | diff -w -B - ./m8-fest-tests/vanhorn/Tests/3-out.json;
+        ./xref <./m8-fest-tests/whitharral/Tests/1-in.json | diff -w -B - ./m8-fest-tests/whitharral/Tests/1-out.json;
+        ./xref <./m8-fest-tests/whitharral/Tests/2-in.json | diff -w -B - ./m8-fest-tests/whitharral/Tests/2-out.json;
+        ./xref <./m8-fest-tests/bartonville/Tests/1-in.json | diff -w -B - ./m8-fest-tests/bartonville/Tests/1-out.json;
+        ./xref <./m8-fest-tests/bartonville/Tests/3-in.json | diff -w -B - ./m8-fest-tests/bartonville/Tests/3-out.json;
+        ./xref <./m8-fest-tests/whitharral/Tests/3-in.json | diff -w -B - ./m8-fest-tests/whitharral/Tests/3-out.json;
+     ;;
+
+   Linux)
+     ./xref < ./Tests/1-in.json | diff - ./Tests/1-out.json
+     ;;
+
+   *)
+
+esac
