@@ -49,7 +49,7 @@ export default Vue.extend({
     // Based on number of tiles and tileSize, with 5px added for padding
     calculateBoardSize(): CSSElementSize {
       const height = this.calculateBoardHeight() + 5;
-      const width = this.calculateBoardWidth() + 5;
+      const width = this.calculateBoardWidth();
       return {
         height: `${height}px`,
         width: `${width}px`,
@@ -61,7 +61,7 @@ export default Vue.extend({
     },
     // Calculates board width
     calculateBoardWidth(): number {
-      return 4 * this.tileSize * this.board.tiles.length + this.tileSize;
+      return 4 * this.tileSize * this.board.tiles.length + this.tileSize * 5;
     },
   },
 });

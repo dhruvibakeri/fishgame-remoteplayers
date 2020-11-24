@@ -61,9 +61,9 @@ const playersAsTournamentPlayers: Array<TournamentPlayer> = players.map((player)
 });
 
 const boardParams: BoardParameters = {
-  rows: 5,
+  rows: 4,
   cols: 5,
-  numFish: 3,
+  numFish: 4,
 };
 
 Vue.config.productionTip = false;  

@@ -1,15 +1,10 @@
-<!-- 
-Renders a single Player. 
-A rendered Player consist of the Player's name, an indicator of the color of 
-their Penguins, and a count of how many Penguins they have left to place.
-Whether this player is the current player is also denoted by a black border 
-around the Player's rendering.
--->
+
 <template lang="pug">
   .player(:class='{current: isCurPlayer}')
     div.player-name {{player.name}}
     div.color-indicator(:style='colorStyle')
-    div.unplaced-penguins {{unplacedPenguins}} penguins left to place
+    div.unplaced-penguins Placing stage: {{unplacedPenguins}} left
+    div.player-score Score : {{playerScore}}
 </template>
 
 <script lang="ts">
@@ -25,6 +20,7 @@ export default Vue.extend({
   props: {
     player: { type: Object as () => Player, required: true },
     unplacedPenguins: { type: Number, required: true },
+    playerScore: {type: Number, required: true },
     isCurPlayer: { type: Boolean, required: true },
   },
   computed: {
@@ -62,5 +58,9 @@ export default Vue.extend({
   }
   .current {
     border: 4px solid black;
+  }
+  .player-score {
+    font-size: 20px;
+    font-weight: 900;
   }
 </style>

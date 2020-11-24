@@ -13,8 +13,10 @@ turns within the Game's roster of players.
         Player(
           :player='player' 
           :unplacedPenguins='game.remainingUnplacedPenguins.get(player.color)' 
+          :playerScore='game.scores.get(player.color)'
           :isCurPlayer='isCurPlayer(player)'
         )
+    div.title Players with Highest Score : {{getMaxScore()}}
 </template>
 
 <script lang="ts">
@@ -40,6 +42,22 @@ export default Vue.extend({
     isCurPlayer(player: PlayerType) {
       return this.game.players[0].color === player.color;
     },
+
+    getMaxScore() {
+
+      const getName = (color) => {for(let i = 0; i < this.game.players.length; i++) {
+        if(this.game.players[i].color === color) {
+            return this.game.players[i].name
+        }
+      }
+      }
+      const max = Math.max(...this.game.scores.values())
+      let keysScores = [...this.game.scores.entries()].filter((a) => a[1] === max)
+      let res = [...keysScores].map((e) => getName(e[0]))
+
+      return res;
+    },
+
   },
 });
 </script>
