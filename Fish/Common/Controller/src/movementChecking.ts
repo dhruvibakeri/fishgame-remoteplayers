@@ -2,15 +2,14 @@ import {
   BoardPosition,
   VerticalDirection,
   HorizontalDirection,
-  DIRECTIONS,
+  DIRECTIONS, Board,
 } from "../../board";
 import { Game, Player } from "../../state";
 import { positionIsPlayable } from "./validation";
 
-const DIRECTIONS_NEXTPOS: Map<
-  string,
-  (pos: BoardPosition) => BoardPosition
-> = new Map([
+type VectorFunction = (pos: BoardPosition) => BoardPosition;
+
+const DIRECTIONS_NEXTPOS: Map<string, VectorFunction> = new Map([
   ["NORTH", (pos: BoardPosition) => getNextPosUpNeutral(pos)],
   ["NORTHEAST", (pos: BoardPosition) => getNextPosUpRight(pos)],
   ["SOUTHEAST", (pos: BoardPosition) => getNextPosDownRight(pos)],
@@ -134,9 +133,9 @@ const getNextPosition = (
         value.horizontalDirection === horizontalDirection
       );
     }
-  );
+  ) as [string, any];
 
-  return DIRECTIONS_NEXTPOS.get(dir)(position);
+  return (DIRECTIONS_NEXTPOS.get(dir) as VectorFunction)(position);
 };
 
 /**

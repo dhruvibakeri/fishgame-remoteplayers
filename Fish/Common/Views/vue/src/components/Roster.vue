@@ -22,6 +22,7 @@ turns within the Game's roster of players.
 <script lang="ts">
 import Vue from "vue";
 import { Game, Player as PlayerType } from "../../../../../Common/state";
+import { PenguinColor } from "../../../../../Common/board";
 import Player from "./Player.vue";
 
 export default Vue.extend({
@@ -45,7 +46,7 @@ export default Vue.extend({
 
     getMaxScore() {
 
-      const getName = (color) => {for(let i = 0; i < this.game.players.length; i++) {
+      const getName = (color: PenguinColor) => {for(let i = 0; i < this.game.players.length; i++) {
         if(this.game.players[i].color === color) {
             return this.game.players[i].name
         }

@@ -104,7 +104,8 @@ const getCurrentTournamentPlayer = (
   refereeState: RefereeState
 ): TournamentPlayer => {
   const game = refereeState.game;
-  return refereeState.tournamentPlayers.get(getCurrentPlayer(game).name);
+  const player: Player = getCurrentPlayer(game);
+  return refereeState.tournamentPlayers.get(player.name) as TournamentPlayer;
 };
 
 /**
@@ -527,9 +528,9 @@ const addScoresOfPlacedPenguins = (game: Game): Game => {
       0
     );
 
+    const curScore: number = scoresCopy.get(penguinColor) as number;
     scoresCopy.set(
-      penguinColor,
-      scoresCopy.get(penguinColor) + scoreOfPlacedPenguins
+      penguinColor, curScore + scoreOfPlacedPenguins
     );
   }
 

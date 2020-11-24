@@ -1,4 +1,4 @@
-import { BoardPosition, PenguinColor } from "../../board";
+import {Board, BoardPosition, PenguinColor} from "../../board";
 import {
   Game,
   getCurrentPlayer,
@@ -56,7 +56,7 @@ const placeNextPenguin = (game: Game): Result<Game, IllegalPlacementError> => {
       new IllegalPlacementError(
         game,
         getCurrentPlayer(game),
-        null,
+          { row: 0, col: 0 } as BoardPosition,
         "No more placements available"
       )
     );
@@ -121,11 +121,8 @@ const getMinMaxScore = (
 ): number => {
   // If current node is root node or if we've reached the desired depth, return current player score.
   if (lookAheadTurnsDepth === 1 || gameTree.potentialMoves.length === 0) {
-    return gameTree.gameState.scores.get(
-      gameTree.gameState.players.find(
-        (player: Player) => player.color === searchingPlayerColor
-      ).color
-    );
+    const player: Player = gameTree.gameState.players.find((player: Player) => player.color === searchingPlayerColor) as Player;
+    return gameTree.gameState.scores.get(player.color) as number;
   }
 
   const isMaximizing: boolean =
