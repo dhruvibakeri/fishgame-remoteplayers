@@ -90,7 +90,7 @@ new Vue({
   mounted: async function () {
     // tournament players based on the no. of players given from the command line argument
     const gamePlayers : TournamentPlayer[] = playersAsTournamentPlayers(parseInt(playerCount as string))
-    // runs a game, the given observers are identified as soon as the game has any updates
+    // runs a game, the given observers are notified as soon as the game has any updates
     runGame(gamePlayers, boardParams, [gameObserver]);
     // displays the game updates every second
     window.setInterval(() => {
