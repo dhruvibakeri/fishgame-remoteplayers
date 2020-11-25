@@ -1,4 +1,34 @@
-# Fish - Andrew Leung and Fiona Gridley
+# Fish - Kevin Zhang and Dhruvi Bakeri
+
+## 9 &mdash; The Humans
+
+These additions are for the assignment, [9 - The Humans](https://www.ccs.neu.edu/home/matthias/4500-f20/9.html). We were given three choices for implementing functionality that introduces a Human component to the Fish game. We chose to implement a **game observer**.
+
+<details>
+  <summary>Click to see the new elements:</summary>
+  
+- `Fish`
+  - `Admin`
+    - `game-visualizer.ts` : TypeScript file with game visualizer implementations used for abiding by the specified project structure
+  - `Common`
+    - `Controller`
+      - `src`
+        - `gameObserver-interface.ts` : TypeScript file with implementation of a game Observer interface used by the referee to signal the game observer about game updates
+    - `Views`
+      - `vue`
+        - `src`
+          - `main.ts` : TypeScript file with game visualizer implementations actually used
+
+</details>
+<br/>
+
+### IMPORTANT NOTE
+- The two of us have inherited this code base in the recent partner switches. The rendering code for the GUI uses `Vue`, which neither of us have worked with before. We read documentation for `Vue` and were able to display a full game and add features such as **showing the scores of the players** and the **players with the highest scores** at a given point in the game. 
+- The `./xgui (no. of players)` executable in repo-level directory 9 which in turn starts up the `Vue` development server runs successfully every other time you run it. We do not know why this is the case. It fails with a linting error one time, but successfully runs the next time. We have tried to fix this, but with very limited knowledge of Vue we were not able to understand the problem. 
+- Please do run it atleast `3` times before grading. 
+
+
+
 
 ## 8 &mdash; The League
 

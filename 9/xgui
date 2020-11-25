@@ -1,3 +1,15 @@
 #!/bin/bash
-   
-cd ../Fish/Common/Views/vue && export VUE_PLAYER_COUNT=$1 && npm run serve; 
+
+case "$(uname -s)" in
+
+   Darwin)
+      cd ../Fish/Common/Views/vue; export VUE_PLAYER_COUNT=$1 && npm run serve;
+     ;;
+
+   Linux)
+     cd ../Fish/Common/Views/vue; scl enable rh-nodejs10 "export VUE_PLAYER_COUNT=${@} && npm run serve";
+     ;;
+
+   *)
+
+esac

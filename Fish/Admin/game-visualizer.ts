@@ -1,3 +1,10 @@
+// Actual file is located at Common/Views/vue/src/main.ts
+// Reason for this is because we are using Vue for the gui, and
+// rather than installing node_modules every where we use the it,
+// our Common/Views/vue will have all files that need this library (and more)
+
+// -- IMPORTANT : PLEASE READ THE README.md IN FISH/ DIRECTORY BEFORE GRADING OR TESTING THE GUI
+
 // Mounts Vue app to HTML
 import Vue from "vue";
 import App from "./App.vue";

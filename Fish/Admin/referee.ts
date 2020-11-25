@@ -13,7 +13,6 @@ import {
   IllegalGameStateError,
   IllegalMovementError,
   IllegalPlacementError,
-  IllegalPositionError,
 } from "../types/errors";
 import {
   Game,
@@ -22,7 +21,7 @@ import {
   getCurrentPlayerColor,
   getCurrentPlayer,
 } from "../../state";
-import { createHoledOneFishBoard, getTileOnBoard } from "./boardCreation";
+import {createBlankBoard, createHoledOneFishBoard, getTileOnBoard} from "./boardCreation";
 import {
   createGameTreeFromMovementGame,
   gameIsMovementGame,
@@ -37,20 +36,25 @@ import { GameTree, Movement } from "../../game-tree";
 import { TournamentPlayer } from "../../player-interface";
 import { checkMovementLegal } from "./queryGameTree";
 import { Result } from "true-myth";
+import { GameObserver } from "./gameObserver-interface";
 const { err } = Result;
 
 const PLAYER_REQUEST_TIMEOUT = 5000;
 
 /**
- * A BoardDimension represents the size of a board within a Fish game. It
- * specifies both the number of rows and the number of columns in the board.
+ * A BoardParameters represents the size of a board within a Fish game. It
+ * specifies both the number of rows and the number of columns in the board,
+ * and the fish that should be on each tile.
  *
  * @param rows the number of rows in the board, must be a positive integer
  * @param cols the number of columns in the board, must be a positive integer
+ * @param numFish the number of fish that each tile should have, if provided. Defaults to 1.
  */
-interface BoardDimension {
+interface BoardParameters {
   readonly rows: number;
   readonly cols: number;
+  readonly numFish?: number;
+  readonly holes?: Array<BoardPosition>;
 }
 
 /**
@@ -94,7 +98,8 @@ const getCurrentTournamentPlayer = (
   refereeState: RefereeState
 ): TournamentPlayer => {
   const game = refereeState.game;
-  return refereeState.tournamentPlayers.get(getCurrentPlayer(game).name);
+  const player: Player = getCurrentPlayer(game);
+  return refereeState.tournamentPlayers.get(player.name) as TournamentPlayer;
 };
 
 /**
@@ -136,6 +141,16 @@ const notifyPlayersGameStarting = (
   }
 };
 
+// TODO
+const notifyObserversGameStarting = (
+  observers: Array<GameObserver>,
+  startingGameState: Game
+): void => {
+  observers.forEach((observer) => {
+    observer.gameIsStarting(startingGameState);
+  })
+}
+
 /**
  * Given an array of TournamentPlayers and a set of BoardDimenesions, for a new
  * Fish game, create the Game's initial state.
@@ -146,24 +161,22 @@ const notifyPlayersGameStarting = (
  */
 const createInitialGameState = (
   tournamentPlayers: Array<TournamentPlayer>,
-  boardDimensions: BoardDimension
-): Result<
-  Game,
-  IllegalBoardError | IllegalPositionError | IllegalGameStateError
-> => {
+  boardParams: BoardParameters
+): Result<Game, IllegalBoardError | IllegalGameStateError> => {
   // Create the Game state's player roster.
   const players: Array<Player> = tournamentPlayersToGamePlayers(
     tournamentPlayers
   );
 
   return (createHoledOneFishBoard(
-    boardDimensions.cols,
-    boardDimensions.rows,
-    [],
-    1
+      boardParams.cols,
+      boardParams.rows,
+    boardParams.holes || [],
+    1,
+    boardParams.numFish || 1
   ) as Result<
     Board,
-    IllegalBoardError | IllegalPositionError | IllegalGameStateError
+    IllegalBoardError | IllegalGameStateError
   >).andThen((board: Board) => createGameState(players, board));
 };
 
@@ -208,14 +221,18 @@ const timeoutRequest = <T>(
   request: Promise<T>,
   timeout: number
 ): Promise<T> => {
+  let id: NodeJS.Timeout;
   const timeoutPromise = new Promise<T>((resolve, reject) => {
-    setTimeout(
+    id = setTimeout(
       () => reject(`Player did not respond in ${timeout}ms.`),
       timeout
     );
   });
 
-  return Promise.race([request, timeoutPromise]);
+  return Promise.race([request, timeoutPromise]).then((result) => {
+    clearTimeout(id);
+    return result;
+  });
 };
 
 /**
@@ -229,7 +246,8 @@ const timeoutRequest = <T>(
  */
 const runPlacementRounds = async (
   refereeState: RefereeState,
-  timeout: number = PLAYER_REQUEST_TIMEOUT
+  timeout: number = PLAYER_REQUEST_TIMEOUT,
+  observers?: Array<GameObserver>
 ): Promise<RefereeStateWithMovementGame> => {
   let currRefereeState: RefereeState = refereeState;
 
@@ -248,6 +266,8 @@ const runPlacementRounds = async (
       .catch((err: string) => {
         return disqualifyCurrentFailingPlayer(currRefereeState, err);
       });
+
+    observers && notifyObserversOfChange(observers, currRefereeState.game);
   }
 
   // With the invariant that the board made by the referee must contain enough
@@ -314,7 +334,8 @@ const runMovementTurn = (
  */
 const runMovementRounds = async (
   refereeState: RefereeStateWithMovementGame,
-  timeout: number = PLAYER_REQUEST_TIMEOUT
+  timeout: number = PLAYER_REQUEST_TIMEOUT,
+  observers?: Array<GameObserver>,
 ): Promise<RefereeStateWithMovementGame> => {
   let currRefereeState: RefereeStateWithMovementGame = refereeState;
 
@@ -336,6 +357,8 @@ const runMovementRounds = async (
           err
         ) as RefereeStateWithMovementGame;
       });
+    
+    observers && notifyObserversOfChange(observers, currRefereeState.game);
   }
 
   return currRefereeState;
@@ -499,9 +522,9 @@ const addScoresOfPlacedPenguins = (game: Game): Game => {
       0
     );
 
+    const curScore: number = scoresCopy.get(penguinColor) as number;
     scoresCopy.set(
-      penguinColor,
-      scoresCopy.get(penguinColor) + scoreOfPlacedPenguins
+      penguinColor, curScore + scoreOfPlacedPenguins
     );
   }
 
@@ -518,25 +541,23 @@ const addScoresOfPlacedPenguins = (game: Game): Game => {
  * @return the created GameDebrief
  */
 const createGameDebrief = (refereeState: RefereeState): GameDebrief => {
-  const updatedScoresRefereeState: RefereeState = {
-    ...refereeState,
-    game: addScoresOfPlacedPenguins(refereeState.game),
-  };
+  const compareActivePlayers = (player1: ActivePlayer, player2: ActivePlayer) =>
+    player2.score - player1.score;
 
   // Get the active players from the Game's roster of players.
-  const activePlayers: Array<ActivePlayer> = updatedScoresRefereeState.game.players.map(
-    (player: Player) => {
+  const activePlayers: Array<ActivePlayer> = refereeState.game.players
+    .map((player: Player) => {
       return {
         name: player.name,
-        score: updatedScoresRefereeState.game.scores.get(player.color),
-      };
-    }
-  );
+        score: refereeState.game.scores.get(player.color),
+      } as ActivePlayer;
+    })
+    .sort(compareActivePlayers);
 
   // Get kicked players from the RefereeState.
   const kickedPlayers: Array<InactivePlayer> = [
-    ...updatedScoresRefereeState.cheatingPlayers,
-    ...updatedScoresRefereeState.failingPlayers,
+    ...refereeState.cheatingPlayers,
+    ...refereeState.failingPlayers,
   ].map((player: Player) => {
     return { name: player.name };
   });
@@ -563,6 +584,26 @@ const notifyPlayersOfOutcome = (
   );
 };
 
+// TODO purpose
+const notifyObserversOfOutcome = (
+  observers: Array<GameObserver>,
+  gameDebrief: GameDebrief
+): void => {
+  observers.forEach((observer: GameObserver) => {
+    observer.gameHasEnded(gameDebrief)
+  })
+}
+
+// TODO purpose
+const notifyObserversOfChange = (
+  observers: Array<GameObserver>,
+  game: Game
+): void => {
+  observers.forEach((observer: GameObserver) => {
+    observer.gameHasChanged(game);
+  })
+}
+
 /**
  * Get the total number of penguin placements which would be made for the given
  * number of players.
@@ -583,7 +624,7 @@ const numberOfPenguinPlacements = (numOfPlayers: number) =>
  */
 const boardIsBigEnough = (
   numOfPlayers: number,
-  boardDimension: BoardDimension
+  boardDimension: BoardParameters
 ): boolean => {
   const numOfPlacements = numberOfPenguinPlacements(numOfPlayers);
   const numOfTilesOnBoard = boardDimension.cols * boardDimension.rows;
@@ -627,7 +668,7 @@ const createTournamentPlayerMapping = (
  * @param tournamentPlayers the TournamentPlayers participating in the game,
  * being at most length 4 and uniquely identified by name. The order of
  * received players is the ordering used when playing
- * @param boardDimensions the dimensions of the board to be created in the
+ * @param boardParameters the dimensions of the board to be created in the
  * game, this must at least have enough containers to hold all the players'
  * avatars
  * @return the GameDebrief from the finished game or an Error if the game
@@ -635,16 +676,17 @@ const createTournamentPlayerMapping = (
  */
 const runGame = (
   tournamentPlayers: Array<TournamentPlayer>,
-  boardDimensions: BoardDimension
-): Result<Promise<GameDebrief>, Error> => {
-  if (!boardIsBigEnough(tournamentPlayers.length, boardDimensions)) {
+  boardParameters: BoardParameters,
+  observers?: Array<GameObserver>
+): Result<Promise<GameDebrief>, IllegalBoardError | IllegalGameStateError> => {
+  if (!boardIsBigEnough(tournamentPlayers.length, boardParameters)) {
     return err(
-      new IllegalBoardError(boardDimensions.cols, boardDimensions.rows)
+      new IllegalBoardError(boardParameters.cols, boardParameters.rows)
     );
   }
 
-  return createInitialGameState(tournamentPlayers, boardDimensions).map(
-    async (game: Game) => {
+  return createInitialGameState(tournamentPlayers, boardParameters).map((game: Game) => {
+    return new Promise(async (resolve) => {
       // Create the initial RefereeState.
       const initialRefereeState: RefereeState = {
         game,
@@ -656,30 +698,63 @@ const runGame = (
       // Notify all players the game is starting.
       notifyPlayersGameStarting(tournamentPlayers, game);
 
+      observers && notifyObserversGameStarting(observers, game);
+
       // Run placement rounds.
       const refereeStateAfterPlacements = await runPlacementRounds(
-        initialRefereeState
+        initialRefereeState, PLAYER_REQUEST_TIMEOUT, observers || []
       );
 
       // Run movement rounds.
       const refereeStateAfterMovements = await runMovementRounds(
-        refereeStateAfterPlacements
+        refereeStateAfterPlacements, PLAYER_REQUEST_TIMEOUT, observers || []
       );
 
       // Deliver the game outcome.
       const gameDebrief: GameDebrief = createGameDebrief(
         refereeStateAfterMovements
       );
+
       notifyPlayersOfOutcome(tournamentPlayers, gameDebrief);
 
-      return gameDebrief;
-    }
-  );
+      observers && notifyObserversOfOutcome(observers, gameDebrief);
+
+      resolve(gameDebrief);
+    });
+  });
 };
+
+/**
+ * Gets the winners of a game from the game debrief.
+ * The winners are the highest scoring active players in the game.
+ *
+ * @param debrief the game debrief, which is the outcome of the run game.
+ */
+const getWinners = (debrief: GameDebrief): Array<ActivePlayer> => {
+  const activePlayers = debrief.activePlayers;
+  if (activePlayers.length === 0) {
+    return [];
+  }
+  return activePlayers.filter((player: ActivePlayer) => player.score === activePlayers[0].score);
+}
+/**
+ * Gets the losers of a game from the game debrief.
+ * The losers are all the players who did not get the highest score in the game.
+ *
+ * @param debrief the game debrief, which is the outcome of the run game.
+ */
+const getLosers = (debrief: GameDebrief): Array<ActivePlayer> => {
+  const activePlayers = debrief.activePlayers;
+  if (activePlayers.length === 0) {
+    return [];
+  }
+  return activePlayers.filter((player: ActivePlayer) => player.score !== activePlayers[0].score);
+}
 
 export {
   RefereeState,
   RefereeStateWithMovementGame,
+  BoardParameters,
   tournamentPlayersToGamePlayers,
   notifyPlayersGameStarting,
   runPlacementRounds,
@@ -698,4 +773,8 @@ export {
   addScoresOfPlacedPenguins,
   numberOfPenguinPlacements,
   runGame,
+  timeoutRequest,
+  PLAYER_REQUEST_TIMEOUT,
+  getWinners,
+  getLosers,
 };

@@ -3,8 +3,6 @@ import {
   GameDebrief,
   ActivePlayer,
   InactivePlayer,
-  GameHasEnded,
-  GameIsStarting,
 } from "../../player-interface";
 import {
   IllegalBoardError,
@@ -34,6 +32,7 @@ import { GameTree, Movement } from "../../game-tree";
 import { TournamentPlayer } from "../../player-interface";
 import { checkMovementLegal } from "./queryGameTree";
 import { Result } from "true-myth";
+import { GameObserver } from "./gameObserver-interface";
 const { err } = Result;
 
 const PLAYER_REQUEST_TIMEOUT = 5000;
@@ -83,15 +82,6 @@ interface RefereeState {
  * made. It is simply a RefereeState where the Game state is a MovementGame.
  */
 type RefereeStateWithMovementGame = RefereeState & { game: MovementGame };
-
-
-type GameHasChanged = (game: Game) => void;
-
-interface GameObserver {
-  readonly gameIsStarting: GameIsStarting;
-  readonly gameHasChanged: GameHasChanged;
-  readonly gameHasEnded: GameHasEnded;
-}
 
 /**
  * Given the currrent Referee state, returns the currently playing
@@ -761,7 +751,6 @@ export {
   RefereeState,
   RefereeStateWithMovementGame,
   BoardParameters,
-  GameObserver,
   tournamentPlayersToGamePlayers,
   notifyPlayersGameStarting,
   runPlacementRounds,
