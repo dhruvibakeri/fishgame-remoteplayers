@@ -39,7 +39,7 @@ const gameObserver: GameObserver = {
   },
 };
 
-function playersAsTournamentPlayers(playerCount : number) : TournamentPlayer[] {
+const playersAsTournamentPlayers =(playerCount : number) : TournamentPlayer[] => {
   let res : TournamentPlayer[] = []
   for(let i = 0; i < playerCount; i++) {
     res.push(createSamplePlayer(i.toString()))
@@ -47,8 +47,6 @@ function playersAsTournamentPlayers(playerCount : number) : TournamentPlayer[] {
 
   return res;
 }
-
-console.log(playersAsTournamentPlayers)
 
 const boardParams: BoardParameters = {
   rows: 4,
