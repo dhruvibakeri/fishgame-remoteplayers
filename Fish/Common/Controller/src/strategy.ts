@@ -1,4 +1,4 @@
-import { BoardPosition, PenguinColor } from "../../board";
+import {Board, BoardPosition, PenguinColor} from "../../board";
 import {
   Game,
   getCurrentPlayer,
@@ -56,7 +56,7 @@ const placeNextPenguin = (game: Game): Result<Game, IllegalPlacementError> => {
       new IllegalPlacementError(
         game,
         getCurrentPlayer(game),
-        null,
+          { row: 0, col: 0 } as BoardPosition,
         "No more placements available"
       )
     );
@@ -121,17 +121,16 @@ const getMinMaxScore = (
 ): number => {
   // If current node is root node or if we've reached the desired depth, return current player score.
   if (lookAheadTurnsDepth === 1 || gameTree.potentialMoves.length === 0) {
-    return gameTree.gameState.scores.get(
-      gameTree.gameState.players.find(
-        (player: Player) => player.color === searchingPlayerColor
-      ).color
-    );
+    const player: Player = gameTree.gameState.players.find((player: Player) => player.color === searchingPlayerColor) as Player;
+    return gameTree.gameState.scores.get(player.color) as number;
   }
 
   const isMaximizing: boolean =
     searchingPlayerColor === getCurrentPlayerColor(gameTree.gameState);
   
-  let curLookAheadTurnsDepth: number = lookAheadTurnsDepth
+    let curLookAheadTurnsDepth: number = isMaximizing
+    ? lookAheadTurnsDepth - 1
+    : lookAheadTurnsDepth;
 
 
   // Get minimax scores for all child nodes of current gameTree.
@@ -140,7 +139,7 @@ const getMinMaxScore = (
     { 
       let resGameTree = movementToResultingTree.resultingGameTree()
 
-      if(gameTree.gameState.players[1].color === searchingPlayerColor) {
+      if(isTurnSkipped(gameTree, resGameTree, searchingPlayerColor) ) {
         curLookAheadTurnsDepth = lookAheadTurnsDepth - 1
       }
       return getMinMaxScore(
@@ -158,6 +157,19 @@ const getMinMaxScore = (
   }
   return Math.min(...scores);
 };
+
+/**
+ * 
+ * @param prevGameTree previous game tree
+ * @param curGameTree current game tree
+ * @param maximizingPlayerColor color of the maximizing player
+ * Checks if the maximizing Player's turn was skipped while transitioning to a directly
+ * reachable substate in the cureent Game Tree from the game State in the previous game tree
+ */
+const isTurnSkipped = (prevGameTree : GameTree, curGameTree : GameTree, maximizingPlayerColor : PenguinColor) : boolean => {
+  return prevGameTree.gameState.players[1].color === maximizingPlayerColor && 
+  curGameTree.gameState.players[0].color !== prevGameTree.gameState.players[1].color 
+}
 
 /**
  * Given an array of T and a function to get the numeric value of T, return

@@ -3,8 +3,6 @@ import {
   GameDebrief,
   ActivePlayer,
   InactivePlayer,
-  GameHasEnded,
-  GameIsStarting,
 } from "../../player-interface";
 import {
   IllegalBoardError,
@@ -34,6 +32,7 @@ import { GameTree, Movement } from "../../game-tree";
 import { TournamentPlayer } from "../../player-interface";
 import { checkMovementLegal } from "./queryGameTree";
 import { Result } from "true-myth";
+import { GameObserver } from "./gameObserver-interface";
 const { err } = Result;
 
 const PLAYER_REQUEST_TIMEOUT = 5000;
@@ -84,15 +83,6 @@ interface RefereeState {
  */
 type RefereeStateWithMovementGame = RefereeState & { game: MovementGame };
 
-
-type GameHasChanged = (game: Game) => void;
-
-interface GameObserver {
-  readonly gameIsStarting: GameIsStarting;
-  readonly gameHasChanged: GameHasChanged;
-  readonly gameHasEnded: GameHasEnded;
-}
-
 /**
  * Given the currrent Referee state, returns the currently playing
  * TournamentPlayer in the Game.
@@ -104,7 +94,8 @@ const getCurrentTournamentPlayer = (
   refereeState: RefereeState
 ): TournamentPlayer => {
   const game = refereeState.game;
-  return refereeState.tournamentPlayers.get(getCurrentPlayer(game).name);
+  const player: Player = getCurrentPlayer(game);
+  return refereeState.tournamentPlayers.get(player.name) as TournamentPlayer;
 };
 
 /**
@@ -527,9 +518,9 @@ const addScoresOfPlacedPenguins = (game: Game): Game => {
       0
     );
 
+    const curScore: number = scoresCopy.get(penguinColor) as number;
     scoresCopy.set(
-      penguinColor,
-      scoresCopy.get(penguinColor) + scoreOfPlacedPenguins
+      penguinColor, curScore + scoreOfPlacedPenguins
     );
   }
 
@@ -760,7 +751,6 @@ export {
   RefereeState,
   RefereeStateWithMovementGame,
   BoardParameters,
-  GameObserver,
   tournamentPlayersToGamePlayers,
   notifyPlayersGameStarting,
   runPlacementRounds,

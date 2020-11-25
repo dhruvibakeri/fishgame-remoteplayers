@@ -22,7 +22,7 @@ const shiftPlayers = (players: Array<Player>): Array<Player> => {
     return players;
   }
   const nextPlayers: Array<Player> = [...players];
-  nextPlayers.push(nextPlayers.shift());
+  nextPlayers.push(nextPlayers.shift() as Player);
   return nextPlayers;
 };
 
