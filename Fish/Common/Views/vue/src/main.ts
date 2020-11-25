@@ -9,27 +9,7 @@ import { createSamplePlayer } from "../../../../Player/player";
 import { runGame, GameObserver, BoardParameters } from "../../../Controller/src/referee";
 import { TournamentPlayer } from '../../../player-interface';
 
-// const player1: Player = { name: "foo", color: PenguinColor.White };
-// const player2: Player = { name: "bar", color: PenguinColor.Red };
-// const holePosition: BoardPosition = { col: 0, row: 0 };
-// const player1PenguinPosition1: BoardPosition = { row: 1, col: 1 };
-// const player1PenguinPosition2: BoardPosition = { row: 2, col: 2 }; 
-// const player2PenguinPosition1: BoardPosition = { row: 1, col: 2 };
-// const player2PenguinPosition2: BoardPosition = { row: 3, col: 0 };
-// const game: Game = {
-//   ...createGameState(
-//     [player1, player2],
-//     createHoledOneFishBoard(4, 3, [holePosition], 1).unsafelyUnwrap()
-//   ).unsafelyUnwrap(),
-//   penguinPositions: new Map([
-//     [player1.color, [player1PenguinPosition1, player1PenguinPosition2]],
-//     [player2.color, [player2PenguinPosition1, player2PenguinPosition2]],
-//   ]),
-//   remainingUnplacedPenguins: new Map([
-//     [player1.color, 2],
-//     [player2.color, 2],
-//   ]),
-// };
+const playerCount = process.env.PLAYER_COUNT;
 
 const player1: Player = { name: "foo", color: PenguinColor.White };
 const player2: Player = { name: "bar", color: PenguinColor.Red };
@@ -37,7 +17,11 @@ const player3: Player = { name: "hi", color: PenguinColor.Black };
 const player4: Player = { name: "bye", color: PenguinColor.Brown }; 
 const players = [player1, player2, player3, player4];
 
-let game: Game = createGameState(players, createBlankBoard(5, 5, 3).unsafelyUnwrap()).unsafelyUnwrap();
+const dummyGame: Game = createGameState(players, createBlankBoard(4, 5, 3).unsafelyUnwrap()).unsafelyUnwrap(); 
+
+let game: Game = dummyGame;
+
+let gameEnded = false;
 
 const gameHistory: Array<Game> = [];
 
@@ -51,13 +35,12 @@ const gameObserver: GameObserver = {
   },
 
   gameHasEnded: (game) => {
-    return;
+      gameEnded = true;
   },
 };
 
-
-const playersAsTournamentPlayers: Array<TournamentPlayer> = players.map((player) => {
-  return createSamplePlayer(player.name);
+const playersAsTournamentPlayers: Array<TournamentPlayer> = new Array(playerCount).map((player, index) => {
+    return createSamplePlayer(index.toString());
 });
 
 const boardParams: BoardParameters = {
@@ -75,7 +58,12 @@ new Vue({
       if (gameHistory.length !== 0) {
         game = (gameHistory.shift() as Game);
         this.$forceUpdate();
-      };
+      } else if (gameEnded) {
+          setTimeout(() => {
+              alert("Game has ended, closing!");
+              window.close();
+          }, 1000);
+      }
     }, 1000);
   },
 
