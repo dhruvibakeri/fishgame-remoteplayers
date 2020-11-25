@@ -1,4 +1,4 @@
-all: buildController permissions
+all: buildController buildView permissions
 buildController:  
 	@echo "installing controller dependencies"  
 	cd ../Fish/Common/Controller; npm install

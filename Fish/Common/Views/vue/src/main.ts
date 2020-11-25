@@ -39,9 +39,16 @@ const gameObserver: GameObserver = {
   },
 };
 
-const playersAsTournamentPlayers: Array<TournamentPlayer> = new Array(playerCount).map((player, index) => {
-    return createSamplePlayer(index.toString());
-});
+function playersAsTournamentPlayers(playerCount : number) : TournamentPlayer[] {
+  let res : TournamentPlayer[] = []
+  for(let i = 0; i < playerCount; i++) {
+    res.push(createSamplePlayer(i.toString()))
+  }
+
+  return res;
+}
+
+console.log(playersAsTournamentPlayers)
 
 const boardParams: BoardParameters = {
   rows: 4,
@@ -53,14 +60,15 @@ Vue.config.productionTip = false;
 
 new Vue({
   mounted: async function () {
-    runGame(playersAsTournamentPlayers, boardParams, [gameObserver]);
+    const gamePlayers : TournamentPlayer[] = playersAsTournamentPlayers(parseInt(playerCount as string))
+    runGame(gamePlayers, boardParams, [gameObserver]);
     window.setInterval(() => {
       if (gameHistory.length !== 0) {
         game = (gameHistory.shift() as Game);
         this.$forceUpdate();
       } else if (gameEnded) {
           setTimeout(() => {
-              alert("Game has ended, closing!");
+              //alert("Game has ended, closing!");
               window.close();
           }, 1000);
       }
