@@ -167,8 +167,9 @@ const getMinMaxScore = (
  * reachable substate in the cureent Game Tree from the game State in the previous game tree
  */
 const isTurnSkipped = (prevGameTree : GameTree, curGameTree : GameTree, maximizingPlayerColor : PenguinColor) : boolean => {
-  return prevGameTree.gameState.players[1].color === maximizingPlayerColor && 
-  curGameTree.gameState.players[0].color !== prevGameTree.gameState.players[1].color 
+  return curGameTree.gameState.players.length >= 2 &&
+         prevGameTree.gameState.players[1].color === maximizingPlayerColor &&
+         curGameTree.gameState.players[0].color !== prevGameTree.gameState.players[1].color;
 }
 
 /**

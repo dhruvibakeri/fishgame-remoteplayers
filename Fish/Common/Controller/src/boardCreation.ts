@@ -117,7 +117,7 @@ const createBlankBoard = (
   columns: number,
   fishPerTile: number
 ): Result<Board, IllegalBoardError> => {
-  if (!isValidBoardSize(columns, rows) || rows * columns > 200) {
+  if (!isValidBoardSize(columns, rows) || rows * columns > 25) {
     return err(new IllegalBoardError(columns, rows));
   }
 

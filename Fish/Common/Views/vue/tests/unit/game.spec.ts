@@ -22,7 +22,7 @@ describe("Game.vue", () => {
     [player2.color, [{ col: 1, row: 1 }]],
   ]);
   const game: GameState = {
-    ...(createGameState(players, board) as GameState),
+    ...(createGameState(players, board).unsafelyUnwrap() as GameState),
     penguinPositions,
   };
 

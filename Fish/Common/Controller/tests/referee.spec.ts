@@ -32,6 +32,7 @@ import { createGameState, shiftPlayers } from "../src/gameStateCreation";
 import { Movement } from "../../game-tree";
 import { IllegalBoardError, IllegalGameStateError } from "../types/errors";
 import { Result } from "true-myth";
+import {GameObserver} from "../src/gameObserver-interface";
 const { ok, err } = Result;
 
 interface IteratorResponse<T> {
@@ -917,17 +918,16 @@ describe("referee", () => {
   describe("runGame", () => {
     const expectedGameDebrief: GameDebrief = {
       activePlayers: [
-        { name: player1Name, score: 8 },
-        { name: player2Name, score: 8 },
+        { name: player1Name, score: 4 },
+        { name: player2Name, score: 4 },
       ],
       kickedPlayers: [],
     };
     const players = [tournamentPlayer1, tournamentPlayer2];
 
-    it("runs an entire game", () => {
-      expect(runGame(players, { cols: 4, rows: 4 })).toEqual(
-        ok(Promise.resolve(expectedGameDebrief))
-      );
+    it("runs an entire game", async () => {
+      const result = await runGame(players, { cols: 4, rows: 4 }).unsafelyUnwrap();
+      expect(result).toEqual(expectedGameDebrief);
     });
 
     it("rejects not enough positions for the number of placements", () => {
@@ -1128,6 +1128,31 @@ describe("referee", () => {
       expect(removeDisqualifiedPlayerFromGame(numberedGame)).toEqual(
         expectedGame
       );
+    });
+  });
+
+  describe("runGame with Observers", () => {
+    const mockObserver: GameObserver = {
+      gameHasChanged: jest.fn(),
+      gameHasEnded: jest.fn(),
+      gameIsStarting: jest.fn(),
+    }
+    const expectedGameDebrief: GameDebrief = {
+      activePlayers: [
+        { name: player1Name, score: 4 },
+        { name: player2Name, score: 4 },
+      ],
+      kickedPlayers: [],
+    };
+    const players = [tournamentPlayer1, tournamentPlayer2];
+    const observers = [mockObserver];
+
+    it("should notify observer of game updates", async () => {
+      const result = await runGame(players, { cols: 4, rows: 4 }, observers).unsafelyUnwrap();
+      expect(result).toEqual(expectedGameDebrief);
+      expect(mockObserver.gameIsStarting).toHaveBeenCalledTimes(1);
+      expect(mockObserver.gameHasChanged).toHaveBeenCalledTimes(16);
+      expect(mockObserver.gameHasEnded).toHaveBeenCalledTimes(1);
     });
   });
 });
