@@ -14,6 +14,8 @@ These additions are for the assignment, [9 - The Humans](https://www.ccs.neu.edu
     - `Controller`
       - `src`
         - `gameObserver-interface.ts` : TypeScript file with implementation of a game Observer interface used by the referee to signal the game observer about game updates
+      - `test`
+        - `referee.spec.ts` : Testing for the referee running the game, and testing to see if the observer is informed when changes take place.
     - `Views`
       - `vue`
         - `src`
