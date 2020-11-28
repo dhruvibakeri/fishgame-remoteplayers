@@ -13,9 +13,11 @@ and/or player-interface modules:
    - the implementation of the player GUI
 
 2. for game observers, point the TA to
-   - the `game-observer` interface that observers implement 
-   - the point where the `referee` consumes observers 
-   - the callback from `referee` to observers concerning turns
+   - the `game-observer` interface that observers implement : [`src`](https://github.ccs.neu.edu/CS4500-F20/fairview/blob/d17f3d8ac8dc2640d9e51763258bde7f2ad3dac6/Fish/Common/Controller/src/gameObserver-interface.ts#L5-L17)
+   - the point where the `referee` consumes observers : [`src`](https://github.ccs.neu.edu/CS4500-F20/fairview/blob/d17f3d8ac8dc2640d9e51763258bde7f2ad3dac6/Fish/Admin/referee.ts#L677-L681)
+   - the callback from `referee` to observers concerning turns : 
+      - placement turns : [`src`](https://github.ccs.neu.edu/CS4500-F20/fairview/blob/d17f3d8ac8dc2640d9e51763258bde7f2ad3dac6/Fish/Admin/referee.ts#L270)
+      - movement turns : [`src`](https://github.ccs.neu.edu/CS4500-F20/fairview/blob/d17f3d8ac8dc2640d9e51763258bde7f2ad3dac6/Fish/Admin/referee.ts#L361)
 
 3. for tournament observers, point the TA to
    - the `tournament-observer` interface that observers implement 
