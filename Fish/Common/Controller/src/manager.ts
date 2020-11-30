@@ -225,6 +225,16 @@ const informWinnersAndLosers = async (
   return finalWinners;
 };
 
+// TODO
+const notifyPlayersTournamentStarting = (
+  tournamentPlayers: Array<TournamentPlayer>,
+  hasTournamentStarted : boolean
+): void => {
+  for (const player of tournamentPlayers) {
+    player.tournamentIsStarting(hasTournamentStarted);
+  }
+};
+
 /**
  * Given the specifications for boards, an array of participating players
  * sorted in ascending order of age, and an array of tournament observers,
@@ -255,6 +265,8 @@ const runTournament = (
   } else if (tournamentPlayers.length < 2) {
     return err(new IllegalTournamentError(boardParameters, tournamentPlayers));
   }
+
+  notifyPlayersTournamentStarting(tournamentPlayers, true)
 
   return ok(
     new Promise(async (resolve) => {

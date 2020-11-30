@@ -419,4 +419,5 @@ export {
   movementToAction,
   gameDescriptionPlayersToTournamentPlayers,
   tournamentPlayerNameToGameDescriptionName,
+  inputPositionsToMovement,
 };

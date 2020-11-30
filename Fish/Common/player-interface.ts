@@ -1,4 +1,4 @@
-import { BoardPosition } from "./board";
+import { PenguinColor, BoardPosition } from "./board";
 import { Movement } from "./game-tree";
 import { Game } from "./state";
 
@@ -52,6 +52,12 @@ interface InactivePlayer {
 }
 
 /**
+ * TODO
+ */
+type TournamentIsStarting = (hasTournamentStarted : boolean) => void
+
+
+/**
  * A GameIsStarting call is meant to allow the referee to signal to the player
  * that the game is starting. The referee passes the initial game state to the
  * player, but does not need or expect a response from the player. This call is
@@ -89,7 +95,7 @@ type MakePlacement = (game: Game) => Promise<BoardPosition>;
  * @return the Movement which represents the starting and ending positions on
  * the board of the player's turn.
  */
-type MakeMovement = (game: Game) => Promise<Movement>;
+type MakeMovement = (game: Game, movementsSoFar?: Array<Movement>) => Promise<Movement>;
 
 /**
  * The GameHasEnded call allows the referee to send the player a debrief
@@ -124,6 +130,17 @@ type DisqualifyMe = (msg: string) => void;
 type WonTournament = (won: boolean) => Promise<boolean>;
 
 /**
+ * A AssignColor call informs the player of the color that they were assigned as. 
+ */
+type AssignColor = (color: PenguinColor) => void;
+
+/**
+ * A PlayingAgainst call informs the player of the colors of the other players that
+ * they are up against (and who to watch when the tournament observer starts).
+ */
+type PlayingAgainst = (colors: PenguinColor[]) => void;
+
+/**
  * A TournamentPlayer represents an implementation of the player-referee
  * protocol, specifying both identifying information for the player, along
  * with the various calls that the referee may make to this player in order
@@ -141,12 +158,15 @@ type WonTournament = (won: boolean) => Promise<boolean>;
  */
 interface TournamentPlayer {
   readonly name: string;
+  readonly tournamentIsStarting : TournamentIsStarting;
   readonly gameIsStarting: GameIsStarting;
   readonly makePlacement: MakePlacement;
   readonly makeMovement: MakeMovement;
   readonly gameHasEnded: GameHasEnded;
   readonly disqualifyMe: DisqualifyMe;
   readonly wonTournament: WonTournament;
+  readonly assignColor: AssignColor;
+  readonly playingAgainst: PlayingAgainst;
 }
 
 interface TournamentPlayerWithAge extends TournamentPlayer {
@@ -163,5 +183,9 @@ export {
   GameHasEnded,
   DisqualifyMe,
   TournamentPlayer,
+  AssignColor,
+  PlayingAgainst,
+  WonTournament,
   TournamentPlayerWithAge,
+  TournamentIsStarting,
 };

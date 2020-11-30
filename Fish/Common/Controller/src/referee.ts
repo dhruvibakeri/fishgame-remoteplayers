@@ -74,6 +74,7 @@ interface RefereeState {
   readonly tournamentPlayers: Map<string, TournamentPlayer>;
   readonly cheatingPlayers: Array<Player>;
   readonly failingPlayers: Array<Player>;
+  readonly movementSoFar: Array<[PenguinColor, Movement]>;
 }
 
 /**
@@ -112,14 +113,33 @@ const tournamentPlayersToGamePlayers = (
   const players: Array<Player> = [];
   for (const penguinColor in PenguinColor) {
     if (players.length < tournamentPlayers.length) {
+      const tourPlayer: TournamentPlayer = tournamentPlayers[players.length];
+      tourPlayer.assignColor(penguinColor as PenguinColor);
       players.push({
-        name: tournamentPlayers[players.length].name,
+        name: tourPlayer.name,
         color: penguinColor as PenguinColor,
       });
     }
   }
   return players;
 };
+
+/**
+ * Notifies the players (once the game is starting) of the colors
+ * of the other players that they will be playing against.
+ * 
+ * @param gamePlayers array of in-game player representations
+ * @param tournamentPlayers array of TournamentPlayers, who the referee will communicate with
+ */
+const notifyPlayersOfOpponents = (
+  gamePlayers: Array<Player>,
+  tournamentPlayers: Array<TournamentPlayer>
+): void => {
+  for (const tp of tournamentPlayers) {
+    const otherColors: PenguinColor[] = gamePlayers.filter((p) => tp.name !== p.name).map((p) => p.color);
+    tp.playingAgainst(otherColors);
+  }
+}
 
 /**
  * Given an array of TournamentPlayers along with the game's initial Game,
@@ -303,11 +323,14 @@ const runMovementTurn = (
     currRefereeState.game
   );
 
+  const currGame = currRefereeState.game;
+
   return checkMovementLegal(gameTree, movement).match({
     Ok: (game: MovementGame) => {
       return {
         ...currRefereeState,
         game,
+        movementSoFar: currRefereeState.movementSoFar.concat([getCurrentPlayerColor(currGame), movement])
       };
     },
     Err: (e: IllegalMovementError) => {
@@ -318,6 +341,22 @@ const runMovementTurn = (
     },
   });
 };
+
+// TODO
+const getMovementsSinceThisPlayer = (curState : RefereeState) : Array<Movement> => {
+    let currentPlayerColor : PenguinColor = getCurrentPlayerColor(curState.game)
+    let res : Movement[] = []
+
+    for(let i = curState.movementSoFar.length - 1; i >= 0; i--) {
+        if(curState.movementSoFar[i][0] != currentPlayerColor) {
+          res.push(curState.movementSoFar[i][1])
+        }
+        else {
+          return res;
+        }
+    }
+    return res;
+}
 
 /**
  * Run the movement rounds of the Game within the given RefereeState, calling
@@ -340,8 +379,11 @@ const runMovementRounds = async (
       currRefereeState
     );
 
+    const currGame = currRefereeState.game;
+    const movementsSinceThisPlayer: Array<Movement> = getMovementsSinceThisPlayer(currRefereeState); 
+
     currRefereeState = await timeoutRequest(
-      currentTournamentPlayer.makeMovement(currRefereeState.game),
+      currentTournamentPlayer.makeMovement(currRefereeState.game, movementsSinceThisPlayer),
       timeout
     )
       .then((movement: Movement) => {
@@ -451,6 +493,7 @@ const disqualifyCurrentPlayer = (
     ...refereeState,
     game: newGame,
     tournamentPlayers: newTournamentPlayers,
+    movementSoFar: [],
   };
 };
 
@@ -689,10 +732,15 @@ const runGame = (
         tournamentPlayers: createTournamentPlayerMapping(tournamentPlayers),
         cheatingPlayers: [],
         failingPlayers: [],
+        movementSoFar: [],
       };
+
+      // Notify all players who they are playing against
+      notifyPlayersOfOpponents(game.players, tournamentPlayers)
 
       // Notify all players the game is starting.
       notifyPlayersGameStarting(tournamentPlayers, game);
+    
 
       observers && notifyObserversGameStarting(observers, game);
 

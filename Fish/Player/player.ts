@@ -1,4 +1,4 @@
-import { BoardPosition } from "../Common/board";
+import { BoardPosition, PenguinColor } from "../Common/board";
 import { Game, MovementGame } from "../Common/state";
 import { getNextPenguinPlacementPosition, chooseNextAction } from "../Common/Controller/src/strategy";
 import { GameDebrief, TournamentPlayer } from "../Common/player-interface";
@@ -19,6 +19,11 @@ const LOOKAHEAD_DEPTH = 2;
 const gameIsStarting = (game: Game): void => {
   return;
 };
+
+const tournamentIsStarting = (hasTournamentStarted: boolean): void => {
+  return;
+};
+
 
 /**
  * Given a game, this function uses the logic from ./strategy.ts to make a
@@ -84,6 +89,17 @@ const wonTournament = async (didIWin: boolean): Promise<boolean> => {
 }
 
 /**
+ * TODO
+ */
+const assignColor = (color: PenguinColor): void => {
+  return;
+}
+
+const playingAgainst = (colors: PenguinColor[]): void => {
+  return;
+}
+
+/**
  * Given the player's name, create a TournamentPlayer implementation using the
  * strategies for placement and movement outlined within "./strategy.ts"
  *
@@ -95,12 +111,15 @@ const wonTournament = async (didIWin: boolean): Promise<boolean> => {
 const createSamplePlayer = (name: string, depth: InputDepth = LOOKAHEAD_DEPTH): TournamentPlayer => {
   return {
     name,
-    gameIsStarting,
+    gameIsStarting, 
     makePlacement,
     makeMovement: makeMovementWithDepth(depth),
     gameHasEnded,
     disqualifyMe,
-    wonTournament
+    wonTournament,
+    playingAgainst,
+    assignColor,
+    tournamentIsStarting,
   };
 };
 
