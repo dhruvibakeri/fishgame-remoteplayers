@@ -92,6 +92,8 @@ type MakePlacement = (game: Game) => Promise<BoardPosition>;
  *
  * @param game the current Game state from which the player will be making
  * their placement.
+ * @param movementsSoFar the list of movements that have occurred since this
+ * player was last able to move.
  * @return the Movement which represents the starting and ending positions on
  * the board of the player's turn.
  */
@@ -130,7 +132,10 @@ type DisqualifyMe = (msg: string) => void;
 type WonTournament = (won: boolean) => Promise<boolean>;
 
 /**
- * A AssignColor call informs the player of the color that they were assigned as. 
+ * A AssignColor call informs the player of the color that they were assigned for
+ * the game play. The Referee will not call on the player to make any moves until
+ * it is their turn, but this provided as a benefit to the player for any decision
+ * making they would like.
  */
 type AssignColor = (color: PenguinColor) => void;
 
