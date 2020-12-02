@@ -31,7 +31,8 @@ function isGame(arg: Argument): arg is Game {
 }
 
 function isMovements(arg: Argument): arg is Movement[] {
-    return (arg as Movement[]).every((movement: Movement) => movement.endPosition && movement.startPosition && true);
+    console.log("check arg",arg)
+    return (arg as Movement[]).every && (arg as Movement[]).every((movement: Movement) => movement.endPosition && movement.startPosition && true);
 }
 
 /**
@@ -68,7 +69,9 @@ const sendMessage = (socket: Socket, name: string, args: Array<Argument>): void 
  * @param message the raw string that was received from the client.
  */
 const parseMessage = (message : string): InputObj => {
+    console.log("message to parse", message)
     const data = JSON.parse(message);
+    console.log("message parsed in messageConversion", data)
 
     if (isInputPosition(data)) {
         return data as InputPosition;
@@ -89,7 +92,19 @@ function isTuplePositions(data : any): data is [InputPosition, InputPosition] {
     return true;
 }
 
+const waitForResponse = (socket: Socket, expectedResponse: string): Promise<void> => {
+    return new Promise((resolve) => {
+        socket.on('data-received', (data: string) => {
+            if (expectedResponse !== data) {
+                console.log("Data (" + data + ") was not as expected: " + expectedResponse);
+            }
+            resolve();
+        });
+    });
+}
+
 export {
     sendMessage,
     parseMessage,
+    waitForResponse,
 }

@@ -33,6 +33,7 @@ import { TournamentPlayer } from "../../player-interface";
 import { checkMovementLegal } from "./queryGameTree";
 import { Result } from "true-myth";
 import { GameObserver } from "./gameObserver-interface";
+import { connect } from "http2";
 const { err } = Result;
 
 const PLAYER_REQUEST_TIMEOUT = 5000;
@@ -277,6 +278,7 @@ const runPlacementRounds = async (
       timeout
     )
       .then((position: BoardPosition) => {
+        console.log("ref postion", position)
         return runPlacementTurn(position, currRefereeState);
       })
       .catch((err: string) => {
@@ -330,7 +332,7 @@ const runMovementTurn = (
       return {
         ...currRefereeState,
         game,
-        movementSoFar: currRefereeState.movementSoFar.concat([getCurrentPlayerColor(currGame), movement])
+        movementSoFar: currRefereeState.movementSoFar.concat([[getCurrentPlayerColor(currGame), movement]])
       };
     },
     Err: (e: IllegalMovementError) => {
@@ -347,14 +349,19 @@ const getMovementsSinceThisPlayer = (curState : RefereeState) : Array<Movement> 
     let currentPlayerColor : PenguinColor = getCurrentPlayerColor(curState.game)
     let res : Movement[] = []
 
+    console.log("movements so far", curState.movementSoFar)
+
     for(let i = curState.movementSoFar.length - 1; i >= 0; i--) {
+
         if(curState.movementSoFar[i][0] != currentPlayerColor) {
           res.push(curState.movementSoFar[i][1])
         }
         else {
+          console.log("res of movement so far", res)
           return res;
         }
     }
+    console.log("res of movement so far final", res)
     return res;
 }
 
@@ -390,6 +397,7 @@ const runMovementRounds = async (
         return runMovementTurn(movement, currRefereeState);
       })
       .catch((err: string) => {
+        console.log("err", err, "state", currRefereeState.game)
         return disqualifyCurrentFailingPlayer(
           currRefereeState,
           err

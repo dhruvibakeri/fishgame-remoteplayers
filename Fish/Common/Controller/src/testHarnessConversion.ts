@@ -420,4 +420,5 @@ export {
   gameDescriptionPlayersToTournamentPlayers,
   tournamentPlayerNameToGameDescriptionName,
   inputPositionsToMovement,
+  boardPositionToInputPosition,
 };

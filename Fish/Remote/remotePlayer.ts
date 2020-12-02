@@ -10,7 +10,8 @@ import { BoardPosition, PenguinColor } from "../Common/board";
 import { Movement } from "../Common/game-tree";
 import { InputPosition } from "../Common/Controller/src/testHarnessInput";
 import { inputPositionToBoardPosition, inputPositionsToMovement } from "../Common/Controller/src/testHarnessConversion";
-import { sendMessage, parseMessage } from "./messageConversion";
+import { sendMessage, parseMessage, waitForResponse } from "./messageConversion";
+import { parseJsonSequence } from "./json-utils";
 
 /**
  * Implementation of the player-referee protocol GameIsStarting call.
@@ -54,7 +55,8 @@ const disqualifyMe = (msg: string): void => {
  */
 const tournamentIsStarting = (socket: Socket): TournamentIsStarting => {
     return (hasTournamentStarted: boolean): void => {
-      sendMessage(socket, "start", [hasTournamentStarted])
+      sendMessage(socket, "start", [hasTournamentStarted]);
+      waitForResponse(socket, "void");
     }
   }
 
@@ -68,12 +70,22 @@ const tournamentIsStarting = (socket: Socket): TournamentIsStarting => {
 const makePlacement = (socket: Socket): MakePlacement => {
   return (game: Game): Promise<BoardPosition> => {
     return new Promise((resolve, reject) => {
+      console.log("setup event")
       sendMessage(socket, "setup", [game]);
-      socket.on('data', function(data : string) {
-        const inputPosition = parseMessage(data) as InputPosition; 
+
+      function dataReceived(data : string) {
+        const message : String = parseJsonSequence(new String(data.toString())).pop() as String;
+        console.log("message placement remote player", message)
+        if(message !== "\"void\"") {
+        const inputPosition = parseMessage(message as string) as InputPosition; 
         const boardPosition = inputPositionToBoardPosition(inputPosition);
+        socket.removeListener('data-received', dataReceived)
         resolve(boardPosition);
-      });      
+        }
+      }
+
+      socket.on('data-received', dataReceived);  
+
     });
   }
 }
@@ -89,11 +101,19 @@ const makeMovement = (socket: Socket): MakeMovement => {
     return (game: Game, movementsSoFar?: Movement[]): Promise<Movement> => {
         return new Promise((resolve, reject) => {
             sendMessage(socket, "take-turn", [game, movementsSoFar as Movement[]]);
-            socket.on('data', function (data: string) {
-                const inputMove = parseMessage(data) as [InputPosition, InputPosition]; 
-                const movement = inputPositionsToMovement(inputMove[0], inputMove[1]);
-                resolve(movement);
-            });
+
+            function dataReceived(data: string) {
+              const message : String = parseJsonSequence(new String(data.toString())).pop() as String;
+              console.log("remote movement message", message)
+              if(message !== "\"void\"") {
+              const inputMove = parseMessage(message as string) as [InputPosition, InputPosition]; 
+              const movement = inputPositionsToMovement(inputMove[0], inputMove[1]);
+              socket.removeListener('data-received', dataReceived)
+              resolve(movement);
+              }
+          }
+
+            socket.on('data-received', dataReceived);
         });
     }
 }
@@ -107,8 +127,11 @@ const makeMovement = (socket: Socket): MakeMovement => {
  */
 const wonTournament = (socket: Socket): WonTournament => {
   return (didIWin: boolean): Promise<boolean> => {
-    sendMessage(socket, "end", [didIWin]);
-    return Promise.resolve(true);
+    return new Promise(async (resolve) => {
+      sendMessage(socket, "end", [didIWin]);
+      await waitForResponse(socket, "void");
+      resolve(true);
+    })
   }
 }
 
@@ -120,7 +143,9 @@ const wonTournament = (socket: Socket): WonTournament => {
  */
 const assignColor = (socket: Socket): AssignColor => {
   return (color: PenguinColor): void => {
+    console.log("playing-as event")
     sendMessage(socket, "playing-as", [color])
+    waitForResponse(socket, "void");
   }
 }
 
@@ -132,7 +157,9 @@ const assignColor = (socket: Socket): AssignColor => {
  */
 const playingAgainst = (socket : Socket): PlayingAgainst => {
   return (colors :PenguinColor[]) : void => {
-    sendMessage(socket, "playing-with", colors)
+    console.log("playing-with event")
+    sendMessage(socket, "playing-with", colors);
+    waitForResponse(socket, "void");
   }
 }
 

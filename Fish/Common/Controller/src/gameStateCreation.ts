@@ -153,7 +153,7 @@ const createGameState = (
   board: Board
 ): Result<Game, IllegalGameStateError> => {
   // Error check whether the number of players given is valid.
-  if (!isValidNumberOfPlayers(players.length)) {
+  /*if (!isValidNumberOfPlayers(players.length)) {
     return err(
       new IllegalGameStateError(
         players,
@@ -161,7 +161,7 @@ const createGameState = (
         `Invalid number of players specified for game: ${players.length}`
       )
     );
-  }
+  }*/
 
   // Error check that all player colors are unique
   if (new Set(players.map((player) => player.color)).size !== players.length) {
