@@ -74,6 +74,7 @@ type RunTournament = (
  */
 export interface TournamentDebrief {
   readonly winners: Array<string>;
+  readonly cheatingOrFailingPlayers: Array<string>;
 }
 
 /**
@@ -81,7 +82,8 @@ export interface TournamentDebrief {
  * The remaining suriving players of a Round are split
  * into Winners (highest-score) and Losers.
  */
-export type RoundResults = [
-  winners: Array<TournamentPlayer>,
-  losers: Array<TournamentPlayer>,
-]
+export type RoundResults = {
+  readonly winners: Array<TournamentPlayer>;
+  readonly losers: Array<TournamentPlayer>;
+  readonly cheaters: Array<TournamentPlayer>;
+}

@@ -1,9 +1,5 @@
-import { inputStateToGameState } from "../Common/Controller/src/testHarnessConversion";
-import { Game, getCurrentPlayer } from "../Common/state";
-
 import { createClient } from "./client";
 
-const net = require('net'); 
 const PORT = 1234, HOST = 'localhost'; 
 
 const connectClients = (num : number) => {
@@ -12,16 +8,5 @@ const connectClients = (num : number) => {
         createClient(name, PORT, HOST);
     };
  };
-
-
-
-
-
-
-
-
-
-
-
 
 connectClients(10);

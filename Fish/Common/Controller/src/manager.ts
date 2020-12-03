@@ -3,6 +3,7 @@ import {
   TournamentPlayerWithAge,
   GameDebrief,
   ActivePlayer,
+  InactivePlayer,
 } from "../../player-interface";
 import {
   boardIsBigEnough,
@@ -12,6 +13,7 @@ import {
   runGame,
   getWinners,
   getLosers,
+  getCheaters,
 } from "./referee";
 import {
   IllegalBoardError,
@@ -181,19 +183,19 @@ const runTournamentRound = async (
     string,
     TournamentPlayerWithAge
   > = makeTournamentPlayerMapping(tournamentPool);
+  const fetchFromCombinedResults = (results: GameDebrief[], f: (gd: GameDebrief) => Array<ActivePlayer | InactivePlayer>): TournamentPlayer[] => {
+    return results
+      .reduce((acc, gd: GameDebrief) => acc.concat(f(gd)), [])
+      .map((value: ActivePlayer | InactivePlayer) => tournamentMapping.get(value.name))
+      .sort(sortByAge)
+      .map(deleteAge);
+  }
   const games = assignAndRunGames(tournamentPool, boardParameters);
   const results = await Promise.all(games);
-  const winners = results
-    .reduce((acc, gd: GameDebrief) => acc.concat(getWinners(gd)), [])
-    .map((value: ActivePlayer) => tournamentMapping.get(value.name))
-    .sort(sortByAge)
-    .map(deleteAge);
-  const losers = results
-    .reduce((acc, gd: GameDebrief) => acc.concat(getLosers(gd)), [])
-    .map((value: ActivePlayer) => tournamentMapping.get(value.name))
-    .sort(sortByAge)
-    .map(deleteAge);
-  return [winners, losers];
+  const winners = fetchFromCombinedResults(results, getWinners);
+  const losers = fetchFromCombinedResults(results, getLosers);
+  const cheaters = fetchFromCombinedResults(results, getCheaters);
+  return {winners, losers, cheaters};
 };
 
 /**
@@ -272,15 +274,17 @@ const runTournament = (
     new Promise(async (resolve) => {
       let previousPoolLength = 0;
       let loserPool: Array<TournamentPlayer> = [];
+      let cheaterPool: Array<TournamentPlayer> = [];
       let tournamentPool: Array<TournamentPlayer> = tournamentPlayers;
       while (continueTournament(tournamentPool.length, previousPoolLength)) {
         previousPoolLength = tournamentPool.length;
-        let losers;
-        [tournamentPool, losers] = await runTournamentRound(
+        let { winners, losers, cheaters } = await runTournamentRound(
           tournamentPool,
           boardParameters
         );
+        tournamentPool = winners;
         loserPool = loserPool.concat(losers);
+        cheaterPool = cheaterPool.concat(cheaters);
       }
 
       // Inform players of the last game they have won (or lost)
@@ -289,7 +293,8 @@ const runTournament = (
         loserPool
       );
 
-      resolve({ winners: informedWinners.map((tp) => tp.name) });
+      const getNames = (players: TournamentPlayer[]): string[] => players.map((tp) => tp.name);
+      resolve({ winners: getNames(informedWinners), cheatingOrFailingPlayers: getNames(cheaterPool) });
     })
   );
 };

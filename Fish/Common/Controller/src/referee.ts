@@ -17,7 +17,7 @@ import {
   getCurrentPlayerColor,
   getCurrentPlayer,
 } from "../../state";
-import {createBlankBoard, createHoledOneFishBoard, getTileOnBoard} from "./boardCreation";
+import {createHoledOneFishBoard, getTileOnBoard} from "./boardCreation";
 import {
   createGameTreeFromMovementGame,
   gameIsMovementGame,
@@ -33,10 +33,9 @@ import { TournamentPlayer } from "../../player-interface";
 import { checkMovementLegal } from "./queryGameTree";
 import { Result } from "true-myth";
 import { GameObserver } from "./gameObserver-interface";
-import { connect } from "http2";
 const { err } = Result;
 
-const PLAYER_REQUEST_TIMEOUT = 5000;
+const PLAYER_REQUEST_TIMEOUT = 10000;
 
 /**
  * A BoardParameters represents the size of a board within a Fish game. It
@@ -803,6 +802,15 @@ const getLosers = (debrief: GameDebrief): Array<ActivePlayer> => {
   return activePlayers.filter((player: ActivePlayer) => player.score !== activePlayers[0].score);
 }
 
+/**
+ * Returns the cheaters of a game from the game debrief.
+ * 
+ * @param debrief the game debrief, which is the outcome of the run game.
+ */
+const getCheaters = (debrief: GameDebrief): Array<InactivePlayer> => {
+  return debrief.kickedPlayers;
+}
+
 export {
   RefereeState,
   RefereeStateWithMovementGame,
@@ -829,4 +837,5 @@ export {
   PLAYER_REQUEST_TIMEOUT,
   getWinners,
   getLosers,
+  getCheaters,
 };

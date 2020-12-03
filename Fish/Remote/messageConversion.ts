@@ -69,9 +69,7 @@ const sendMessage = (socket: Socket, name: string, args: Array<Argument>): void 
  * @param message the raw string that was received from the client.
  */
 const parseMessage = (message : string): InputObj => {
-    console.log("message to parse", message)
     const data = JSON.parse(message);
-    console.log("message parsed in messageConversion", data)
 
     if (isInputPosition(data)) {
         return data as InputPosition;
@@ -92,14 +90,18 @@ function isTuplePositions(data : any): data is [InputPosition, InputPosition] {
     return true;
 }
 
-const waitForResponse = (socket: Socket, expectedResponse: string): Promise<void> => {
+const waitForResponse = (socket: Socket, expectedResponse: string): Promise<boolean> => {
     return new Promise((resolve) => {
-        socket.on('data-received', (data: string) => {
-            if (expectedResponse !== data) {
-                console.log("Data (" + data + ") was not as expected: " + expectedResponse);
+        const dataReceived = (data: string) => {
+            socket.removeListener('data-received', dataReceived);
+            if (expectedResponse !== JSON.parse(data.toString())) {
+                console.log("Data  (" + data + ") was not as expected: " + expectedResponse);
+                resolve(false);
             }
-            resolve();
-        });
+            resolve(true);
+        };
+
+        socket.on('data-received', dataReceived);
     });
 }
 

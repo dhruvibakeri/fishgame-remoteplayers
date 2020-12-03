@@ -4,22 +4,22 @@ import {
   import {
     runTournament
   } from "../Common/Controller/src/manager";
-
-import { createSamplePlayer } from "../Player/player";
 import { createRemotePlayer } from "./remotePlayer";
-import { Socket } from "dgram";
+import {BoardParameters} from "../Common/Controller/src/referee";
+import { Server, Socket } from "net";
+import { parseJsonSequence } from "./json-utils";
 
-const net = require('net'); 
+const net = require('net');
+
+// Minimum number of players required on the tournament
+const MIN_CONNECTIONS = 5;
+const MAX_CONNECTIONS = 10;
+const SIGNUP_PERIOD = 3000;
+const SIGNUP_ATTEMPTS = 2;
 
 const port = 1234; 
 
 const host = 'localhost'; 
-
-const server = net.createServer(); 
-
-let readyForTournament : boolean = false;
-
-let tournamentStarted : boolean = false;
 
 /**
  * 
@@ -45,106 +45,90 @@ let tournamentStarted : boolean = false;
  * 
  */
 
-server.listen(port, host, () => { 
-console.log(`TCP server listening on ${host}:${port}`);
-setTimeout(signUpProtocol, 3000); 
-}); 
+type ConnectedPlayer = [TournamentPlayer, Socket];
 
-const signUpProtocol = () => {
-    server.getConnections(function (error: any, count: any) {
-        if (count < 5) {
-            console.log("re-entering waiting stage")
-            setTimeout(() => {
-                server.getConnections(function (error: any, count: any) {
-                    if(count < 5) {
-                        throw Error('Minimum player count not reached')
-                    }
-                    else {
-                        getReadyForTournament();
-                        tournamentStarted = true;
-                        runTournament({rows : 5, cols : 5, numFish: 2}, players)
-                    }
+type ServerOpts = {
+    readonly minConnections: number,
+    readonly maxConnections: number,
+    readonly signupPeriod: number,
+    readonly signupAttempts: number,
+    readonly boardParams: BoardParameters
+}
+
+const defaultOpts: ServerOpts = {
+    minConnections: MIN_CONNECTIONS,
+    maxConnections: MAX_CONNECTIONS,
+    signupAttempts: SIGNUP_ATTEMPTS,
+    signupPeriod: SIGNUP_PERIOD,
+    boardParams: {rows : 5, cols : 5, numFish: 2},
+}
+
+const createServer = async (port: number, host: string, opts: ServerOpts = defaultOpts) => {
+    opts = Object.assign({}, defaultOpts, opts);
+    const server = net.createServer();
+    server.listen(port, host);
+    console.log("server started");
+    const players: ConnectedPlayer[] = await signUpProtocol(server, opts);    
+    if (players.length !== 0) {
+        players.forEach(([, socket]) => {
+            socket.on('data', (data: string) => {
+                const messages = parseJsonSequence(new String(data.toString()));
+                messages.forEach((message: String) => {
+                    socket.emit('data-received', message.toString());
                 });
-            }, 3000)
-        }
-        else {
-            getReadyForTournament();
-            tournamentStarted = true;
-            runTournament({rows : 5, cols : 5, numFish: 2}, players)
-        }
+            });
+        });
 
+        const results = await runTournament(opts.boardParams, players.map(([tp,]) => tp)).unsafelyUnwrap();
+        players.forEach(([, socket]) => socket.destroy());
+        console.log("Results:", [results.winners.length, results.cheatingOrFailingPlayers.length]);
+    }
+}
+
+const signUpProtocol = (server: Server, opts: ServerOpts): Promise<ConnectedPlayer[]> => {
+    const players: ConnectedPlayer[] = [];
+    const usedNames: Set<string> = new Set<string>();
+    return new Promise((resolve) => {
+        let attemptsLeft = opts.signupAttempts - 1;
+        const timer = setInterval(() => {
+            if (attemptsLeft <= 0) {
+                server.close();
+                clearInterval(timer);
+                if (players.length < opts.minConnections) {
+                    console.log("Not enough players to start a tournament");
+                    players.forEach(([, socket]) => socket.destroy());
+                    resolve([]);
+                } else {
+                    resolve(players);
+                }
+            } else {
+                attemptsLeft -= 1;
+            }
+        }, opts.signupPeriod);
+
+        server.on("connection", (socket: Socket) => {
+            console.log("connection made with " + `${socket.remoteAddress}:${socket.remotePort}` );
+            socket.once('data', (data: string) => {
+                const name = data.toString();
+                if (usedNames.has(name)) {
+                    socket.destroy(new Error(`${name} has been taken already by another player. Please use another name`));
+                } else {
+                    const player = createRemotePlayer(data.toString(), socket);
+                    console.log("adding player", player)
+                    players.push([player, socket]);
+                }
+            });
+    
+            if (players.length > opts.maxConnections) {
+                server.close();
+                clearInterval(timer);
+                resolve(players);
+            }
+        });
     });
 }
 
-let sockets : any[] = []; 
+createServer(port, host);
 
-let players : TournamentPlayer[] = [];
+export { createServer };
 
-let connections : number = 0
-
-server.on('connection', (socket : any) => { 
-
-    connections += 1;
-
-    var clientAddress = `${socket.remoteAddress}:${socket.remotePort}`; 
-
-    console.log(`new client connected: ${clientAddress}`); 
-
-    
-
-    socket.on('data', (data : any) => {     
-        //names = names + data.toString()
-        if(!tournamentStarted) {
-            console.log("name received")
-            let player : TournamentPlayer = createRemotePlayer(data.toString(), socket)
-            players.push(player)
-            console.log("adding player", player) 
-        }
-        else {
-            socket.emit('data-received', data)
-        }
-    })
-    
-    sockets.push(socket); 
-
-    
-        if(connections === 10) {
-            readyForTournament = true;
-            console.log("max player limit reached")
-            server.close()
-        }
-
-    socket.on('error', (err : any) => { 
-    console.log(`Error occurred in ${clientAddress}: ${err.message}`); 
-    }); 
-});
-
-
-const getReadyForTournament = () => {
-    console.log("sign up period over")
-    readyForTournament = true;
-    server.close();
-}
-
-
-
-
-
-
-    /*let player : TournamentPlayer = createRemotePlayer(players.length.toString(), socket)
-        players.push(player)
-        console.log("adding player", player)
-        
-        if(players.length === 10) {
-            console.log("starting tournament")
-            runTournament({rows : 5, cols : 5, numFish: 2}, players).unsafelyUnwrap().then((debrief) => {
-                console.log("tournament over")
-                sockets.forEach((sock) => {
-                    sock.write(JSON.stringify(debrief))
-                    sock.end(() => {
-                        console.log("closing connection with", `${sock.remoteAddress}:${sock.remotePort}`)
-                    })
-                })
-                server.close()
-            })
-            }*/

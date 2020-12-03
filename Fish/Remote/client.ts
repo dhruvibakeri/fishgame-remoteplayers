@@ -26,9 +26,7 @@ const createClient = (name: string, port: number, host: string) => {
     
     client.on("data", (data: string) => {
         const messages : String[] = parseJsonSequence(new String(data));
-        console.log("client messages",messages)
         messages.forEach((message: String) => {
-            console.log("message:", message);
             currentPhase = changePhaseIfNecessary(message as string);
             switch(currentPhase) {
                 case TournamentPhase.INITIAL:
@@ -83,7 +81,6 @@ const changePhaseIfNecessary = (data: string) => {
 }
 
 const handlePlacing = (client: Socket, data: string) => {
-    console.log("handling placing")
     const parsed = JSON.parse(data);
     const game: Game = inputStateToGameState(parsed[1][0]).unsafelyUnwrap();
     const nextPos: Maybe<BoardPosition> = getNextPenguinPlacementPosition(game);
@@ -95,7 +92,6 @@ const handlePlacing = (client: Socket, data: string) => {
 }
 
 const handlePlaying = (client: Socket, data: string) => {
-    console.log("handling playing")
     const parsed = JSON.parse(data);
     const game: Game = inputStateToGameState(parsed[1][0]).unsafelyUnwrap();
     const nextMovement: Maybe<Movement> = chooseNextAction(game as MovementGame, 2);
@@ -108,12 +104,10 @@ const handlePlaying = (client: Socket, data: string) => {
 
 
 const handleStart = (client : Socket, data : string) => {
-     console.log("handling start")
      client.write("void");
 }
 
 const handleEnd = (client : Socket, data : string) => {
-    console.log("handling end")
     client.write("void");
 }
 

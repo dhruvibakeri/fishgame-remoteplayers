@@ -9,10 +9,7 @@ const isJsonString = (str: string): boolean => {
   try {
     JSON.parse(str);
   } catch (e) {
-      if(str === "void") {
-          return true;
-      }
-    return false;
+    return str === "void" || false;
   }
   return true;
 };
@@ -74,12 +71,7 @@ const parseJsonSequence = (jsonString: String): Array<String> => {
   } else {
     const lastIndex = loopUntilParseable(jsonString);
     const token = jsonString.substring(0, lastIndex);
-    if(token === "void") {
-    jsonStrs.push("\""+token+"\"");
-    }
-    else {
-        jsonStrs.push(token); 
-    }
+    jsonStrs.push(token === "void" ? `\"${token}\"` : token);
     return jsonStrs.concat(parseJsonSequence(jsonString.substring(lastIndex)));
   }
 };

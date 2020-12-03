@@ -69,18 +69,18 @@ const tournamentIsStarting = (socket: Socket): TournamentIsStarting => {
  */
 const makePlacement = (socket: Socket): MakePlacement => {
   return (game: Game): Promise<BoardPosition> => {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       console.log("setup event")
       sendMessage(socket, "setup", [game]);
 
       function dataReceived(data : string) {
         const message : String = parseJsonSequence(new String(data.toString())).pop() as String;
         console.log("message placement remote player", message)
-        if(message !== "\"void\"") {
-        const inputPosition = parseMessage(message as string) as InputPosition; 
-        const boardPosition = inputPositionToBoardPosition(inputPosition);
-        socket.removeListener('data-received', dataReceived)
-        resolve(boardPosition);
+        if (message !== "\"void\"") {
+          const inputPosition = parseMessage(message as string) as InputPosition; 
+          const boardPosition = inputPositionToBoardPosition(inputPosition);
+          socket.removeListener('data-received', dataReceived)
+          resolve(boardPosition);
         }
       }
 
@@ -99,20 +99,19 @@ const makePlacement = (socket: Socket): MakePlacement => {
  */
 const makeMovement = (socket: Socket): MakeMovement => {
     return (game: Game, movementsSoFar?: Movement[]): Promise<Movement> => {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             sendMessage(socket, "take-turn", [game, movementsSoFar as Movement[]]);
 
             function dataReceived(data: string) {
-              const message : String = parseJsonSequence(new String(data.toString())).pop() as String;
-              console.log("remote movement message", message)
-              if(message !== "\"void\"") {
-              const inputMove = parseMessage(message as string) as [InputPosition, InputPosition]; 
-              const movement = inputPositionsToMovement(inputMove[0], inputMove[1]);
-              socket.removeListener('data-received', dataReceived)
-              resolve(movement);
+              const message = data.toString();
+              console.log("remote movement message", message);
+              if (message !== "\"void\"") {
+                const inputMove = parseMessage(message as string) as [InputPosition, InputPosition]; 
+                const movement = inputPositionsToMovement(inputMove[0], inputMove[1]);
+                socket.removeListener('data-received', dataReceived)
+                resolve(movement);
               }
-          }
-
+            }
             socket.on('data-received', dataReceived);
         });
     }
