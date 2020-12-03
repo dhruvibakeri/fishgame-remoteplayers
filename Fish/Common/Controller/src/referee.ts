@@ -17,7 +17,7 @@ import {
   getCurrentPlayerColor,
   getCurrentPlayer,
 } from "../../state";
-import {createHoledOneFishBoard, getTileOnBoard} from "./boardCreation";
+import { createHoledOneFishBoard, getTileOnBoard } from "./boardCreation";
 import {
   createGameTreeFromMovementGame,
   gameIsMovementGame,
@@ -127,7 +127,7 @@ const tournamentPlayersToGamePlayers = (
 /**
  * Notifies the players (once the game is starting) of the colors
  * of the other players that they will be playing against.
- * 
+ *
  * @param gamePlayers array of in-game player representations
  * @param tournamentPlayers array of TournamentPlayers, who the referee will communicate with
  */
@@ -136,10 +136,12 @@ const notifyPlayersOfOpponents = (
   tournamentPlayers: Array<TournamentPlayer>
 ): void => {
   for (const tp of tournamentPlayers) {
-    const otherColors: PenguinColor[] = gamePlayers.filter((p) => tp.name !== p.name).map((p) => p.color);
+    const otherColors: PenguinColor[] = gamePlayers
+      .filter((p) => tp.name !== p.name)
+      .map((p) => p.color);
     tp.playingAgainst(otherColors);
   }
-}
+};
 
 /**
  * Given an array of TournamentPlayers along with the game's initial Game,
@@ -157,15 +159,19 @@ const notifyPlayersGameStarting = (
   }
 };
 
-// TODO
+/**
+ * Notifies the given observers about the start of the game
+ * @param observers the given array of Game Observers
+ * @param startingGameState the Game State at the start of the game
+ */
 const notifyObserversGameStarting = (
   observers: Array<GameObserver>,
   startingGameState: Game
 ): void => {
   observers.forEach((observer) => {
     observer.gameIsStarting(startingGameState);
-  })
-}
+  });
+};
 
 /**
  * Given an array of TournamentPlayers and a set of BoardDimenesions, for a new
@@ -185,8 +191,8 @@ const createInitialGameState = (
   );
 
   return (createHoledOneFishBoard(
-      boardParams.cols,
-      boardParams.rows,
+    boardParams.cols,
+    boardParams.rows,
     boardParams.holes || [],
     1,
     boardParams.numFish || 1
@@ -277,7 +283,6 @@ const runPlacementRounds = async (
       timeout
     )
       .then((position: BoardPosition) => {
-        console.log("ref postion", position)
         return runPlacementTurn(position, currRefereeState);
       })
       .catch((err: string) => {
@@ -331,7 +336,9 @@ const runMovementTurn = (
       return {
         ...currRefereeState,
         game,
-        movementSoFar: currRefereeState.movementSoFar.concat([[getCurrentPlayerColor(currGame), movement]])
+        movementSoFar: currRefereeState.movementSoFar.concat([
+          [getCurrentPlayerColor(currGame), movement],
+        ]),
       };
     },
     Err: (e: IllegalMovementError) => {
@@ -343,26 +350,26 @@ const runMovementTurn = (
   });
 };
 
-// TODO
-const getMovementsSinceThisPlayer = (curState : RefereeState) : Array<Movement> => {
-    let currentPlayerColor : PenguinColor = getCurrentPlayerColor(curState.game)
-    let res : Movement[] = []
+/**
+ * Gets movements made by the other players since the last time the current player of
+ * the given game state made a move.
+ * @param curState represents the current state of the game.
+ */
+const getMovementsSinceThisPlayer = (
+  curState: RefereeState
+): Array<Movement> => {
+  let currentPlayerColor: PenguinColor = getCurrentPlayerColor(curState.game);
+  let res: Movement[] = [];
 
-    console.log("movements so far", curState.movementSoFar)
-
-    for(let i = curState.movementSoFar.length - 1; i >= 0; i--) {
-
-        if(curState.movementSoFar[i][0] != currentPlayerColor) {
-          res.push(curState.movementSoFar[i][1])
-        }
-        else {
-          console.log("res of movement so far", res)
-          return res;
-        }
+  for (let i = curState.movementSoFar.length - 1; i >= 0; i--) {
+    if (curState.movementSoFar[i][0] != currentPlayerColor) {
+      res.push(curState.movementSoFar[i][1]);
+    } else {
+      return res;
     }
-    console.log("res of movement so far final", res)
-    return res;
-}
+  }
+  return res;
+};
 
 /**
  * Run the movement rounds of the Game within the given RefereeState, calling
@@ -376,7 +383,7 @@ const getMovementsSinceThisPlayer = (curState : RefereeState) : Array<Movement> 
 const runMovementRounds = async (
   refereeState: RefereeStateWithMovementGame,
   timeout: number = PLAYER_REQUEST_TIMEOUT,
-  observers?: Array<GameObserver>,
+  observers?: Array<GameObserver>
 ): Promise<RefereeStateWithMovementGame> => {
   let currRefereeState: RefereeStateWithMovementGame = refereeState;
 
@@ -386,23 +393,28 @@ const runMovementRounds = async (
     );
 
     const currGame = currRefereeState.game;
-    const movementsSinceThisPlayer: Array<Movement> = getMovementsSinceThisPlayer(currRefereeState); 
+    const movementsSinceThisPlayer: Array<Movement> = getMovementsSinceThisPlayer(
+      currRefereeState
+    );
 
     currRefereeState = await timeoutRequest(
-      currentTournamentPlayer.makeMovement(currRefereeState.game, movementsSinceThisPlayer),
+      currentTournamentPlayer.makeMovement(
+        currRefereeState.game,
+        movementsSinceThisPlayer
+      ),
       timeout
     )
       .then((movement: Movement) => {
         return runMovementTurn(movement, currRefereeState);
       })
       .catch((err: string) => {
-        console.log("err", err, "state", currRefereeState.game)
+        console.log("err", err, "state", currRefereeState.game);
         return disqualifyCurrentFailingPlayer(
           currRefereeState,
           err
         ) as RefereeStateWithMovementGame;
       });
-    
+
     observers && notifyObserversOfChange(observers, currRefereeState.game);
   }
 
@@ -569,9 +581,7 @@ const addScoresOfPlacedPenguins = (game: Game): Game => {
     );
 
     const curScore: number = scoresCopy.get(penguinColor) as number;
-    scoresCopy.set(
-      penguinColor, curScore + scoreOfPlacedPenguins
-    );
+    scoresCopy.set(penguinColor, curScore + scoreOfPlacedPenguins);
   }
 
   return {
@@ -630,25 +640,34 @@ const notifyPlayersOfOutcome = (
   );
 };
 
-// TODO purpose
+/**
+ * Notify all the given GameObservers about the outcome of the finished
+ * game with the given GameDebrief.
+ * @param observers the participating observers to be notified
+ * @param gameDebrief the GameDebrief describing the game's outcome
+ */
 const notifyObserversOfOutcome = (
   observers: Array<GameObserver>,
   gameDebrief: GameDebrief
 ): void => {
   observers.forEach((observer: GameObserver) => {
-    observer.gameHasEnded(gameDebrief)
-  })
-}
+    observer.gameHasEnded(gameDebrief);
+  });
+};
 
-// TODO purpose
+/**
+ * Notify all the given GameObservers about any change in the game.
+ * @param observers the participating observers to be notified
+ * @param game the Game State with the changes made
+ */
 const notifyObserversOfChange = (
   observers: Array<GameObserver>,
   game: Game
 ): void => {
   observers.forEach((observer: GameObserver) => {
     observer.gameHasChanged(game);
-  })
-}
+  });
+};
 
 /**
  * Get the total number of penguin placements which would be made for the given
@@ -731,48 +750,53 @@ const runGame = (
     );
   }
 
-  return createInitialGameState(tournamentPlayers, boardParameters).map((game: Game) => {
-    return new Promise(async (resolve) => {
-      // Create the initial RefereeState.
-      const initialRefereeState: RefereeState = {
-        game,
-        tournamentPlayers: createTournamentPlayerMapping(tournamentPlayers),
-        cheatingPlayers: [],
-        failingPlayers: [],
-        movementSoFar: [],
-      };
+  return createInitialGameState(tournamentPlayers, boardParameters).map(
+    (game: Game) => {
+      return new Promise(async (resolve) => {
+        // Create the initial RefereeState.
+        const initialRefereeState: RefereeState = {
+          game,
+          tournamentPlayers: createTournamentPlayerMapping(tournamentPlayers),
+          cheatingPlayers: [],
+          failingPlayers: [],
+          movementSoFar: [],
+        };
 
-      // Notify all players who they are playing against
-      notifyPlayersOfOpponents(game.players, tournamentPlayers)
+        // Notify all players who they are playing against
+        notifyPlayersOfOpponents(game.players, tournamentPlayers);
 
-      // Notify all players the game is starting.
-      notifyPlayersGameStarting(tournamentPlayers, game);
-    
+        // Notify all players the game is starting.
+        notifyPlayersGameStarting(tournamentPlayers, game);
 
-      observers && notifyObserversGameStarting(observers, game);
+        observers && notifyObserversGameStarting(observers, game);
 
-      // Run placement rounds.
-      const refereeStateAfterPlacements = await runPlacementRounds(
-        initialRefereeState, PLAYER_REQUEST_TIMEOUT, observers || []
-      );
+        // Run placement rounds.
+        const refereeStateAfterPlacements = await runPlacementRounds(
+          initialRefereeState,
+          PLAYER_REQUEST_TIMEOUT,
+          observers || []
+        );
 
-      // Run movement rounds.
-      const refereeStateAfterMovements = await runMovementRounds(
-        refereeStateAfterPlacements, PLAYER_REQUEST_TIMEOUT, observers || []
-      );
+        // Run movement rounds.
+        const refereeStateAfterMovements = await runMovementRounds(
+          refereeStateAfterPlacements,
+          PLAYER_REQUEST_TIMEOUT,
+          observers || []
+        );
 
-      // Deliver the game outcome.
-      const gameDebrief: GameDebrief = createGameDebrief(
-        refereeStateAfterMovements
-      );
+        // Deliver the game outcome.
+        const gameDebrief: GameDebrief = createGameDebrief(
+          refereeStateAfterMovements
+        );
 
-      notifyPlayersOfOutcome(tournamentPlayers, gameDebrief);
+        notifyPlayersOfOutcome(tournamentPlayers, gameDebrief);
 
-      observers && notifyObserversOfOutcome(observers, gameDebrief);
+        observers && notifyObserversOfOutcome(observers, gameDebrief);
 
-      resolve(gameDebrief);
-    });
-  });
+        resolve(gameDebrief);
+      });
+    }
+  );
 };
 
 /**
@@ -786,8 +810,10 @@ const getWinners = (debrief: GameDebrief): Array<ActivePlayer> => {
   if (activePlayers.length === 0) {
     return [];
   }
-  return activePlayers.filter((player: ActivePlayer) => player.score === activePlayers[0].score);
-}
+  return activePlayers.filter(
+    (player: ActivePlayer) => player.score === activePlayers[0].score
+  );
+};
 /**
  * Gets the losers of a game from the game debrief.
  * The losers are all the players who did not get the highest score in the game.
@@ -799,17 +825,19 @@ const getLosers = (debrief: GameDebrief): Array<ActivePlayer> => {
   if (activePlayers.length === 0) {
     return [];
   }
-  return activePlayers.filter((player: ActivePlayer) => player.score !== activePlayers[0].score);
-}
+  return activePlayers.filter(
+    (player: ActivePlayer) => player.score !== activePlayers[0].score
+  );
+};
 
 /**
  * Returns the cheaters of a game from the game debrief.
- * 
+ *
  * @param debrief the game debrief, which is the outcome of the run game.
  */
 const getCheaters = (debrief: GameDebrief): Array<InactivePlayer> => {
   return debrief.kickedPlayers;
-}
+};
 
 export {
   RefereeState,

@@ -127,9 +127,9 @@ const assignAndRunGames = (
   // These games can be unsafely unwrapped since the manager maintains the
   // constraints on the size of the board making sure that the given
   // specifications must be valid for any size game.
-  const games: Array<Promise<
-    GameDebrief
-  >> = parties
+  const games: Array<
+    Promise<GameDebrief>
+  > = parties
     .map((party: Array<TournamentPlayer>) => runGame(party, boardParameters))
     .map((result) => result.unsafelyUnwrap());
 
@@ -183,19 +183,24 @@ const runTournamentRound = async (
     string,
     TournamentPlayerWithAge
   > = makeTournamentPlayerMapping(tournamentPool);
-  const fetchFromCombinedResults = (results: GameDebrief[], f: (gd: GameDebrief) => Array<ActivePlayer | InactivePlayer>): TournamentPlayer[] => {
+  const fetchFromCombinedResults = (
+    results: GameDebrief[],
+    f: (gd: GameDebrief) => Array<ActivePlayer | InactivePlayer>
+  ): TournamentPlayer[] => {
     return results
       .reduce((acc, gd: GameDebrief) => acc.concat(f(gd)), [])
-      .map((value: ActivePlayer | InactivePlayer) => tournamentMapping.get(value.name))
+      .map((value: ActivePlayer | InactivePlayer) =>
+        tournamentMapping.get(value.name)
+      )
       .sort(sortByAge)
       .map(deleteAge);
-  }
+  };
   const games = assignAndRunGames(tournamentPool, boardParameters);
   const results = await Promise.all(games);
   const winners = fetchFromCombinedResults(results, getWinners);
   const losers = fetchFromCombinedResults(results, getLosers);
   const cheaters = fetchFromCombinedResults(results, getCheaters);
-  return {winners, losers, cheaters};
+  return { winners, losers, cheaters };
 };
 
 /**
@@ -227,10 +232,14 @@ const informWinnersAndLosers = async (
   return finalWinners;
 };
 
-// TODO
+/**
+ * Notifies the given tournament players whether a tournament has started.
+ * @param tournamentPlayers the given tournament players
+ * @param hasTournamentStarted the boolean representing whether the tournament has started
+ */
 const notifyPlayersTournamentStarting = (
   tournamentPlayers: Array<TournamentPlayer>,
-  hasTournamentStarted : boolean
+  hasTournamentStarted: boolean
 ): void => {
   for (const player of tournamentPlayers) {
     player.tournamentIsStarting(hasTournamentStarted);
@@ -268,7 +277,7 @@ const runTournament = (
     return err(new IllegalTournamentError(boardParameters, tournamentPlayers));
   }
 
-  notifyPlayersTournamentStarting(tournamentPlayers, true)
+  notifyPlayersTournamentStarting(tournamentPlayers, true);
 
   return ok(
     new Promise(async (resolve) => {
@@ -293,8 +302,12 @@ const runTournament = (
         loserPool
       );
 
-      const getNames = (players: TournamentPlayer[]): string[] => players.map((tp) => tp.name);
-      resolve({ winners: getNames(informedWinners), cheatingOrFailingPlayers: getNames(cheaterPool) });
+      const getNames = (players: TournamentPlayer[]): string[] =>
+        players.map((tp) => tp.name);
+      resolve({
+        winners: getNames(informedWinners),
+        cheatingOrFailingPlayers: getNames(cheaterPool),
+      });
     })
   );
 };
