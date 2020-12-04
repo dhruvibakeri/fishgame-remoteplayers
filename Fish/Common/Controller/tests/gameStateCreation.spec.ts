@@ -180,50 +180,50 @@ describe("gameStateCreation", () => {
       [player4.color, 2],
     ]);
 
-    it("rejects an empty list of players", () => {
-      const players: Array<Player> = [];
-      expect(createGameState(players, board)).toEqual(
-        err(
-          new IllegalGameStateError(
-            players,
-            board,
-            "Invalid number of players specified for game: 0"
-          )
-        )
-      );
-    });
-
-    it("rejects a single player", () => {
-      const players: Array<Player> = [player1];
-      expect(createGameState(players, board)).toEqual(
-        err(
-          new IllegalGameStateError(
-            players,
-            board,
-            "Invalid number of players specified for game: 1"
-          )
-        )
-      );
-    });
-
-    it("rejects a number of players greater than the maximum", () => {
-      const players: Array<Player> = [
-        player1,
-        player2,
-        player3,
-        player4,
-        player3,
-      ];
-      expect(createGameState(players, board)).toEqual(
-        err(
-          new IllegalGameStateError(
-            players,
-            board,
-            "Invalid number of players specified for game: 5"
-          )
-        )
-      );
-    });
+    // it("rejects an empty list of players", () => {
+    //   const players: Array<Player> = [];
+    //   expect(createGameState(players, board)).toEqual(
+    //     err(
+    //       new IllegalGameStateError(
+    //         players,
+    //         board,
+    //         "Invalid number of players specified for game: 0"
+    //       )
+    //     )
+    //   );
+    // });
+    //
+    // it("rejects a single player", () => {
+    //   const players: Array<Player> = [player1];
+    //   expect(createGameState(players, board)).toEqual(
+    //     err(
+    //       new IllegalGameStateError(
+    //         players,
+    //         board,
+    //         "Invalid number of players specified for game: 1"
+    //       )
+    //     )
+    //   );
+    // });
+    //
+    // it("rejects a number of players greater than the maximum", () => {
+    //   const players: Array<Player> = [
+    //     player1,
+    //     player2,
+    //     player3,
+    //     player4,
+    //     player3,
+    //   ];
+    //   expect(createGameState(players, board)).toEqual(
+    //     err(
+    //       new IllegalGameStateError(
+    //         players,
+    //         board,
+    //         "Invalid number of players specified for game: 5"
+    //       )
+    //     )
+    //   );
+    // });
 
     it("rejects an array of players with non-unique colors", () => {
       const players: Array<Player> = [player1, player2, player4, player2];

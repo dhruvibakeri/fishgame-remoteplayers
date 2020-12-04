@@ -330,16 +330,16 @@ const runMovementTurn = (
   );
 
   const currGame = currRefereeState.game;
+  const newMovementSoFar = currRefereeState.movementSoFar ? currRefereeState.movementSoFar.concat([
+    [getCurrentPlayerColor(currGame), movement],
+  ]) : undefined;
 
   return checkMovementLegal(gameTree, movement).match({
     Ok: (game: MovementGame) => {
       return {
         ...currRefereeState,
         game,
-        movementSoFar:
-          currRefereeState.movementSoFar.concat([
-            [getCurrentPlayerColor(currGame), movement],
-          ]) || [],
+        movementSoFar: newMovementSoFar,
       };
     },
     Err: (e: IllegalMovementError) => {
@@ -411,7 +411,6 @@ const runMovementRounds = async (
         return runMovementTurn(movement, currRefereeState);
       })
       .catch((err: string) => {
-        console.log("err", err, "state", currRefereeState.game);
         return disqualifyCurrentFailingPlayer(
           currRefereeState,
           err
@@ -515,7 +514,7 @@ const disqualifyCurrentPlayer = (
     ...refereeState,
     game: newGame,
     tournamentPlayers: newTournamentPlayers,
-    movementSoFar: [],
+    movementSoFar: refereeState.movementSoFar ? [] : refereeState.movementSoFar,
   };
 };
 

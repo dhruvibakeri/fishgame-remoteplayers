@@ -16,7 +16,6 @@ import { Movement } from "../../game-tree";
 import { BoardParameters } from "../src/referee";
 import { IllegalBoardError, IllegalTournamentError } from "../types/errors";
 import { Result } from "true-myth";
-import {TournamentDebrief} from "../../../Admin/manager-interface";
 
 describe("manager tests", () => {
   const makeMockPlayer = (
@@ -232,7 +231,11 @@ describe("manager tests", () => {
       const players = makePlayersWithProperties([badMovement, badMovement, badMovement, badMovement])
 
       const results = await runTournamentRound(players, boardParams);
-      expect(results).toStrictEqual([[], []]);
+      expect(results).toStrictEqual({
+        cheaters: players,
+        winners: [],
+        losers: [],
+      });
     });
 
     it("should produce both winners if two players tied in a game", async () => {
@@ -242,7 +245,11 @@ describe("manager tests", () => {
       });
       const playerB = makeMockPlayer("b", 1, {});
       const results = await runTournamentRound([playerA, playerB], boardParams);
-      expect(results).toStrictEqual([[playerA, playerB], []]);
+      expect(results).toStrictEqual({
+        winners: [playerA, playerB],
+        losers: [],
+        cheaters: [],
+      });
     });
 
     it("should combine winners of two separate games", async () => {
@@ -255,10 +262,11 @@ describe("manager tests", () => {
       const players = [playerA, playerB, playerC, playerD, playerE];
 
       const results = await runTournamentRound(players, boardParams);
-      expect(results).toStrictEqual([
-        [playerB, playerD],
-        [playerA, playerC, playerE],
-      ]);
+      expect(results).toStrictEqual({
+        winners: [playerB, playerD],
+        losers: [playerA, playerC, playerE],
+        cheaters: [],
+      });
     });
 
     it("should produce winners in the order given", async () => {
@@ -275,10 +283,11 @@ describe("manager tests", () => {
         holes: [{ row: 2, col: 4 }],
       };
       const results = await runTournamentRound(players, boardParams);
-      expect(results).toStrictEqual([
-        [playerA, playerD],
-        [playerB, playerC],
-      ]);
+      expect(results).toStrictEqual({
+        winners: [playerA, playerD],
+        losers: [playerB, playerC],
+        cheaters: [],
+      });
     });
   });
 
@@ -314,49 +323,41 @@ describe("manager tests", () => {
       );
     });
 
-    it("produces a winner from one final game", () => {
+    it("produces a winner from one final game", async () => {
       const players = makePlayers(7);
-      expect(
-        runTournament(boardParameters, players).unsafelyUnwrap()
-      ).resolves.toEqual({ winners: [players[0].name] });
+      const results = await runTournament(boardParameters, players).unsafelyUnwrap();
+      expect(results).toStrictEqual({ cheatingOrFailingPlayers: [], winners: [players[0].name] });
     });
 
-    it("recognizes a single winner from a game if all other games produce no winners", () => {
+    it("recognizes a single winner from a game if all other games produce no winners", async () => {
       const badMovement = { makeMovement: jest.fn(makeMovementFunction(0, 0, 0, 0)) };
       const defaultProperties = {};
       const players = makePlayersWithProperties([defaultProperties, defaultProperties, defaultProperties, badMovement, badMovement]);
-
-      runTournament(boardParams, players).map((prom) => {
-        expect(prom).resolves.toStrictEqual({ winners: [players[0].name]});
-      });
+      const results = await runTournament(boardParams, players).unsafelyUnwrap();
+      expect(results).toStrictEqual({ winners: [players[0].name], cheatingOrFailingPlayers: [players[3].name, players[4].name]});
     });
 
-    it("produces an empty result if there are no winners", () => {
+    it("produces an empty result if there are no winners", async () => {
       const badMovement = { makeMovement: jest.fn(makeMovementFunction(0, 0, 0, 0)) };
       const players = makePlayersWithProperties([badMovement, badMovement, badMovement, badMovement, badMovement, badMovement, badMovement, badMovement]);
-
-      runTournament(boardParams, players).map((prom) => {
-        expect(prom).resolves.toStrictEqual({ winners: [] });
-      });
+      const results = await runTournament(boardParams, players).unsafelyUnwrap();
+      expect(results).toStrictEqual({ winners: [], cheatingOrFailingPlayers: players.map(player => player.name) })
     });
 
-    it("produces winners if two rounds in a row produce the same exact winners", () => {
+    it("produces winners if two rounds in a row produce the same exact winners", async () => {
       const players = makePlayers(4);
       const boardParams: BoardParameters = {
         rows: 4,
-        cols: 2,
+        cols: 4,
       };
-      runTournament(boardParams, players).map((prom) => {
-        // everyone wins
-        expect(prom).resolves.toStrictEqual({ winners: players.map(p => p.name) });
-      });
+      const results = await runTournament(boardParams, players).unsafelyUnwrap();
+      expect(results).toStrictEqual({ winners: players.map(p => p.name), cheatingOrFailingPlayers: [] });
     });
 
-    it("should run multiple tournament rounds if there is enough players for another round", () => {
+    it("should run multiple tournament rounds if there is enough players for another round", async () => {
       const players = makePlayers(15);
-      runTournament(boardParams, players).map((prom: Promise<TournamentDebrief> ) => {
-        expect(prom).resolves.toStrictEqual({ winners: [players[0].name]});
-      })
+      const results = await runTournament(boardParams, players).unsafelyUnwrap();
+      expect(results).toStrictEqual({ winners: [players[0].name], cheatingOrFailingPlayers: [] });
     });
   });
 });
