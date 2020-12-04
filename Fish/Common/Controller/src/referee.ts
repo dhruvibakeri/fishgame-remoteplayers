@@ -35,7 +35,7 @@ import { Result } from "true-myth";
 import { GameObserver } from "./gameObserver-interface";
 const { err } = Result;
 
-const PLAYER_REQUEST_TIMEOUT = 10000;
+const PLAYER_REQUEST_TIMEOUT = 2000;
 
 /**
  * A BoardParameters represents the size of a board within a Fish game. It
