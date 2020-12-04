@@ -3,16 +3,16 @@ import {
   inputStateToGameState,
   movementToAction,
   boardPositionToInputPosition,
-} from "../Common/Controller/src/testHarnessConversion";
-import { Game, MovementGame } from "../Common/state";
+} from "../../Common/Controller/src/testHarnessConversion";
+import { Game, MovementGame } from "../../Common/state";
 import {
   getNextPenguinPlacementPosition,
   chooseNextAction,
-} from "../Common/Controller/src/strategy";
-import { Movement } from "../Common/game-tree";
+} from "../../Common/Controller/src/strategy";
+import { Movement } from "../../Common/game-tree";
 import { Maybe } from "true-myth";
-import { BoardPosition } from "../Common/board";
-import { parseJsonSequence } from "./json-utils";
+import { BoardPosition } from "../../Common/board";
+import { parseJsonSequence } from "./../Other/json-utils";
 
 // importing nodejs 'net' module
 const net = require("net");

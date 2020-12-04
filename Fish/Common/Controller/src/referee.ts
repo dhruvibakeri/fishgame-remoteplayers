@@ -74,7 +74,7 @@ interface RefereeState {
   readonly tournamentPlayers: Map<string, TournamentPlayer>;
   readonly cheatingPlayers: Array<Player>;
   readonly failingPlayers: Array<Player>;
-  readonly movementSoFar: Array<[PenguinColor, Movement]>;
+  readonly movementSoFar?: Array<[PenguinColor, Movement]>;
 }
 
 /**
@@ -336,9 +336,10 @@ const runMovementTurn = (
       return {
         ...currRefereeState,
         game,
-        movementSoFar: currRefereeState.movementSoFar.concat([
-          [getCurrentPlayerColor(currGame), movement],
-        ]),
+        movementSoFar:
+          currRefereeState.movementSoFar.concat([
+            [getCurrentPlayerColor(currGame), movement],
+          ]) || [],
       };
     },
     Err: (e: IllegalMovementError) => {
@@ -361,11 +362,13 @@ const getMovementsSinceThisPlayer = (
   let currentPlayerColor: PenguinColor = getCurrentPlayerColor(curState.game);
   let res: Movement[] = [];
 
-  for (let i = curState.movementSoFar.length - 1; i >= 0; i--) {
-    if (curState.movementSoFar[i][0] != currentPlayerColor) {
-      res.push(curState.movementSoFar[i][1]);
-    } else {
-      return res;
+  if (curState.movementSoFar) {
+    for (let i = curState.movementSoFar.length - 1; i >= 0; i--) {
+      if (curState.movementSoFar[i][0] != currentPlayerColor) {
+        res.push(curState.movementSoFar[i][1]);
+      } else {
+        return res;
+      }
     }
   }
   return res;

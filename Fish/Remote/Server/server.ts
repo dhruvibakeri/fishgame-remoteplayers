@@ -1,9 +1,9 @@
-import { TournamentPlayer } from "../Common/player-interface";
-import { runTournament } from "../Common/Controller/src/manager";
-import { createRemotePlayer } from "./remotePlayer";
-import { BoardParameters } from "../Common/Controller/src/referee";
+import { TournamentPlayer } from "../../Common/player-interface";
+import { runTournament } from "../../Common/Controller/src/manager";
+import { createRemotePlayer } from "./../RemotePlayer/remotePlayer";
+import { BoardParameters } from "../../Common/Controller/src/referee";
 import { Server, Socket } from "net";
-import { parseJsonSequence } from "./json-utils";
+import { parseJsonSequence } from "./../Other/json-utils";
 
 const net = require("net");
 

@@ -1,15 +1,15 @@
-import { PenguinColor } from "../Common/board";
-import { Game } from "../Common/state";
-import { Movement } from "../Common/game-tree";
+import { PenguinColor } from "../../Common/board";
+import { Game } from "../../Common/state";
+import { Movement } from "../../Common/game-tree";
 import {
   Action,
   InputPosition,
   InputState,
-} from "../Common/Controller/src/testHarnessInput";
+} from "../../Common/Controller/src/testHarnessInput";
 import {
   gameToInputState,
   movementToAction,
-} from "../Common/Controller/src/testHarnessConversion";
+} from "../../Common/Controller/src/testHarnessConversion";
 import { Socket } from "net";
 
 /**

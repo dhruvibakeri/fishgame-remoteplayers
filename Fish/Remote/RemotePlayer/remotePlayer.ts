@@ -8,21 +8,21 @@ import {
   WonTournament,
   PlayingAgainst,
   TournamentIsStarting,
-} from "../Common/player-interface";
-import { Game } from "../Common/state";
-import { BoardPosition, PenguinColor } from "../Common/board";
-import { Movement } from "../Common/game-tree";
-import { InputPosition } from "../Common/Controller/src/testHarnessInput";
+} from "../../Common/player-interface";
+import { Game } from "../../Common/state";
+import { BoardPosition, PenguinColor } from "../../Common/board";
+import { Movement } from "../../Common/game-tree";
+import { InputPosition } from "../../Common/Controller/src/testHarnessInput";
 import {
   inputPositionToBoardPosition,
   inputPositionsToMovement,
-} from "../Common/Controller/src/testHarnessConversion";
+} from "../../Common/Controller/src/testHarnessConversion";
 import {
   sendMessage,
   parseMessage,
   waitForResponse,
 } from "./messageConversion";
-import { parseJsonSequence } from "./json-utils";
+import { parseJsonSequence } from "./../Other/json-utils";
 
 /**
  * Implementation of the player-referee protocol GameIsStarting call.
