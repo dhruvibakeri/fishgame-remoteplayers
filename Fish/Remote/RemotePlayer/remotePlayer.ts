@@ -83,9 +83,7 @@ const makePlacement = (socket: Socket): MakePlacement => {
       sendMessage(socket, "setup", [game]);
 
       function dataReceived(data: string) {
-        const message: String = parseJsonSequence(
-          new String(data.toString())
-        ).pop() as String;
+        const message: String = data.toString();
         if (message !== '"void"') {
           const inputPosition = parseMessage(
             message as string
@@ -141,8 +139,8 @@ const wonTournament = (socket: Socket): WonTournament => {
   return (didIWin: boolean): Promise<boolean> => {
     return new Promise(async (resolve) => {
       sendMessage(socket, "end", [didIWin]);
-      await waitForResponse(socket, "void");
-      resolve(true);
+      const result = await waitForResponse(socket, "void");
+      resolve(result);
     });
   };
 };
@@ -168,7 +166,7 @@ const assignColor = (socket: Socket): AssignColor => {
  */
 const playingAgainst = (socket: Socket): PlayingAgainst => {
   return (colors: PenguinColor[]): void => {
-    sendMessage(socket, "playing-with", colors);
+    sendMessage(socket, "playing-with", [colors]);
     waitForResponse(socket, "void");
   };
 };
