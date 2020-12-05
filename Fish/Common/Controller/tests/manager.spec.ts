@@ -200,8 +200,9 @@ describe("manager tests", () => {
     });
 
     it("should turn winners into losers if they don't accept in time", async () => {
+      jest.setTimeout(15000);
       const resolveTrueAfterDelay = () =>
-        new Promise((resolve) => setTimeout(() => resolve(true), 10000));
+        new Promise((resolve) => setTimeout(() => resolve(true), 20000));
       const playerC = makeMockPlayer("c", 1, {
         wonTournament: jest.fn(resolveTrueAfterDelay),
       });
