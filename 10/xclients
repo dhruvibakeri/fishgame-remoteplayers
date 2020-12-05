@@ -1,2 +1,2 @@
 #!/bin/bash
-node --experimental-worker ../Fish/Remote/build/Remote/Client/xclients.js "$@"
+/opt/rh/rh-nodejs10/root/bin/node --experimental-worker ../Fish/Remote/build/Remote/Client/xclients.js "$@"

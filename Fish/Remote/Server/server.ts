@@ -12,7 +12,7 @@ const MIN_CONNECTIONS = 5;
 // Maximum number of players allowed in a tournament
 const MAX_CONNECTIONS = 10;
 // Wait time for a server to accept player sign ups
-const SIGNUP_PERIOD = 3000;
+const SIGNUP_PERIOD = 30000;
 // Number of times server can go into a waiting stage to accept player sign ups
 const SIGNUP_ATTEMPTS = 2;
 

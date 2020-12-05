@@ -1,11 +1,8 @@
 all: buildController permissions
 buildController:  
-	@echo "installing controller dependencies"  
-	cd ../Fish/Common/Controller; npm install
-	cd ../Fish/Common/Controller; npx tsc
 	@echo "installing server/client dependencies"
-	cd ../Fish/Remote; npm install
-	cd ../Fish/Remote; npx tsc
+	cd ../Fish/Remote; scl enable rh-nodejs10 'npm install'
+	cd ../Fish/Remote; scl enable rh-nodejs10 'npm run build'
 permissions:
 	chmod +x ./xserver
 	chmod +x ./xclients
