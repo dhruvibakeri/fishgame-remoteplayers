@@ -25,7 +25,7 @@ const net = require("net");
  * PLACING - stage when games in a tournament round are in the placing phase.
  * PLAYING - stage when games in a tournament round are in the playing phase.
  */
-enum TournamentPhase {
+export enum TournamentPhase {
   INITIAL,
   STARTING,
   ENDED,
@@ -79,15 +79,15 @@ const createClient = (name: string, port: number, host: string) => {
   });
 
   return new Promise((resolve) => {
-    client.on('close', resolve);
-  })
+    client.on("close", resolve);
+  });
 };
 
 /**
  * Changes the phase of the tournament based on the given message
  * @param data message received by the client
  */
-const changePhaseIfNecessary = (data: string) => {
+export const changePhaseIfNecessary = (data: string) => {
   const parsed = JSON.parse(data);
   if (parsed[0] === "start" && parsed[1][0] === true) {
     return TournamentPhase.STARTING;
@@ -116,7 +116,7 @@ const changePhaseIfNecessary = (data: string) => {
  * @param client the client who needs to make a placement
  * @param data the data received by the client based on which it would make a placement
  */
-const handlePlacing = (client: Socket, data: string) => {
+export const handlePlacing = (client: Socket, data: string) => {
   const parsed = JSON.parse(data);
   // gets the current game state from the given data
   const game: Game = inputStateToGameState(parsed[1][0]).unsafelyUnwrap();
@@ -135,7 +135,7 @@ const handlePlacing = (client: Socket, data: string) => {
  * @param client the client who needs to make a movement
  * @param data the data received by the client based on which it would make a movement
  */
-const handlePlaying = (client: Socket, data: string) => {
+export const handlePlaying = (client: Socket, data: string) => {
   const parsed = JSON.parse(data);
   // gets the current game state from the given data
   const game: Game = inputStateToGameState(parsed[1][0]).unsafelyUnwrap();
@@ -157,7 +157,7 @@ const handlePlaying = (client: Socket, data: string) => {
  * @param client the client who needs to respond
  * @param data the data received by the client
  */
-const handleStart = (client: Socket, data: string) => {
+export const handleStart = (client: Socket, data: string) => {
   client.write("void");
 };
 
@@ -167,7 +167,7 @@ const handleStart = (client: Socket, data: string) => {
  * @param client the client who needs to respond
  * @param data the data received by the client
  */
-const handleEnd = (client: Socket, data: string) => {
+export const handleEnd = (client: Socket, data: string) => {
   client.write("void");
 };
 

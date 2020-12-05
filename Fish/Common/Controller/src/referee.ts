@@ -35,7 +35,7 @@ import { Result } from "true-myth";
 import { GameObserver } from "./gameObserver-interface";
 const { err } = Result;
 
-const PLAYER_REQUEST_TIMEOUT = 2000;
+const PLAYER_REQUEST_TIMEOUT = 10000;
 
 /**
  * A BoardParameters represents the size of a board within a Fish game. It
@@ -330,9 +330,11 @@ const runMovementTurn = (
   );
 
   const currGame = currRefereeState.game;
-  const newMovementSoFar = currRefereeState.movementSoFar ? currRefereeState.movementSoFar.concat([
-    [getCurrentPlayerColor(currGame), movement],
-  ]) : undefined;
+  const newMovementSoFar = currRefereeState.movementSoFar
+    ? currRefereeState.movementSoFar.concat([
+        [getCurrentPlayerColor(currGame), movement],
+      ])
+    : undefined;
 
   return checkMovementLegal(gameTree, movement).match({
     Ok: (game: MovementGame) => {

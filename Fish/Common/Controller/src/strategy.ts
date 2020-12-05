@@ -143,7 +143,7 @@ const getMinMaxScore = (
 
       if (isTurnSkipped(gameTree, resGameTree, searchingPlayerColor)) {
         curLookAheadTurnsDepth = lookAheadTurnsDepth - 1;
-      } else if (
+      } /*else if (
         getCurrentPlayerColor(resGameTree.gameState) === searchingPlayerColor &&
         resGameTree.potentialMoves.length > 0 &&
         curLookAheadTurnsDepth === 2
@@ -155,7 +155,7 @@ const getMinMaxScore = (
             resGameTree.gameState.penguinPositions.get(searchingPlayerColor)[0]
           )
         );
-      }
+      }*/
       return getMinMaxScore(
         resGameTree,
         searchingPlayerColor,

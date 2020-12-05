@@ -19,7 +19,12 @@ import { Socket } from "net";
  * the common JSON-serializable ontology on which all clients will
  * be expected to communicate.
  */
-type Argument = PenguinColor | PenguinColor[] | Game | Movement[] | boolean;
+export type Argument =
+  | PenguinColor
+  | PenguinColor[]
+  | Game
+  | Movement[]
+  | boolean;
 
 /**
  * The JSON-serializable output object that players will receive. Each
@@ -42,7 +47,7 @@ type InputObj = [InputPosition, InputPosition] | InputPosition;
  * Checks whether the type of the given argument is a Game
  * @param arg argument to be type checked
  */
-function isGame(arg: Argument): arg is Game {
+export function isGame(arg: Argument): arg is Game {
   return (arg as Game).board && (arg as Game).players && true;
 }
 
@@ -50,7 +55,7 @@ function isGame(arg: Argument): arg is Game {
  * Checks whether the type of the given argument is a list of Movements
  * @param arg argument to be type checked
  */
-function isMovements(arg: Argument): arg is Movement[] {
+export function isMovements(arg: Argument): arg is Movement[] {
   return (
     (arg as Movement[]).every &&
     (arg as Movement[]).every(
@@ -64,7 +69,7 @@ function isMovements(arg: Argument): arg is Movement[] {
  * Converts an Argument to an OutputObj
  * @param arg the argument to be converted.
  */
-const convertArgumentToOutput = (arg: Argument): OutputObj => {
+export const convertArgumentToOutput = (arg: Argument): OutputObj => {
   if (isGame(arg)) {
     return gameToInputState(arg as Game);
   }
