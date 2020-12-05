@@ -77,6 +77,10 @@ const createClient = (name: string, port: number, host: string) => {
       }
     });
   });
+
+  return new Promise((resolve) => {
+    client.on('close', resolve);
+  })
 };
 
 /**

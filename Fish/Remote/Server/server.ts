@@ -16,12 +16,6 @@ const SIGNUP_PERIOD = 3000;
 // Number of times server can go into a waiting stage to accept player sign ups
 const SIGNUP_ATTEMPTS = 2;
 
-// default port
-const port = 1234;
-
-// default host
-const host = "localhost";
-
 /**
  * Type representing a connected player
  * TournamentPlayer - TournamentPlayer object
@@ -70,7 +64,7 @@ const createServer = async (
   const server = net.createServer();
   // server starts listening for connections
   server.listen(port, host);
-  console.log("server started");
+  // console.log("server started");
 
   // starts sign up period and collects players according to the signup protocol
   const players: ConnectedPlayer[] = await signUpProtocol(server, opts);
@@ -95,7 +89,7 @@ const createServer = async (
     // ends connection with players after tournament is over
     players.forEach(([, socket]) => socket.destroy());
     // prints out results
-    console.log("Results:", [
+    console.log([
       results.winners.length,
       results.cheatingOrFailingPlayers.length,
     ]);
@@ -139,9 +133,9 @@ const signUpProtocol = (
 
     // every time a connection on the server is established
     server.on("connection", (socket: Socket) => {
-      console.log(
-        "connection made with " + `${socket.remoteAddress}:${socket.remotePort}`
-      );
+      // console.log(
+      //   "connection made with " + `${socket.remoteAddress}:${socket.remotePort}`
+      // );
 
       // creates a remote player with the name given by the client
       socket.once("data", (data: string) =>
@@ -213,12 +207,9 @@ const createPlayerIfValidName = (
     );
   } else {
     const player = createRemotePlayer(data.toString(), socket);
-    console.log("adding player", player);
+    // console.log("adding player", player);
     players.push([player, socket]);
   }
 };
-
-// start up the server
-createServer(port, host);
 
 export { createServer };
