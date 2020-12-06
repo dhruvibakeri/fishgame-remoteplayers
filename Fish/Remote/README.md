@@ -23,6 +23,8 @@
 - `Fish/Common/Controller/src/referee.ts` :
   //TODO:
   - Including optional argument for movementSoFar
+- `Fish/Common/Controller/src/strategy.ts` :
+  //TODO:
 - `Fish/Common/Controller/src/manager.ts` :
   // TODO:
   - adding 'failingAndCheatingPlayers'

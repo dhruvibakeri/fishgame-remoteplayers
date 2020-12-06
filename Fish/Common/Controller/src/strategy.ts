@@ -18,6 +18,7 @@ import { Result } from "true-myth";
 const { ok, err } = Result;
 import { Maybe } from "true-myth";
 import { getFishNumberFromPosition } from "./boardCreation";
+import { getReachablePositions } from "./movementChecking";
 const { just, nothing } = Maybe;
 
 /**
@@ -143,19 +144,39 @@ const getMinMaxScore = (
 
       if (isTurnSkipped(gameTree, resGameTree, searchingPlayerColor)) {
         curLookAheadTurnsDepth = lookAheadTurnsDepth - 1;
-      } /*else if (
+      } else if (
         getCurrentPlayerColor(resGameTree.gameState) === searchingPlayerColor &&
         resGameTree.potentialMoves.length > 0 &&
         curLookAheadTurnsDepth === 2
       ) {
-        return (
-          resGameTree.gameState.scores.get(searchingPlayerColor) +
-          getFishNumberFromPosition(
-            resGameTree.gameState.board,
-            resGameTree.gameState.penguinPositions.get(searchingPlayerColor)[0]
-          )
+        const startPositionToMovementToResultingTrees = (
+          startPosition: BoardPosition
+        ): number => {
+          if (
+            getReachablePositions(resGameTree.gameState, startPosition).length >
+            0
+          ) {
+            return getFishNumberFromPosition(
+              resGameTree.gameState.board,
+              startPosition
+            );
+          }
+
+          return Number.NEGATIVE_INFINITY;
+        };
+
+        const positions: BoardPosition[] = resGameTree.gameState.penguinPositions.get(
+          searchingPlayerColor
+        ) as BoardPosition[];
+
+        const scores_temp2: number = Math.max(
+          ...positions.map(startPositionToMovementToResultingTrees)
         );
-      }*/
+
+        return (
+          resGameTree.gameState.scores.get(searchingPlayerColor) + scores_temp2
+        );
+      }
       return getMinMaxScore(
         resGameTree,
         searchingPlayerColor,
