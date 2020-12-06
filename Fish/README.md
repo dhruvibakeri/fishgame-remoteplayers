@@ -1,5 +1,57 @@
 # Fish - Kevin Zhang and Dhruvi Bakeri
 
+## 10 &mdash; This is it!
+
+These additions are for the assignment, [10 - This is it!](https://www.ccs.neu.edu/home/matthias/4500-f20/10.html)
+
+<details>
+  <summary>Click to see the new elements:</summary>
+  
+- `Fish`
+  - `Remote`
+    - `Client` : Folder containing files related to client implementation.
+      - `client.ts` : contains implementation for the client component.
+      - `xclients.ts` : contains implementation for pointing x clients to a certain server.
+    - `Server` : Folder containing files related to server implementation.
+      - `server.ts` : contains server implementation for the fish game.
+    - `RemotePlayer` : Folder containing files related to remote player implementation.
+      - `messageConversion.ts` : contains implementation for functions related to validating messages being sent to the server from the client, parsing them approriately, and also sending a message back to the client.
+      - `remotePlayer.ts` : contains implementation for the remote player component.
+    - `tests` :
+      - `remotePlayer.spec.ts` : tests for the remote player component.
+      - `messageConversion.spec.ts` : test to check if messages are converted to the correct format while sending them to the client.
+      - `client.spec.ts` : tests to check whether the client correctly responds to the requests from the server.
+    - `Other` : Folder containing files related to other utility implementations.
+      - `json-utils.ts` : contains functions for a parser for a sequence of JSON (assignment C)
+    - `README.md` : README explaining Fish/Remote/ file structure and
+
+</details>
+<br/>
+
+### How To Run the runnables (xserver and xclients)
+
+To run the executables do the following from the `10` directory,:
+
+First run :
+
+```
+make
+```
+
+Then, for xserver :
+
+```
+./xserver <port number>
+```
+
+For xclients :
+
+```
+./xclients <number of clients (5 - 10)> <port number>
+```
+
+---
+
 ## 9 &mdash; The Humans
 
 These additions are for the assignment, [9 - The Humans](https://www.ccs.neu.edu/home/matthias/4500-f20/9.html). We were given three choices for implementing functionality that introduces a Human component to the Fish game. We chose to implement a **game observer**.
@@ -25,12 +77,10 @@ These additions are for the assignment, [9 - The Humans](https://www.ccs.neu.edu
 <br/>
 
 ### IMPORTANT NOTE
-- The two of us have inherited this code base in the recent partner switches. The rendering code for the GUI uses `Vue`, which neither of us have worked with before. We read documentation for `Vue` and were able to display a full game and add features such as **showing the scores of the players** and the **players with the highest scores** at a given point in the game. 
-- The `./xgui (no. of players)` executable in repo-level directory 9 which in turn starts up the `Vue` development server runs successfully every other time you run it. We do not know why this is the case. It fails with a linting error one time, but successfully runs the next time. We have tried to fix this, but with very limited knowledge of Vue we were not able to understand the problem. 
-- Please do run it atleast `3` times before grading. 
 
-
-
+- The two of us have inherited this code base in the recent partner switches. The rendering code for the GUI uses `Vue`, which neither of us have worked with before. We read documentation for `Vue` and were able to display a full game and add features such as **showing the scores of the players** and the **players with the highest scores** at a given point in the game.
+- The `./xgui (no. of players)` executable in repo-level directory 9 which in turn starts up the `Vue` development server runs successfully every other time you run it. We do not know why this is the case. It fails with a linting error one time, but successfully runs the next time. We have tried to fix this, but with very limited knowledge of Vue we were not able to understand the problem.
+- Please do run it atleast `3` times before grading.
 
 ## 8 &mdash; The League
 
