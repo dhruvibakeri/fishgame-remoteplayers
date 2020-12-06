@@ -12,7 +12,7 @@
       - `remotePlayer.ts` : contains implementation for the remote player component.
     - `tests` :
       - `remotePlayer.spec.ts` : tests for the remote player component.
-      - `messageConversion.spec.ts` : tests to check if messages are converted to the correct format while sending them to the client.
+      - `messageConversion.spec.ts` : test to check if messages are converted to the correct format while sending them to the client.
       - `client.spec.ts` : tests to check whether the client correctly responds to the requests from the server.
     - `Other` : Folder containing files related to other utility implementations.
       - `json-utils.ts` : contains functions for a parser for a sequence of JSON (assignment C)
@@ -21,10 +21,16 @@
 ## Modifications made in other code
 
 - `Fish/Common/Controller/src/referee.ts` :
-  //TODO:
-  - Including optional argument for movementSoFar
+  - Adding movementSoFar as optional argument for RefereeState + player-interface getMovement
+  - Reason: As the code-base was built with a functional pattern in mind, building an 
+    adapter around `runGame` wasn't an easy option, because there wasn't any methods we could 
+    override -- we would have to override almost everything runGame touched. 
+    So we added the movementSoFar array to the Referee state to pass actions to remote players
 - `Fish/Common/Controller/src/strategy.ts` :
   //TODO:
 - `Fish/Common/Controller/src/manager.ts` :
-  // TODO:
-  - adding 'failingAndCheatingPlayers'
+  - adding 'failingAndCheatingPlayers' to TournamentManager
+  - Reason: this was something that was always left open as an option, pending on this Milestone.
+    As of Milestone 8, the spec didn't mention what to do with failingAndCheatingPlayers, so those
+    players were discarded after each game was over. This change keeps them, and returns them
+    as part of the tournament results.
