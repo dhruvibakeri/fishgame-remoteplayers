@@ -142,7 +142,7 @@ export const handlePlaying = (client: Socket, data: string) => {
   // gets a movement based on the current game state
   const nextMovement: Maybe<Movement> = chooseNextAction(
     game as MovementGame,
-    2
+    1
   );
   // sends that movement back to the server
   nextMovement.map((move: Movement) => {
