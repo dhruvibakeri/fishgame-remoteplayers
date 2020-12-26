@@ -1,2 +1,0 @@
-#!/bin/bash
-node --no-warnings ./Other/xjson.js <&0

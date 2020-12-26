@@ -1,2 +1,0 @@
-#!/bin/bash
-cd Other; npm run start $@; open 'http://localhost:8080'
